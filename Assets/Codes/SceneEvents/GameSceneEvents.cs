@@ -13,6 +13,8 @@ public class GameSceneEvents : MonoBehaviour {
 	GameObject UI_ScorePanel = null;
 	[SerializeField]
 	GameObject UI_ScoreText = null;
+	[SerializeField]
+	GameObject UI_StartPanel = null;
 
 	GameObject Player;
 
@@ -81,8 +83,7 @@ public class GameSceneEvents : MonoBehaviour {
 	void InitGameMgr()
 	{
 		gameMgr = GameObject.Find("GameManager").GetComponent<GameManager>();
-		gameMgr.RespawnPlayer ();
-		gameMgr.StartGame ();
+
 	}
 
 	public void onPlayerDead() 
@@ -138,7 +139,13 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		abilityUISlots.Clear ();
 	}
-	
+
+	public void OnTapToStartButtonClicked()
+	{
+		UI_StartPanel.SetActive (false);
+		gameMgr.RespawnPlayer ();
+		gameMgr.StartGame ();
+	}
 
 	public void ShowAds()
 	{

@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour {
 	bool isFalling = false;
 	bool isHolding = true;
 
-	Rigidbody MyRigidBody;
+	Rigidbody2D MyRigidBody;
 	void Start () 
 	{
 		animator = GetComponent<Animator>();
@@ -26,7 +26,7 @@ public class PlayerController : MonoBehaviour {
 
 		gameMgr = GameObject.Find("GameManager").GetComponent<GameManager>();
 
-		MyRigidBody = GetComponent<Rigidbody> ();
+		MyRigidBody = GetComponent<Rigidbody2D> ();
 	}
 
 
@@ -42,7 +42,6 @@ public class PlayerController : MonoBehaviour {
 		isDead = true;
 		eventHandler.onPlayerDead ();
 
-		MyRigidBody.useGravity = false;
 		MyRigidBody.velocity = Vector3.zero;
 	}
 
@@ -156,7 +155,7 @@ public class PlayerController : MonoBehaviour {
 			isFalling = false;
 		
 			MyRigidBody.AddForce(new Vector3(0,jumpPower * 100f,0));
-			MyRigidBody.useGravity = true;
+			MyRigidBody.gravityScale = 1;
 
 		}
 
@@ -172,7 +171,7 @@ public class PlayerController : MonoBehaviour {
 
 		if (isFalling && checkBars ()) {
 			isHolding = true;
-			MyRigidBody.useGravity = false;
+			MyRigidBody.gravityScale = 0;
 			MyRigidBody.velocity = Vector3.zero;
 		}
 
