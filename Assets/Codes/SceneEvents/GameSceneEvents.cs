@@ -111,7 +111,7 @@ public class GameSceneEvents : MonoBehaviour {
 			bannerView.Hide ();
 
 
-		gameMgr.RespawnPlayer();
+		gameMgr.StartGame ();
 
 		UI_DeathPanel.SetActive (false);
 		UI_ScorePanel.SetActive (true);

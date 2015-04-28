@@ -5,28 +5,35 @@ public class GameManager : MonoBehaviour {
 	public List<GameObject> PlayerTemplates;
 	private GameObject CurrentPlayer;
 
-	bool bGameStarted = false;
+	public bool bGameStarted { get; private set; }
+	public GameObject MainCam { get; private set;}
+	public BarGenerator barGen { get; private set;}
+
 	GameSceneEvents eventHandler = null;
 	GameObject CurrentPlayerTemplate;
-	public GameObject MainCam { get; private set;}
+
+
 
 	void Start () {
 		SetCurrentPlayerTemplateByIdx (0);
 		MainCam = GameObject.Find ("Main Camera");
+
+		barGen = GetComponent<BarGenerator> ();
 	}
 
 	public void StartGame()
 	{
 		bGameStarted = true;
-	
+		
 		RespawnPlayer ();
+
+		GetComponent<BarGenerator> ().onGameStarted ();
 
 	}
 
 	public void EndGame()
 	{
 		bGameStarted = false;
-		GetComponent<SectionGenerator> ().enabled = bGameStarted;
 	}
 
 	public void SetAudioAvailable(bool bAvailable)

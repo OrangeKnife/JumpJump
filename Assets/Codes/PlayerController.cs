@@ -4,7 +4,8 @@ using System.Collections;
 public class PlayerController : MonoBehaviour {
 
 	int jumpPower = 4;
-
+	int maxJumpCount = 1;
+	int currentJumpCount = 0;
 
 	Animator animator;
 	bool isDead = false;
@@ -12,12 +13,14 @@ public class PlayerController : MonoBehaviour {
 
 	GameSceneEvents eventHandler = null;
 	GameManager gameMgr = null;
-
-	bool isJumping = false;
-	bool isFalling = false;
-	bool isHolding = true;
-
 	Rigidbody2D MyRigidBody;
+
+	public bool jumped {get; private set;}
+
+
+
+
+
 	void Start () 
 	{
 		animator = GetComponent<Animator>();
@@ -27,6 +30,9 @@ public class PlayerController : MonoBehaviour {
 		gameMgr = GameObject.Find("GameManager").GetComponent<GameManager>();
 
 		MyRigidBody = GetComponent<Rigidbody2D> ();
+
+		jumped = false;
+
 	}
 
 
@@ -43,6 +49,8 @@ public class PlayerController : MonoBehaviour {
 		eventHandler.onPlayerDead ();
 
 		MyRigidBody.velocity = Vector3.zero;
+
+		gameMgr.EndGame ();
 	}
 
 	void Update () 
@@ -144,50 +152,73 @@ public class PlayerController : MonoBehaviour {
 
 		HandleInput (ButtonJumpDown, ButtonJumpHold, ButtonJumpUp);
 
+
 	}
 
 	
 
 	void HandleInput(bool bButtonJumpDown, bool bButtonJumpHold, bool bButtonJumpUp)
 	{
-		if (bButtonJumpDown && isHolding) {
-			isJumping = true; isHolding = false;
-			isFalling = false;
-		
+		if (bButtonJumpDown && maxJumpCount > currentJumpCount) {
+			jumped = true;
+			currentJumpCount += 1;
+
 			MyRigidBody.AddForce(new Vector3(0,jumpPower * 100f,0));
 			MyRigidBody.gravityScale = 1;
 
 		}
 
-		if (bButtonJumpHold && isJumping) {
+		if (bButtonJumpHold) {
 
 		}
 
-		if (bButtonJumpUp) {
-			isJumping = false;
-			isFalling = true;
-		
+		if (bButtonJumpUp && jumped) {
+			jumped = false;
+			TryHold();
 		}
 
-		if (isFalling && checkBars ()) {
-			isHolding = true;
-			MyRigidBody.gravityScale = 0;
-			MyRigidBody.velocity = Vector3.zero;
-		}
 
 		if (!isAlive ())
 			Die ();
 
 	}
 
-	bool checkBars ()
-	{
-		return true;
-	}
 
 	bool isAlive()
 	{
 		return gameMgr.MainCam.transform.position.y - gameObject.transform.position.y < gameMgr.MainCam.GetComponent<Camera>().orthographicSize;
 	}
+
+	void TryHold()
+	{ 
+		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y);
+		float halfBarSizeY = gameMgr.barGen.barTemmplate.GetComponent<BoxCollider2D> ().size.y/2 * gameMgr.barGen.barTemmplate.transform.localScale.y;
+		RaycastHit2D hitup = Physics2D.Raycast (myPos, Vector2.up, halfBarSizeY, 1 << LayerMask.NameToLayer("Level"));
+		if (hitup.collider != null)
+			Hold (hitup.collider.gameObject.GetComponent<BarController> ());
+		else {
+			RaycastHit2D hitdown = Physics2D.Raycast (myPos, -Vector2.up, halfBarSizeY, 1 << LayerMask.NameToLayer("Level"));
+			if (hitdown.collider != null)
+				Hold (hitdown.collider.gameObject.GetComponent<BarController> ());
+		}
+	}
+
+	void Hold(BarController bc)
+	{
+		if(bc)
+			bc.onPlayerHold ();
+
+		MyRigidBody.gravityScale = 0;
+		MyRigidBody.velocity = Vector3.zero;
+		currentJumpCount = 0;
+	}
+
+	public void ResetJumpCount(int num)
+	{
+		if(!isDead)
+			currentJumpCount = Mathf.Min (Mathf.Max (0, num), maxJumpCount);
+	}
+
+
 
 }
