@@ -28,6 +28,9 @@ public class BarGenerator : MonoBehaviour {
 
 	public void onGameStarted()
 	{
+		foreach (GameObject obj in SpawnedBarsList) {
+			Destroy (obj);
+		}
 		SpawnedBarsList.Clear ();
 
 		player = gameMgr.GetCurrentPlayer();

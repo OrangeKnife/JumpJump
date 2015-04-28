@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour {
 		
 		RespawnPlayer ();
 
-		GetComponent<BarGenerator> ().onGameStarted ();
+		barGen.onGameStarted ();
 
 	}
 
