@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+using System.Collections.Generic;
 
 public enum EObjectColor
 {
@@ -16,10 +16,9 @@ public class PlayerController : MonoBehaviour {
 	int jumpPower = 4;
 	int maxJumpCount = 1;
 	int currentJumpCount = 0;
-
-	Animator animator;
+	int airCombo = 0;
 	bool isDead = false;
-
+	bool allowInput = true;
 
 	GameSceneEvents eventHandler = null;
 	GameManager gameMgr = null;
@@ -30,12 +29,11 @@ public class PlayerController : MonoBehaviour {
 
 
 	EObjectColor currentColor = EObjectColor.RED;
-
-
+	AudioSource audioSource;
+	public List<AudioClip> audioClips = new List<AudioClip>();
+	GameObject fullScreenFlashImage;
 	void Start () 
 	{
-		animator = GetComponent<Animator>();
-
 		eventHandler = GameObject.Find("eventHandler").GetComponent<GameSceneEvents>();
 
 		gameMgr = GameObject.Find("GameManager").GetComponent<GameManager>();
@@ -43,6 +41,10 @@ public class PlayerController : MonoBehaviour {
 		MyRigidBody = GetComponent<Rigidbody2D> ();
 
 		spriteRenderer = GetComponent<SpriteRenderer>();
+
+		audioSource = GetComponent<AudioSource> ();
+
+		fullScreenFlashImage = GameObject.Find ("FullScreenFlashImage");
 
 		jumped = false;
 
@@ -52,15 +54,10 @@ public class PlayerController : MonoBehaviour {
 	}
 
 
-
-	void UpdateAnimator()
-	{
-		animator.SetBool("IsOnGround", true);
-		animator.SetBool("IsDead", isDead);
-	}
-
 	void Die()
 	{
+		playSound (audioClips [3]);
+		allowInput = false;
 		isDead = true;
 		eventHandler.onPlayerDead ();
 
@@ -73,9 +70,10 @@ public class PlayerController : MonoBehaviour {
 	{
 		bool ButtonJumpDown, ButtonJumpHold, ButtonJumpUp;
 
-		UpdateAnimator();
+		if (!isAlive () && !isDead)
+			Die ();
 
-		if (isDead)
+		if (isDead || !allowInput)
 		{
 			return;
 		}
@@ -119,8 +117,11 @@ public class PlayerController : MonoBehaviour {
 			ButtonJumpUp = false;
 		}
 
-		if( Input.GetButtonDown("Fire1"))
+		if(Input.GetButtonDown("Fire1"))
+		{
+			playSound(audioClips[2]);
 			ChangeColor();
+		}
 	
 
 		#elif UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
@@ -132,7 +133,7 @@ public class PlayerController : MonoBehaviour {
 			{
 				Touch touch = Input.GetTouch(i);
 
-				if (touch.position.x >= Screen.width / 2)
+				if (touch.position.x <= Screen.width / 2)
 				{
 					// jump
 					if (touch.phase == TouchPhase.Began)
@@ -176,20 +177,39 @@ public class PlayerController : MonoBehaviour {
 		HandleInput (ButtonJumpDown, ButtonJumpHold, ButtonJumpUp);
 
 		
-		if (!isAlive ())
-			Die ();
+
+
+		GameObject bar = HeadKnocked ();
+		if (bar != null) {
+			playSound(audioClips[1]);
+			fullScreenFlashImage.GetComponent<Animator>().Play("fading",0);
+			MyRigidBody.velocity = -MyRigidBody.velocity * 0.8f;
+			ChangeColor ((int)bar.GetComponent<BarController> ().getColor ());
+
+			if( gameMgr.AddLife(-1) <= 0)
+			{
+				allowInput = false;
+				gameObject.layer = LayerMask.NameToLayer("NoCollision");
+			}
+		}
 	}
 
-	void ChangeColor()
+	void ChangeColor(int newColor = -1)
 	{
-		currentColor = currentColor + 1;
-		if (currentColor == EObjectColor.MAXCOLORNUM)
-			currentColor = 0;
+		if (newColor < 0) {
+			currentColor = currentColor + 1;
+			if (currentColor == EObjectColor.MAXCOLORNUM)
+				currentColor = 0;
+		} else
+			currentColor = (EObjectColor)newColor;
 
-		Utils.addLog("Current Color: " + currentColor.ToString());
+			gameObject.layer = 10 + (int)currentColor;
+			spriteRenderer.color = getColorBuyColorEnum (currentColor);
 
-		gameObject.layer = 10 + (int)currentColor;
-		spriteRenderer.color = getColorBuyColorEnum (currentColor);
+		if (jumped)
+			airCombo += 1;
+		else
+			airCombo = 0;
 	}
 
 	Color getColorBuyColorEnum(EObjectColor oc)
@@ -217,21 +237,21 @@ public class PlayerController : MonoBehaviour {
 	void HandleInput(bool bButtonJumpDown, bool bButtonJumpHold, bool bButtonJumpUp)
 	{
 		if (bButtonJumpDown && maxJumpCount > currentJumpCount) {
+
 			jumped = true;
 			currentJumpCount += 1;
-
 			MyRigidBody.AddForce(new Vector3(0,jumpPower * 100f,0));
 			MyRigidBody.gravityScale = 1;
+			playSound(audioClips[0]);
 
 		}
-
+		/*
 		if (bButtonJumpHold) {
 
-		}
+		}*/
 
-		if (bButtonJumpUp && jumped) {
-			jumped = false;
-			TryHold();
+		if (bButtonJumpUp && maxJumpCount > currentJumpCount) {
+
 		}
 
 
@@ -241,50 +261,52 @@ public class PlayerController : MonoBehaviour {
 
 	bool isAlive()
 	{
-		return gameMgr.MainCam.transform.position.y - gameObject.transform.position.y < gameMgr.MainCam.GetComponent<Camera>().orthographicSize && !CheckHead();
+		return gameMgr.MainCam.gameObject.transform.position.y - gameObject.transform.position.y < gameMgr.MainCam.orthographicSize;
 	}
 
-	bool CheckHead()
+	GameObject HeadKnocked()
 	{
 		float halfPlayerSizeY = gameObject.GetComponent<BoxCollider2D> ().size.y/2 * gameObject.transform.localScale.y;
 		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y + halfPlayerSizeY);
-
+		Debug.DrawRay (myPos, myPos + Vector2.up * 0.1f,new Color(1,0,0,1));
 		RaycastHit2D hitup = Physics2D.Raycast (myPos, Vector2.up, 0.1f,~(1 <<  (gameObject.layer)));
 		if (hitup.collider != null )
-			return true;//knock into bar
-		return false;
+			return hitup.collider.gameObject;//knock into bar
+		return null;
 	}
 
-	void TryHold()
-	{ 
-		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y);
-		float halfBarSizeY = gameMgr.barGen.barTemmplate.GetComponent<BoxCollider2D> ().size.y/2 * gameMgr.barGen.barTemmplate.transform.localScale.y;
-		RaycastHit2D hitup = Physics2D.Raycast (myPos, Vector2.up, halfBarSizeY, 1 << LayerMask.NameToLayer("Level"));
-		if (hitup.collider != null)
-			Hold (hitup.collider.gameObject.GetComponent<BarController> ());
-		else {
-			RaycastHit2D hitdown = Physics2D.Raycast (myPos, -Vector2.up, halfBarSizeY, 1 << LayerMask.NameToLayer("Level"));
-			if (hitdown.collider != null)
-				Hold (hitdown.collider.gameObject.GetComponent<BarController> ());
+	GameObject FootTouched()
+	{
+		float halfPlayerSizeY = gameObject.GetComponent<BoxCollider2D> ().size.y/2 * gameObject.transform.localScale.y;
+		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y + halfPlayerSizeY);
+		
+		RaycastHit2D hitup = Physics2D.Raycast (myPos, -Vector2.up, 0.1f,~(1 <<  (gameObject.layer)));
+		if (hitup.collider != null )
+			return hitup.collider.gameObject;//knock into bar
+		return null;
+	}
+
+
+	public void ResetJumpCount(int num, BarController barController)
+	{
+		if (!isDead) {
+			currentJumpCount = Mathf.Min (Mathf.Max (0, num), maxJumpCount);
+			jumped = false;
+			airCombo = 0;
 		}
 	}
 
-	void Hold(BarController bc)
+	public void AddScore(int s)
 	{
-		if(bc)
-			bc.onPlayerHold ();
-
-		MyRigidBody.gravityScale = 0;
-		MyRigidBody.velocity = Vector3.zero;
-		currentJumpCount = 0;
+		gameMgr.AddScore (s + s * (Mathf.Max(0,airCombo - 1)));
 	}
 
-	public void ResetJumpCount(int num)
+	public void playSound(AudioClip ac, bool loop = false)
 	{
-		if(!isDead)
-			currentJumpCount = Mathf.Min (Mathf.Max (0, num), maxJumpCount);
+		audioSource.clip = ac;
+		audioSource.loop = loop;
+		audioSource.Play();
 	}
-
 
 
 }

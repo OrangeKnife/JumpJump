@@ -1,12 +1,15 @@
 using UnityEngine;
 using System.Collections;
-
+using System.Collections.Generic;
 public class BarController : MonoBehaviour
 {
 	public bool TimedBroken = false;
-
+	int score = 1;
 	SpriteRenderer spriteRenderer;
 	EObjectColor barColor;
+	AudioSource audioSource;
+
+	public List<AudioClip> audioClips = new List<AudioClip>();
 
 	void Start ()
 	{
@@ -16,7 +19,7 @@ public class BarController : MonoBehaviour
 
 		spriteRenderer = GetComponent<SpriteRenderer> ();
 
-
+		audioSource = GetComponent<AudioSource> ();
 		ChangeColor ();
 	}
 
@@ -63,15 +66,25 @@ public class BarController : MonoBehaviour
 	
 	}
 
-	public void onPlayerHold()
-	{
-		print ("I am hold");
-	}
 
 	void OnTriggerEnter2D(Collider2D  other) 
 	{
+		//add score first cuz we have combo
+		if (score > 0) {
+			other.gameObject.GetComponent<PlayerController> ().AddScore (score);
+			score = 0;
+			audioSource.clip = audioClips [0];
+			audioSource.Play ();
+		} else {
+			audioSource.clip = audioClips[1];
+			audioSource.Play();
+
+		}
+
 		if (other.gameObject.tag == "Player")
-			other.gameObject.GetComponent<PlayerController> ().ResetJumpCount (0);
+			other.gameObject.GetComponent<PlayerController> ().ResetJumpCount (0, this);
+
+
 	}
 
 

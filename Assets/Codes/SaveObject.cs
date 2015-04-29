@@ -7,11 +7,9 @@ public class SaveObject
 	public SaveObject(bool inFirstRun)
 	{
 		firstRun = inFirstRun;
-
-		optionMusic = true;
+		bestScore = 0;
 	}
 	public bool firstRun;
-
-	public bool optionMusic;
+	public int bestScore;
 }
 

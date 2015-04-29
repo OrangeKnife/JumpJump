@@ -15,12 +15,19 @@ public class GameSceneEvents : MonoBehaviour {
 	GameObject UI_ScoreText = null;
 	[SerializeField]
 	GameObject UI_StartPanel = null;
+	[SerializeField]
+	GameObject UI_LifeText = null;
+
+	[SerializeField]
+	UnityEngine.UI.Text yourScore = null; 
+	[SerializeField]
+	UnityEngine.UI.Text yourBest = null; 
 
 	GameObject Player;
 
 
 	GameManager gameMgr;
-
+	SaveObject mysave;
 
 	List<GameObject> abilityUISlots = new List<GameObject>();
 
@@ -78,6 +85,24 @@ public class GameSceneEvents : MonoBehaviour {
 		}
 		else
 			bannerView.Hide ();
+
+
+
+		try{
+
+			if(GameFile.Load ("save.data", ref mysave))
+				Utils.addLog("save.data loaded");
+			else
+			{
+				mysave = new SaveObject(true);
+				GameFile.Save("save.data",mysave);
+			}
+
+		}
+		catch(System.Exception)
+		{
+			Debug.Log ("save.data loading error");
+		}
 	}
 
 	void InitGameMgr()
@@ -88,7 +113,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onPlayerDead() 
 	{
-		Invoke ("ShowDeathPanel", 2f);
+		Invoke ("ShowDeathPanel", 1f);
 	}
 
 	public void onPlayerRespawn()
@@ -99,6 +124,8 @@ public class GameSceneEvents : MonoBehaviour {
 	void ShowDeathPanel()
 	{	
 		UI_DeathPanel.SetActive (true);
+		yourScore.text = gameMgr.currentScore.ToString ();
+		yourBest.text = gameMgr.bestScore.ToString ();
 
 		if(bannerView!=null)
 			bannerView.Show ();
@@ -114,7 +141,6 @@ public class GameSceneEvents : MonoBehaviour {
 		gameMgr.StartGame ();
 
 		UI_DeathPanel.SetActive (false);
-		UI_ScorePanel.SetActive (true);
 
 
 	}
@@ -133,6 +159,11 @@ public class GameSceneEvents : MonoBehaviour {
 	public void UpdateUISocre(int newScore)
 	{
 		UI_ScoreText.GetComponent<UnityEngine.UI.Text>().text = newScore.ToString();
+	}
+
+	public void UpdateUILife(int newLife)
+	{
+		UI_LifeText.GetComponent<UnityEngine.UI.Text> ().text = newLife.ToString ();
 	}
 
 	public void CleanUpAbilityUISlots()
@@ -165,6 +196,17 @@ public class GameSceneEvents : MonoBehaviour {
 			UI_ScoreText.GetComponent<UnityEngine.UI.Text>().text = "not ready";
 		}
 
+	}
+
+	public void onGameStarted()
+	{
+		UI_ScorePanel.SetActive (true);
+		UpdateUISocre (gameMgr.currentScore);
+	}
+
+	public void onGameEnded()
+	{
+		UI_ScorePanel.SetActive (false);
 	}
 
 	public void addLog(string logstring)
