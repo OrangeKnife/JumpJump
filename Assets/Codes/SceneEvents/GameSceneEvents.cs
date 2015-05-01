@@ -23,6 +23,12 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	UnityEngine.UI.Text yourBest = null; 
 
+	[SerializeField]
+	GameObject tutorialLeft = null; 
+	[SerializeField]
+	GameObject tutorialRight = null; 
+
+
 	GameObject Player;
 
 
@@ -119,6 +125,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onPlayerRespawn()
 	{
 		UpdateUISocre (0);
+		showTutorial (true);
 	}
 
 	void ShowDeathPanel()
@@ -214,4 +221,9 @@ public class GameSceneEvents : MonoBehaviour {
 		GameObject.Find ("LogText").GetComponent<UnityEngine.UI.Text> ().text += logstring;
 	}
 
+	public void showTutorial(bool wantToShow)
+	{
+		tutorialLeft.SetActive(wantToShow);
+		tutorialRight.SetActive(wantToShow);
+	}
 }

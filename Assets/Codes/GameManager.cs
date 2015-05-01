@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SocialPlatforms;
+
 public class GameManager : MonoBehaviour {
 	public List<GameObject> PlayerTemplates;
 	private GameObject CurrentPlayer;
@@ -27,7 +29,22 @@ public class GameManager : MonoBehaviour {
 
 		if (GameFile.Load ("save.data", ref mysave))
 			bestScore = mysave.bestScore;
+
+		//leaderboard
+#if UNITY_ANDROID || UNITY_IOS
+		ILeaderboard leaderboard = Social.CreateLeaderboard();
+		leaderboard.id = "Leaderboard001";
+		leaderboard.LoadScores(result =>
+		                       {
+			Debug.Log("Received " + leaderboard.scores.Length + " scores");
+			foreach (IScore score in leaderboard.scores)
+				Debug.Log(score);
+		});
+#endif
+
 	}
+
+	
 
 	public void StartGame()
 	{
@@ -52,6 +69,17 @@ public class GameManager : MonoBehaviour {
 			bestScore = currentScore;
 			mysave.bestScore = bestScore;
 			GameFile.Save("save.data",mysave);
+
+			//leaderboard
+			ILeaderboard leaderboard = Social.CreateLeaderboard();
+			leaderboard.id = "Leaderboard1";
+			leaderboard.LoadScores(result =>
+			                       {
+				Debug.Log("Received " + leaderboard.scores.Length + " scores");
+				foreach (IScore score in leaderboard.scores)
+					Debug.Log(score);
+			});
+
 		}
 		eventHandler.onGameEnded ();
 	}

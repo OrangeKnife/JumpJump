@@ -12,9 +12,11 @@ public class BarGenerator : MonoBehaviour {
 	private LinkedList<GameObject> SpawnedBarsList;
 
 	public Vector3 firstBarLocation,barHeight;
+	public float flashingBarChance;
+	public int minimumBarCountForFlashingBar;
 	Vector3 lastBarLocation = Vector3.zero;
 	GameManager gameMgr;
-	// Use this for initialization
+	int barCount = 0;
 	void Start () 
 	{
 		if (gameMgr == null)
@@ -37,6 +39,8 @@ public class BarGenerator : MonoBehaviour {
 		playerTransform = player.transform;
 		
 		lastBarLocation = firstBarLocation - barHeight;
+
+		barCount = 0;
 	}
 	
 
@@ -47,7 +51,7 @@ public class BarGenerator : MonoBehaviour {
 			if (lastBarLocation.y - player.transform.position.y < 5 * barHeight.y)
 				SpawnBar (barTemmplate);
 
-			if (SpawnedBarsList.First != null && player.transform.position.y - SpawnedBarsList.First.Value.transform.position.y > 5 * barHeight.y)
+			if (SpawnedBarsList!=null && SpawnedBarsList.First != null && player.transform.position.y - SpawnedBarsList.First.Value.transform.position.y > 5 * barHeight.y)
 			{
 				Destroy (SpawnedBarsList.First.Value);
 				SpawnedBarsList.RemoveFirst ();
@@ -66,11 +70,25 @@ public class BarGenerator : MonoBehaviour {
 
 	void SpawnBar(GameObject template)
 	{
+		EObjectColor lastBarColor = EObjectColor.MAXCOLORNUM;
+
 		for (int i = 0; i < howMany; i++) {
 			GameObject newBar = Instantiate (template);
+
+			BarController bc = newBar.GetComponent<BarController>();
+			if(bc.getColor() == lastBarColor && barCount <= 10)
+				bc.ChangeColor();
+
+			lastBarColor = bc.getColor();
+
+			if(barCount > minimumBarCountForFlashingBar && Random.Range(0f,1f) < flashingBarChance)
+				bc.TickingColor = true;
+
+
 			newBar.transform.position = lastBarLocation + barHeight;
 			lastBarLocation = newBar.transform.position;
 			SpawnedBarsList.AddLast(newBar);
+			barCount++;
 		}
 	}
 

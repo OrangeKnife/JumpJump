@@ -13,8 +13,8 @@ public enum EObjectColor
 
 public class PlayerController : MonoBehaviour {
 
-	int jumpPower = 4;
-	int maxJumpCount = 1;
+	public int jumpPower = 4;
+	public int maxJumpCount = 1;
 	int currentJumpCount = 0;
 	int airCombo = 0;
 	bool isDead = false;
@@ -26,7 +26,10 @@ public class PlayerController : MonoBehaviour {
 	SpriteRenderer spriteRenderer;
 
 	public bool jumped {get; private set;}
-
+	public Vector3 popUpTextOffset;
+	public GUIStyle popUpComboGUIStyle;
+	public GUIStyle popUpLifeGUIStyle;
+	public GUIStyle popUpScoreGUIStyle;
 
 	EObjectColor currentColor = EObjectColor.RED;
 	AudioSource audioSource;
@@ -36,8 +39,15 @@ public class PlayerController : MonoBehaviour {
 	static Color RedColor = new Color(234f/255f,46f/255f,73f/255f);
 	static Color BlueColor = new Color(119f/255f,196f/255f,211f/255f);
 	static Color GreenColor = new Color(102f/255f,196f/255f,50f/255f);
-	static Color YellowColor = new Color(246f/255f,247f/255f,146f/255f);
+	static Color YellowColor = new Color(246f/255f,247f/255f,74f/255f);
 
+	List<string> popUpText = new List<string>();
+	List<Vector3> popUpScreenPos = new List<Vector3>();
+	List<float> popUpShowedTime = new List<float>();
+	List<GUIStyle> popUpGUIStyle = new List<GUIStyle>();
+
+	int tempPlayerScore = 0;
+	public int scoreToLife;
 	void Start () 
 	{
 		eventHandler = GameObject.Find("eventHandler").GetComponent<GameSceneEvents>();
@@ -126,7 +136,7 @@ public class PlayerController : MonoBehaviour {
 		if(Input.GetButtonDown("Fire1"))
 		{
 			playSound(audioClips[2]);
-			ChangeColor();
+			ChangeColor(-1,true);
 		}
 	
 
@@ -189,8 +199,13 @@ public class PlayerController : MonoBehaviour {
 		if (bar != null) {
 			playSound(audioClips[1]);
 			fullScreenFlashImage.GetComponent<Animator>().Play("fading",0);
-			MyRigidBody.velocity = -MyRigidBody.velocity * 0.8f;
+			MyRigidBody.velocity = Vector3.zero;// -MyRigidBody.velocity * 0.1f;
 			ChangeColor ((int)bar.GetComponent<BarController> ().getColor ());
+
+			popUpText.Add("LIFE - 1");
+			popUpScreenPos.Add( gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpTextOffset.x , popUpTextOffset.y * popUpScreenPos.Count,0)));
+			popUpShowedTime.Add(Time.time);
+			popUpGUIStyle.Add(popUpLifeGUIStyle);
 
 			if( gameMgr.AddLife(-1) <= 0)
 			{
@@ -200,7 +215,7 @@ public class PlayerController : MonoBehaviour {
 		}
 	}
 
-	void ChangeColor(int newColor = -1)
+	void ChangeColor(int newColor = -1, bool playerChangeColor = false)
 	{
 		if (newColor < 0) {
 			currentColor = currentColor + 1;
@@ -212,10 +227,38 @@ public class PlayerController : MonoBehaviour {
 			gameObject.layer = 10 + (int)currentColor;
 			spriteRenderer.color = getColorBuyColorEnum (currentColor);
 
-		if (jumped)
+		if (jumped && playerChangeColor) {
 			airCombo += 1;
+			if(airCombo >= 2)
+			{
+				if(airCombo > 2)
+					CleanUpOtherComboText();
+
+				popUpText.Add("COMBO X "+airCombo.ToString());
+				popUpScreenPos.Add( gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpTextOffset.x , popUpTextOffset.y * popUpScreenPos.Count,0)));
+				popUpShowedTime.Add(Time.time);
+				popUpGUIStyle.Add(popUpComboGUIStyle);
+
+			}
+		}
 		else
 			airCombo = 0;
+	}
+
+	void CleanUpOtherComboText()
+	{
+		for(int i = 0; i < popUpText.Count; ++i)
+		{ 
+			if(popUpText[i][0] == 'C')//AIR COMBO
+			{
+				popUpText.RemoveAt(i);
+				popUpScreenPos.RemoveAt(i);
+				popUpGUIStyle.RemoveAt(i);
+				popUpShowedTime.RemoveAt(i);
+				
+				i--;
+			}
+		}
 	}
 
 	Color getColorBuyColorEnum(EObjectColor oc)
@@ -276,7 +319,7 @@ public class PlayerController : MonoBehaviour {
 		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y + halfPlayerSizeY);
 		Debug.DrawRay (myPos, myPos + Vector2.up * 0.1f,new Color(1,0,0,1));
 		RaycastHit2D hitup = Physics2D.Raycast (myPos, Vector2.up, 0.1f,~(1 <<  (gameObject.layer)));
-		if (hitup.collider != null )
+		if (hitup.collider != null && MyRigidBody.velocity.y > 0 )
 			return hitup.collider.gameObject;//knock into bar
 		return null;
 	}
@@ -304,7 +347,26 @@ public class PlayerController : MonoBehaviour {
 
 	public void AddScore(int s)
 	{
-		gameMgr.AddScore (s + s * (Mathf.Max(0,airCombo - 1)));
+		int realScore = s > 0? s + s * (Mathf.Max(0,airCombo - 1)) : s;
+		gameMgr.AddScore (realScore);
+
+		tempPlayerScore += realScore;
+	 
+		 
+		popUpText.Add ("SCORE "+ (realScore>0?"+ " : "") + realScore.ToString ());
+		popUpScreenPos.Add (gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("S")));
+		popUpShowedTime.Add (Time.time);
+		popUpGUIStyle.Add (popUpScoreGUIStyle);
+		 
+		if (tempPlayerScore >= scoreToLife) {
+			tempPlayerScore -= scoreToLife;
+			gameMgr.AddLife (1);
+
+			popUpText.Add ("LIFE X 1");
+			popUpScreenPos.Add (gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("L")));
+			popUpShowedTime.Add (Time.time);
+			popUpGUIStyle.Add (popUpLifeGUIStyle);
+		}
 	}
 
 	public void playSound(AudioClip ac, bool loop = false)
@@ -314,5 +376,55 @@ public class PlayerController : MonoBehaviour {
 		audioSource.Play();
 	}
 
+	void OnGUI() {
+
+
+		if (popUpText.Count > 0) {
+			for(int i = 0; i < popUpText.Count; i++)
+			{
+				GUI.TextField(new Rect (popUpScreenPos[i].x, Screen.height - popUpScreenPos[i].y, 255, 20), popUpText[i],popUpGUIStyle[i]);
+			}
+		}
+
+		if (popUpShowedTime.Count > 0) {
+			for(int i = 0; i < popUpShowedTime.Count; ++i)
+			{
+				float DisplayTime = getPopUpDisplayTimeByString(popUpText[i]);
+				if(Time.time - popUpShowedTime[i] > DisplayTime)
+				{
+					popUpText.RemoveAt(i);
+					popUpScreenPos.RemoveAt(i);
+					popUpGUIStyle.RemoveAt(i);
+					popUpShowedTime.RemoveAt(i);
+
+					i--;
+				}
+			}
+		}
+	}
+
+	float getPopUpDisplayTimeByString(string s)
+	{
+		if (s [0] == 'L')//LIFE - 1
+			return 1f;
+		else if (s [0] == 'C')//AIR COMBO
+			return 0.5f;
+		else if (s [0] == 'S')
+			return 0.5f;
+
+		return 0.5f;
+	}
+
+	Vector3 getPopUpOffSetByString(string s)
+	{
+		if (s [0] == 'L')//LIFE - 1
+			return new Vector3 (popUpTextOffset.x, popUpTextOffset.y * popUpScreenPos.Count, 0);
+		else if (s [0] == 'C')//AIR COMBO
+			return new Vector3 (popUpTextOffset.x, popUpTextOffset.y * popUpScreenPos.Count, 0);
+		else if (s [0] == 'S')
+			return new Vector3 (popUpTextOffset.x, popUpTextOffset.y * 0 , 0);
+		
+		return new Vector3 (popUpTextOffset.x, popUpTextOffset.y * popUpScreenPos.Count, 0);
+	}
 
 }

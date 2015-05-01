@@ -20,6 +20,7 @@ public class GroundTrigger : MonoBehaviour
 	{
 		if (other.gameObject.tag == "Player")
 			other.gameObject.GetComponent<PlayerController> ().ResetJumpCount (0, null);
+
 	}
 }
 
