@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+
 public class BarController : MonoBehaviour
 {
 	public bool TimedBroken = false;
@@ -10,6 +11,11 @@ public class BarController : MonoBehaviour
 	AudioSource audioSource;
 
 	public List<AudioClip> audioClips = new List<AudioClip>();
+
+	static Color RedColor = new Color(234f/255f,46f/255f,73f/255f);
+	static Color BlueColor = new Color(119f/255f,196f/255f,211f/255f);
+	static Color GreenColor = new Color(102f/255f,196f/255f,50f/255f);
+	static Color YellowColor = new Color(246f/255f,247f/255f,146f/255f);
 
 	void Start ()
 	{
@@ -44,16 +50,16 @@ public class BarController : MonoBehaviour
 		Color rtColor = new Color();
 		switch (oc) {
 		case EObjectColor.RED:
-			rtColor = new Color(1,0,0,1);
+			rtColor = RedColor;
 			break;
 		case EObjectColor.BLUE:
-			rtColor = new Color(0,0,1,1);
+			rtColor = BlueColor;
 			break;
 		case EObjectColor.GREEN:
-			rtColor = new Color(0,1,0,1);
+			rtColor = GreenColor;
 			break;
 		case EObjectColor.YELLOW:
-			rtColor = new Color(1,1,0,1);
+			rtColor = YellowColor;
 			break;
 		}
 		
