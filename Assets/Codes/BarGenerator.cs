@@ -8,7 +8,7 @@ public class BarGenerator : MonoBehaviour {
 	public GameObject barTemmplate;
 
 	private GameObject player;
-	private Transform playerTransform;
+
 	private LinkedList<GameObject> SpawnedBarsList;
 
 	public Vector3 firstBarLocation,barHeight;
@@ -36,7 +36,7 @@ public class BarGenerator : MonoBehaviour {
 		SpawnedBarsList.Clear ();
 
 		player = gameMgr.GetCurrentPlayer();
-		playerTransform = player.transform;
+
 		
 		lastBarLocation = firstBarLocation - barHeight;
 

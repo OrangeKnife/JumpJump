@@ -80,6 +80,7 @@ public class GameSceneEvents : MonoBehaviour {
 		#if UNITY_ANDROID && !UNITY_EDITOR
 		//bannerAdsId = "ca-app-pub-7183026460514946/2010435315";
 		#endif
+		/*
 		if (bannerView == null) {
 			bannerView = new BannerView (
 			bannerAdsId, AdSize.Banner, AdPosition.Top);
@@ -91,6 +92,7 @@ public class GameSceneEvents : MonoBehaviour {
 		}
 		else
 			bannerView.Hide ();
+			*/
 
 
 

@@ -11,13 +11,11 @@ public class CameraController : MonoBehaviour {
 	private GameObject player;
 	private Transform playerTransform;
 	private PlayerController playerCon;
-	
-	GameManager gameMgr;
 
 	// Use this for initialization
 	void Start () 
 	{
-		gameMgr = GameObject.Find("GameManager").GetComponent<GameManager>();
+
 	}
 
 	public void ResetCamera(GameObject inPlayer)

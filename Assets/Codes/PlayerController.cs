@@ -181,8 +181,11 @@ public class PlayerController : MonoBehaviour {
 				}
 				else
 				{
-					if (touch.phase == TouchPhase.Began)
-						ChangeColor();
+					if (touch.phase == TouchPhase.Ended)
+					{
+						playSound(audioClips[2]);
+						ChangeColor(-1,true);
+					}
 				}
 				 
 			}
@@ -317,8 +320,8 @@ public class PlayerController : MonoBehaviour {
 	{
 		float halfPlayerSizeY = gameObject.GetComponent<BoxCollider2D> ().size.y/2 * gameObject.transform.localScale.y;
 		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y + halfPlayerSizeY);
-		Debug.DrawRay (myPos, myPos + Vector2.up * 0.1f,new Color(1,0,0,1));
-		RaycastHit2D hitup = Physics2D.Raycast (myPos, Vector2.up, 0.1f,~(1 <<  (gameObject.layer)));
+		Debug.DrawLine (myPos, myPos + Vector2.up * 0.15f,new Color(1,0,0,1));
+		RaycastHit2D hitup = Physics2D.Raycast(myPos, Vector2.up, 0.1f,~(1 <<  (gameObject.layer)));
 		if (hitup.collider != null && MyRigidBody.velocity.y > 0 )
 			return hitup.collider.gameObject;//knock into bar
 		return null;

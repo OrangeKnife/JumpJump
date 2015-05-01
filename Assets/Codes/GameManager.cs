@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SocialPlatforms;
+using UnityEngine.SocialPlatforms.GameCenter;
 
 public class GameManager : MonoBehaviour {
 	public List<GameObject> PlayerTemplates;
@@ -32,14 +33,30 @@ public class GameManager : MonoBehaviour {
 
 		//leaderboard
 #if UNITY_ANDROID || UNITY_IOS
-		ILeaderboard leaderboard = Social.CreateLeaderboard();
-		leaderboard.id = "Leaderboard001";
-		leaderboard.LoadScores(result =>
-		                       {
-			Debug.Log("Received " + leaderboard.scores.Length + " scores");
-			foreach (IScore score in leaderboard.scores)
-				Debug.Log(score);
+
+		Social.localUser.Authenticate (success => {
+			if (success) {
+				Debug.Log ("Authentication successful");
+				string userInfo = "Username: " + Social.localUser.userName + 
+					"\nUser ID: " + Social.localUser.id + 
+						"\nIsUnderage: " + Social.localUser.underage;
+				Debug.Log (userInfo);
+
+				ILeaderboard leaderboard = Social.CreateLeaderboard();
+				leaderboard.id = "Leaderboard001";
+				leaderboard.LoadScores(result =>
+				                       {
+					Debug.Log("Received " + leaderboard.scores.Length + " scores");
+					foreach (IScore score in leaderboard.scores)
+						Debug.Log(score);
+				});
+
+			}
+			else
+				Debug.Log ("Authentication failed");
 		});
+
+
 #endif
 
 	}
