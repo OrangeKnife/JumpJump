@@ -93,7 +93,7 @@ public class BarController : MonoBehaviour
 		gameObject.layer = 10 + (int)barColor;
 		//spriteRenderer.color = getColorBuyColorEnum (barColor);
 
-		spriteRenderer.material.mainTextureOffset = getColorTextureOffsetByColorEnum (barColor);
+		spriteRenderer.material.SetTextureOffset("_MainTex",getColorTextureOffsetByColorEnum (barColor));
 
 		if(Flashing)
 			gameObject.GetComponent<Animator> ().Play ("Regular");
@@ -129,16 +129,16 @@ public class BarController : MonoBehaviour
 		Vector2 rtColorOffset = new Vector2();
 		switch (oc) {
 		case EObjectColor.RED:
-			rtColorOffset =  new Vector2(-0.4f,0f);
+			rtColorOffset =  new Vector2(-7f/16f,0f);
 			break;
 		case EObjectColor.BLUE:
-			rtColorOffset = new Vector2(-0.2f,0f);
+			rtColorOffset = new Vector2(-5f/16f,0f);
 			break;
 		case EObjectColor.GREEN:
-			rtColorOffset = Vector2.zero;
+			rtColorOffset = new Vector2(-3f/16f,0f);
 			break;
 		case EObjectColor.YELLOW:
-			rtColorOffset = new Vector2(0.2f,0f);;
+			rtColorOffset = new Vector2(-1f/16f,0f);;
 			break;
 		}
 		
@@ -205,13 +205,13 @@ public class BarController : MonoBehaviour
 
 	EObjectColor getColorByTextureOffset(Vector2 offset)
 	{
-		if ((0.3f - offset.x) < 0.001f && (0.3f - offset.x) > -0.0001f)
+		if ((0 - offset.x) < 0.001f && (0 - offset.x) > -0.001f)
 			return EObjectColor.RED;
-		if ((-0.3f - offset.x)  < 0.001f && (-0.3f - offset.x) > -0.001f)	 
+		if ((-6f/16f - offset.x)  < 0.001f && (-6f/16f - offset.x) > -0.001f)	 
 			return EObjectColor.BLUE;
-		if ((-0.1f - offset.x)  < 0.001f && (-0.1f - offset.x) > -0.001f)	 
+		if ((-4f/16f - offset.x)  < 0.001f && (-4f/16f - offset.x) > -0.001f)	 
 			return EObjectColor.GREEN;
-		if ((0.1f - offset.x) < 0.001f && (0.1f - offset.x) > -0.001f)	 
+		if ((-2f/16f - offset.x) < 0.001f && (-2f/16f - offset.x) > -0.001f)	 
 			return EObjectColor.YELLOW;
 		/*
 		if ((offset - new Vector2 (0.3f, 0)).sqrMagnitude < 0.0001f)

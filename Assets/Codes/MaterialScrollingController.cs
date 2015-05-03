@@ -26,7 +26,7 @@ public class MaterialScrollingController : MonoBehaviour {
 	{
 		currentOffset = currentOffset + (Time.deltaTime * scrollSpeed);
 		//float x = Mathf.Repeat (Time.time * scrollSpeed, 1);
-		float x = Mathf.Repeat (currentOffset + 0.4f, 0.8f) - 0.4f;//need -0.4f --> 0.4f 
+		float x = Mathf.Repeat (currentOffset + 7f / 16f, 8f / 16f) - 7f / 16f;
 		Vector2 offset = new Vector2 (x, savedOffset.y);
 		barSpriteRenderer.material.mainTextureOffset = offset;
 
