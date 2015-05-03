@@ -8,6 +8,8 @@ public class GameManager : MonoBehaviour {
 	public List<GameObject> PlayerTemplates;
 	private GameObject CurrentPlayer;
 
+	public List<GameObject> PickupTemplates;
+
 	public bool bGameStarted { get; private set; }
 	public Camera MainCam { get; private set;}
 	public BarGenerator barGen { get; private set;}
@@ -127,8 +129,9 @@ public class GameManager : MonoBehaviour {
 	}
 
 	void Awake(){
+#if UNITY_ANDROID || UNITY_IOS
 		System.Environment.SetEnvironmentVariable("MONO_REFLECTION_SERIALIZER", "yes");
-
+#endif
 		DontDestroyOnLoad(gameObject);
 	}
 
@@ -147,6 +150,8 @@ public class GameManager : MonoBehaviour {
 
 		if(eventHandler)
 			eventHandler.onPlayerRespawn ();
+
+		Time.timeScale = 1f;
 	}
 
 	public GameObject GetCurrentPlayer()

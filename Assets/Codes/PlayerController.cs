@@ -14,10 +14,10 @@ public enum EObjectColor
 
 public class PlayerController : MonoBehaviour {
 
-	public int jumpPower = 4;
+	public float jumpPower = 4;
 	public int maxJumpCount = 1;
-	int currentJumpCount = 0;
-	int airCombo = 0;
+	int currentJumpCount = 1;//0;
+	int combo = 0;
 	bool isDead = false;
 	bool allowInput = true;
 
@@ -33,7 +33,7 @@ public class PlayerController : MonoBehaviour {
 	public GUIStyle popUpScoreGUIStyle;
 
 	EObjectColor currentColor = EObjectColor.RED;
-	AudioSource audioSource;
+	List<AudioSource> audioSourceList;
 	public List<AudioClip> audioClips = new List<AudioClip>();
 	GameObject fullScreenFlashImage;
 
@@ -50,6 +50,19 @@ public class PlayerController : MonoBehaviour {
 
 	int tempPlayerScore = 0;
 	public int scoreToLife;
+
+	bool bTimeSlowed;
+	float slowTimeRecoverySpeed;
+	int slowtimeAudioSourceIdx = -1;
+	BarController lastBarStandOn = null;
+	void Awake()
+	{
+		
+		audioSourceList = new List<AudioSource>();
+
+		audioSourceList.Add( gameObject.AddComponent<AudioSource>() );
+
+	}
 	void Start () 
 	{
 		eventHandler = GameObject.Find("eventHandler").GetComponent<GameSceneEvents>();
@@ -60,7 +73,6 @@ public class PlayerController : MonoBehaviour {
 
 		spriteRenderer = GetComponent<SpriteRenderer>();
 
-		audioSource = GetComponent<AudioSource> ();
 
 		fullScreenFlashImage = GameObject.Find ("FullScreenFlashImage");
 
@@ -75,18 +87,54 @@ public class PlayerController : MonoBehaviour {
 	void Die()
 	{
 		playSound (audioClips [3]);
+
+
 		allowInput = false;
+		gameObject.layer = LayerMask.NameToLayer("NoCollision");
 		isDead = true;
-		eventHandler.onPlayerDead ();
-
+		MyRigidBody.gravityScale = 0;
 		MyRigidBody.velocity = Vector3.zero;
+		spriteRenderer.enabled = false;
 
-		gameMgr.EndGame ();
+		if (gameMgr.currentLife < 0) {
+			eventHandler.onPlayerDead ();
+			gameMgr.EndGame ();
+		} else if (gameMgr.AddLife (-1) >= 0) {
+			//AddPopup("LIFE - 1", gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpTextOffset.x , popUpTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpLifeGUIStyle);
+			Invoke ("revive", 1f);
+		} else {
+			eventHandler.onPlayerDead ();
+			gameMgr.EndGame ();
+		}
+
+	}
+
+	void revive()
+	{
+		if (lastBarStandOn != null)
+			gameObject.transform.position = lastBarStandOn.gameObject.transform.position + gameMgr.barGen.barHeight * 0.5f;
+		else
+			gameObject.transform.position = Vector3.zero;
+		isDead = false;
+		allowInput = true;
+		gameObject.layer = 10 + (int)currentColor;
+ 
+		MyRigidBody.gravityScale = 1;
+		spriteRenderer.enabled = true;
 	}
 
 	void Update () 
 	{
 		bool ButtonJumpDown, ButtonJumpHold, ButtonJumpUp;
+
+		if (bTimeSlowed) {
+			if (Time.timeScale < 1f)
+				Time.timeScale += Time.deltaTime * slowTimeRecoverySpeed;
+			else {
+				Time.timeScale = 1;
+				slowTimeFinished();
+			}
+		}
 
 		if (!isAlive () && !isDead)
 			Die ();
@@ -209,21 +257,32 @@ public class PlayerController : MonoBehaviour {
 			if(barC < EObjectColor.MAXCOLORNUM)
 				ChangeColor ((int)barC);
 
-			popUpText.Add("LIFE - 1");
-			popUpScreenPos.Add( gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpTextOffset.x , popUpTextOffset.y * popUpScreenPos.Count,0)));
-			popUpShowedTime.Add(Time.time);
-			popUpGUIStyle.Add(popUpLifeGUIStyle);
+			AddPopup("LIFE - 1", gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpTextOffset.x , popUpTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpLifeGUIStyle);
 
-			if( gameMgr.AddLife(-1) <= 0)
+
+			if( gameMgr.AddLife(-1) < 0)
 			{
 				allowInput = false;
 				gameObject.layer = LayerMask.NameToLayer("NoCollision");
 			}
+			else
+			{
+				ResetJumpCount (0, null);
+			}
 		}
+	}
+
+	public void AddPopup(string message, Vector3 loc, float popupTime, GUIStyle popupStyle)
+	{
+		popUpText.Add(message);
+		popUpScreenPos.Add( loc);
+		popUpShowedTime.Add(popupTime);
+		popUpGUIStyle.Add(popupStyle);
 	}
 
 	void ChangeColor(int newColor = -1, bool playerChangeColor = false)
 	{
+		Color lastColor  = getColorBuyColorEnum (currentColor);
 		if (newColor < 0) {
 			currentColor = currentColor + 1;
 			if (currentColor == EObjectColor.MAXCOLORNUM)
@@ -234,22 +293,25 @@ public class PlayerController : MonoBehaviour {
 			gameObject.layer = 10 + (int)currentColor;
 			spriteRenderer.color = getColorBuyColorEnum (currentColor);
 
+		EObjectColor next = currentColor + 1;
+		next = next == EObjectColor.MAXCOLORNUM ? 0 : next;
+
+		eventHandler.onPlayerColorChanged(lastColor,getColorBuyColorEnum (currentColor),getColorBuyColorEnum (next));
+
 		if (jumped && playerChangeColor) {
-			airCombo += 1;
-			if(airCombo >= 2)
+			combo += 1;
+			if(combo >= 2)
 			{
-				if(airCombo > 2)
+				if(combo > 2)
 					CleanUpOtherComboText();
 
-				popUpText.Add("COMBO X "+airCombo.ToString());
-				popUpScreenPos.Add( gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpTextOffset.x , popUpTextOffset.y * popUpScreenPos.Count,0)));
-				popUpShowedTime.Add(Time.time);
-				popUpGUIStyle.Add(popUpComboGUIStyle);
-
+				AddPopup("COMBO X "+combo.ToString(), gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpTextOffset.x , popUpTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpComboGUIStyle);
 			}
 		}
 		else
-			airCombo = 0;
+			combo = 0;
+
+
 	}
 
 	void CleanUpOtherComboText()
@@ -297,7 +359,6 @@ public class PlayerController : MonoBehaviour {
 			jumped = true;
 			currentJumpCount += 1;
 			MyRigidBody.AddForce(new Vector3(0,jumpPower * 100f,0));
-			MyRigidBody.gravityScale = 1;
 			playSound(audioClips[0]);
 
 		}
@@ -320,20 +381,29 @@ public class PlayerController : MonoBehaviour {
 		return gameMgr.MainCam.gameObject.transform.position.y - gameObject.transform.position.y < gameMgr.MainCam.orthographicSize;
 	}
 
+	public float getHalfPlayerSizeY()
+	{
+		return gameObject.GetComponent<BoxCollider2D> ().size.y/2 * gameObject.transform.localScale.y;
+	}
+
+
 	GameObject HeadKnocked()
 	{
-		float halfPlayerSizeY = gameObject.GetComponent<BoxCollider2D> ().size.y/2 * gameObject.transform.localScale.y;
+		float halfPlayerSizeY = getHalfPlayerSizeY ();
 		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y + halfPlayerSizeY);
 		Debug.DrawLine (myPos, myPos + Vector2.up * 0.15f,new Color(1,0,0,1));
-		RaycastHit2D hitup = Physics2D.Raycast(myPos, Vector2.up, 0.1f,~(1 <<  (gameObject.layer)));
-		if (hitup.collider != null && MyRigidBody.velocity.y > 0 && hitup.collider.gameObject.layer != LayerMask.NameToLayer("NoCollision") )
+
+		LayerMask lmask = (~(1 << (gameObject.layer))) - (1 <<  LayerMask.NameToLayer("NoCollision")) - (1 <<LayerMask.NameToLayer("Pickup"));
+
+		RaycastHit2D hitup = Physics2D.Raycast(myPos, Vector2.up, 0.1f,lmask  );
+		if (hitup.collider != null && MyRigidBody.velocity.y > 0 )
 			return hitup.collider.gameObject;//knock into bar
 		return null;
 	}
 
 	GameObject FootTouched()
 	{
-		float halfPlayerSizeY = gameObject.GetComponent<BoxCollider2D> ().size.y/2 * gameObject.transform.localScale.y;
+		float halfPlayerSizeY = getHalfPlayerSizeY ();
 		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y + halfPlayerSizeY);
 		
 		RaycastHit2D hitup = Physics2D.Raycast (myPos, -Vector2.up, 0.1f,~(1 <<  (gameObject.layer)));
@@ -348,39 +418,41 @@ public class PlayerController : MonoBehaviour {
 		if (!isDead) {
 			currentJumpCount = Mathf.Min (Mathf.Max (0, num), maxJumpCount);
 			jumped = false;
-			airCombo = 0;
+			combo = 0;
+			lastBarStandOn = barController;
 		}
+
+
 	}
 
 	public void AddScore(int s)
 	{
-		int realScore = s > 0? s + s * (Mathf.Max(0,airCombo - 1)) : s;
-		gameMgr.AddScore (realScore);
+		int realScore = s > 0? s + s * (Mathf.Max(0,combo - 1)) : s;
+ 		gameMgr.AddScore (realScore);
 
 		tempPlayerScore += realScore;
 	 
-		 
-		popUpText.Add ("SCORE "+ (realScore>0?"+ " : "") + realScore.ToString ());
-		popUpScreenPos.Add (gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("S")));
-		popUpShowedTime.Add (Time.time);
-		popUpGUIStyle.Add (popUpScoreGUIStyle);
-		 
+		AddPopup ("SCORE "+ (realScore>0?"+ " : "") + realScore.ToString (), gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("S")), Time.time, popUpScoreGUIStyle);
+				 
 		if (tempPlayerScore >= scoreToLife) {
 			tempPlayerScore -= scoreToLife;
 			gameMgr.AddLife (1);
 
-			popUpText.Add ("LIFE X 1");
-			popUpScreenPos.Add (gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("L")));
-			popUpShowedTime.Add (Time.time);
-			popUpGUIStyle.Add (popUpLifeGUIStyle);
+			AddPopup ("LIFE + 1", gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("L")), Time.time, popUpLifeGUIStyle);
+
 		}
 	}
 
-	public void playSound(AudioClip ac, bool loop = false)
+	public void playSound( AudioClip ac, int AudioSourceIdx = 0, bool loop = false)
 	{
-		audioSource.clip = ac;
-		audioSource.loop = loop;
-		audioSource.Play();
+		audioSourceList[AudioSourceIdx].clip = ac;
+		audioSourceList[AudioSourceIdx].loop = loop;
+		audioSourceList[AudioSourceIdx].Play();
+	}
+
+	public void stopSound(int AudioSourceIdx = 0)
+	{
+		audioSourceList [AudioSourceIdx].Stop ();
 	}
 
 	void OnGUI() {
@@ -389,7 +461,7 @@ public class PlayerController : MonoBehaviour {
 		if (popUpText.Count > 0) {
 			for(int i = 0; i < popUpText.Count; i++)
 			{
-				GUI.TextField(new Rect (popUpScreenPos[i].x, Screen.height - popUpScreenPos[i].y, 255, 20), popUpText[i],popUpGUIStyle[i]);
+				GUI.Label(new Rect (popUpScreenPos[i].x, Screen.height - popUpScreenPos[i].y, 255, 20), popUpText[i],popUpGUIStyle[i]);
 			}
 		}
 
@@ -434,4 +506,42 @@ public class PlayerController : MonoBehaviour {
 		return new Vector3 (popUpTextOffset.x, popUpTextOffset.y * popUpScreenPos.Count, 0);
 	}
 
+	void slowTimeFinished()
+	{
+		bTimeSlowed = false;
+		stopSound (slowtimeAudioSourceIdx);
+		Destroy (audioSourceList [slowtimeAudioSourceIdx]);
+		slowtimeAudioSourceIdx = -1;
+	}
+
+	void slowTimeStarted(float timescale, float recoverySpeed, AudioClip slowTimeLoopSound)
+	{
+		Time.timeScale = timescale;
+		bTimeSlowed = true;
+		slowTimeRecoverySpeed = recoverySpeed;
+
+		if (slowtimeAudioSourceIdx == -1) {
+			audioSourceList.Add (gameObject.AddComponent<AudioSource> ());
+			slowtimeAudioSourceIdx = audioSourceList.Count - 1;
+		}
+		playSound (slowTimeLoopSound, slowtimeAudioSourceIdx, true);
+	}
+
+	public bool Pickup(Pickup something)
+	{
+		if (something.gainLife)
+			gameMgr.AddLife (something.gainLifeNum);
+
+		if (something.AddJump)
+			maxJumpCount += something.AddJumpNum;
+
+		if (something.slowTime) {
+			slowTimeStarted(something.timescale, something.slowTimeRecoverySpeed, something.slowTimeLoopSound);
+		}
+
+		AddPopup(something.popupMessage,  gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + something.popUpTextOffset), Time.time, something.popupStyle);
+
+
+		return true;
+	}
 }

@@ -18,7 +18,7 @@ public class MaterialScrollingController : MonoBehaviour {
 		barSpriteRenderer = GetComponent<SpriteRenderer>();
 
 		savedOffset = barSpriteRenderer.material.mainTextureOffset;
-
+		currentOffset = savedOffset.x;
 		barController = GetComponent<BarController> ();
 	}
 	
@@ -33,10 +33,6 @@ public class MaterialScrollingController : MonoBehaviour {
 		barController.NotifyBarColorChanged (offset);
 	}
 	
-	void OnDisable () 
-	{
-		barSpriteRenderer.material.mainTextureOffset = savedOffset;
-	}
 
 	public void SetScrollingSpeed(float speed)
 	{

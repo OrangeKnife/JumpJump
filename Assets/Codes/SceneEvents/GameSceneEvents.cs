@@ -28,6 +28,13 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject tutorialRight = null; 
 
+	[SerializeField]
+	UnityEngine.UI.Image color1 = null; 
+	[SerializeField]
+	UnityEngine.UI.Image color2 = null; 
+	[SerializeField]
+	UnityEngine.UI.Image color3 = null; 
+
 
 	GameObject Player;
 
@@ -227,5 +234,14 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		tutorialLeft.SetActive(wantToShow);
 		tutorialRight.SetActive(wantToShow);
+	}
+
+	public void onPlayerColorChanged(Color lastColor, Color currentColor, Color nextColor)
+	{
+		color1.color = lastColor;
+		color2.color = currentColor;
+		color3.color = nextColor;
+
+		//lifeImg.color = currentColor;
 	}
 }

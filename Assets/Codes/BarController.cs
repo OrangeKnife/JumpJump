@@ -20,6 +20,7 @@ public class BarController : MonoBehaviour
 	public bool minusScore;
 	public bool Flashing;
 	public float FlashingInterVal;
+	public float FlashingDuration;
 	public Material FlashingMaterial;
 
 	public bool ScrollingColor;
@@ -38,6 +39,7 @@ public class BarController : MonoBehaviour
 
 		audioSource = GetComponent<AudioSource> ();
 		ChangeColor ();
+
 
 	}
 
@@ -81,7 +83,7 @@ public class BarController : MonoBehaviour
 			gameObject.layer = 10 + (int)barColor;
 		}
 
-		Debug.Log ("SetLayerByColor " + c.ToString ());
+		//Debug.Log ("SetLayerByColor " + c.ToString ());
 	}
 
 	public void ChangeColor()
@@ -163,18 +165,23 @@ public class BarController : MonoBehaviour
 		bIsDoingFlash = true;
 		gameObject.GetComponent<Animator> ().Play ("FlashingBarAnimation");
 		gameObject.layer = LayerMask.NameToLayer("NoCollision");
-		Invoke("StopFlashing",1.5f);
+		Invoke("StopFlashing",FlashingDuration);
 	}
 
 
 	void OnTriggerEnter2D(Collider2D  other) 
 	{
+/*
 		if (other.gameObject.tag == "Player") {
 			if(other.gameObject.GetComponent<Rigidbody2D>().velocity.y > 0)
 				return;
 
-			if(other.gameObject.transform.position.y < gameObject.transform.position.y )
+			float halfPlayerSize = other.gameObject.GetComponent<PlayerController>().getHalfPlayerSizeY();
+
+			if(other.gameObject.transform.position.y  < gameObject.transform.position.y )
 				return;
+ 
+			other.gameObject.GetComponent<Rigidbody2D>().velocity = Vector3.zero;
 
 			if(minusScore && score < 0 || score > 0)
 				other.gameObject.GetComponent<PlayerController> ().AddScore (score);
@@ -192,7 +199,39 @@ public class BarController : MonoBehaviour
 
 			other.gameObject.GetComponent<PlayerController> ().ResetJumpCount (0, this);
 		}
+		 */
 
+	}
+
+	void OnCollisionEnter2D(Collision2D other)
+	{
+		if (other.gameObject.tag == "Player") {
+			if(other.gameObject.GetComponent<Rigidbody2D>().velocity.y > 0)
+				return;
+			
+			float halfPlayerSize = other.gameObject.GetComponent<PlayerController>().getHalfPlayerSizeY();
+			
+			if(other.gameObject.transform.position.y  < gameObject.transform.position.y )
+				return;
+			
+			other.gameObject.GetComponent<Rigidbody2D>().velocity = Vector3.zero;
+			
+			if(minusScore && score < 0 || score > 0)
+				other.gameObject.GetComponent<PlayerController> ().AddScore (score);
+			
+			if (score > 0) {
+				score = -1;
+				audioSource.clip = audioClips [0];
+				audioSource.Play ();
+			} else {
+				score --;
+				audioSource.clip = audioClips [1];
+				audioSource.Play ();
+				
+			}
+			
+			other.gameObject.GetComponent<PlayerController> ().ResetJumpCount (0, this);
+		}
 	}
 
 	public void NotifyBarColorChanged (Vector2 offset)
