@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -12,11 +12,12 @@ public class BarGenerator : MonoBehaviour {
 	private LinkedList<GameObject> SpawnedBarsList;
 
 	public Vector3 firstBarLocation,barHeight;
-	public float flashingBarChance;
-	public int minimumBarCountForFlashingBar;
+	public float flashingBarChance,scrollingColorChance;
+	public int minimumBarCountForFlashingBar,minimumBarCountForScrollingColor;
 	Vector3 lastBarLocation = Vector3.zero;
 	GameManager gameMgr;
 	int barCount = 0;
+	bool lastBarFlashing = false;
 	void Start () 
 	{
 		if (gameMgr == null)
@@ -81,9 +82,12 @@ public class BarGenerator : MonoBehaviour {
 
 			lastBarColor = bc.getColor();
 
-			if(barCount > minimumBarCountForFlashingBar && Random.Range(0f,1f) < flashingBarChance)
-				bc.TickingColor = true;
+			if(barCount > minimumBarCountForScrollingColor && Random.Range(0f,1f) < scrollingColorChance)
+				bc.enableScrollingColor(true);
+			else if(!lastBarFlashing && barCount > minimumBarCountForFlashingBar && Random.Range(0f,1f) < flashingBarChance)
+				bc.enableFlashing(true);
 
+			lastBarFlashing = bc.Flashing;
 
 			newBar.transform.position = lastBarLocation + barHeight;
 			lastBarLocation = newBar.transform.position;

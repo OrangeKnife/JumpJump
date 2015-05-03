@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -7,8 +7,9 @@ public enum EObjectColor
 	RED = 0,
 	GREEN = 1,
 	BLUE = 2,
-	YELLOW =3,
-	MAXCOLORNUM
+	YELLOW = 3,
+	MAXCOLORNUM = 4,
+	BLACK = 5	//this is for colliding all other colors
 };
 
 public class PlayerController : MonoBehaviour {
@@ -40,6 +41,7 @@ public class PlayerController : MonoBehaviour {
 	static Color BlueColor = new Color(119f/255f,196f/255f,211f/255f);
 	static Color GreenColor = new Color(102f/255f,196f/255f,50f/255f);
 	static Color YellowColor = new Color(246f/255f,247f/255f,74f/255f);
+	static Color BlackColor = new Color(0f,0f,0f);
 
 	List<string> popUpText = new List<string>();
 	List<Vector3> popUpScreenPos = new List<Vector3>();
@@ -203,7 +205,9 @@ public class PlayerController : MonoBehaviour {
 			playSound(audioClips[1]);
 			fullScreenFlashImage.GetComponent<Animator>().Play("fading",0);
 			MyRigidBody.velocity = Vector3.zero;// -MyRigidBody.velocity * 0.1f;
-			ChangeColor ((int)bar.GetComponent<BarController> ().getColor ());
+			EObjectColor barC = bar.GetComponent<BarController> ().getColor ();
+			if(barC < EObjectColor.MAXCOLORNUM)
+				ChangeColor ((int)barC);
 
 			popUpText.Add("LIFE - 1");
 			popUpScreenPos.Add( gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpTextOffset.x , popUpTextOffset.y * popUpScreenPos.Count,0)));
@@ -322,7 +326,7 @@ public class PlayerController : MonoBehaviour {
 		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y + halfPlayerSizeY);
 		Debug.DrawLine (myPos, myPos + Vector2.up * 0.15f,new Color(1,0,0,1));
 		RaycastHit2D hitup = Physics2D.Raycast(myPos, Vector2.up, 0.1f,~(1 <<  (gameObject.layer)));
-		if (hitup.collider != null && MyRigidBody.velocity.y > 0 )
+		if (hitup.collider != null && MyRigidBody.velocity.y > 0 && hitup.collider.gameObject.layer != LayerMask.NameToLayer("NoCollision") )
 			return hitup.collider.gameObject;//knock into bar
 		return null;
 	}
