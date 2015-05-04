@@ -26,9 +26,12 @@ public class BarController : MonoBehaviour
 	public bool ScrollingColor;
 	public float ScrollingColorSpeed;
 
+	public bool fadingAfterPlayerJumped;
 
 	float lastTimeTick = 0f;
 	bool bIsDoingFlash = false;
+
+	public bool isJumpedComboed = false;
 	void Awake ()
 	{
 		barColor = (EObjectColor)Random.Range (0,(int)EObjectColor.MAXCOLORNUM);
@@ -41,6 +44,13 @@ public class BarController : MonoBehaviour
 		ChangeColor ();
 
 
+	}
+
+	public void onPlayerJumped()
+	{
+		if (fadingAfterPlayerJumped) {
+			gameObject.SetActive(false);
+		}
 	}
 
 	public void enableScrollingColor(bool en)
@@ -206,11 +216,9 @@ public class BarController : MonoBehaviour
 	void OnCollisionEnter2D(Collision2D other)
 	{
 		if (other.gameObject.tag == "Player") {
-			if(other.gameObject.GetComponent<Rigidbody2D>().velocity.y > 0)
+			if(other.gameObject.GetComponent<Rigidbody2D>().velocity.y > 0 && other.gameObject.transform.position.y < gameObject.GetComponent<BoxCollider2D>().transform.position.y)
 				return;
-			
-			float halfPlayerSize = other.gameObject.GetComponent<PlayerController>().getHalfPlayerSizeY();
-			
+				
 			if(other.gameObject.transform.position.y  < gameObject.transform.position.y )
 				return;
 			

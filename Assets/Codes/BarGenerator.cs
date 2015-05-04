@@ -59,7 +59,12 @@ public class BarGenerator : MonoBehaviour {
 		pickupCount = 1;
 	}
 	
-
+	public void ActiveAllSpawnedBars(bool wantToActive)
+	{
+		foreach (GameObject go in SpawnedBarsList) {
+			go.SetActive(wantToActive);
+		}
+	}
 
 	void Update () 
 	{
@@ -105,6 +110,9 @@ public class BarGenerator : MonoBehaviour {
 			}
 			else if(!lastBarFlashing && barCount > minimumBarCountForFlashingBar && Random.Range(0f,1f) < flashingBarChance)
 				bc.enableFlashing(true);
+
+			if(barCount > minimumBarCountForFadingBar)
+				bc.fadingAfterPlayerJumped = true;
 
 			lastBarFlashing = bc.Flashing;
 

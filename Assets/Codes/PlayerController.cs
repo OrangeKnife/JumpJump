@@ -17,9 +17,14 @@ public class PlayerController : MonoBehaviour {
 	public float jumpPower = 4;
 	public int maxJumpCount = 1;
 	int currentJumpCount = 1;//0;
-	int combo = 0;
+	int combo = 0;//color combo
+	public bool wantColorCombo = false;
+	int jumpCombo = 0;
+	public bool wantJumpCombo = true;
 	bool isDead = false;
 	bool allowInput = true;
+	bool allowInput_jump = true;
+	bool allowInput_color = true;
 
 	GameSceneEvents eventHandler = null;
 	GameManager gameMgr = null;
@@ -27,7 +32,9 @@ public class PlayerController : MonoBehaviour {
 	SpriteRenderer spriteRenderer;
 
 	public bool jumped {get; private set;}
-	public Vector3 popUpTextOffset;
+	public Vector3 popUpComboTextOffset;
+	public Vector3 popUpLifeTextOffset;
+	public Vector3 popUpScoreTextOffset;
 	public GUIStyle popUpComboGUIStyle;
 	public GUIStyle popUpLifeGUIStyle;
 	public GUIStyle popUpScoreGUIStyle;
@@ -55,12 +62,15 @@ public class PlayerController : MonoBehaviour {
 	float slowTimeRecoverySpeed;
 	int slowtimeAudioSourceIdx = -1;
 	BarController lastBarStandOn = null;
+	float lastStandTime = 0f;
+	public float jumpComboThreshold;
 	void Awake()
 	{
 		
 		audioSourceList = new List<AudioSource>();
 
 		audioSourceList.Add( gameObject.AddComponent<AudioSource>() );
+		audioSourceList [audioSourceList.Count - 1].volume = 0.2f;
 
 	}
 	void Start () 
@@ -100,7 +110,8 @@ public class PlayerController : MonoBehaviour {
 			eventHandler.onPlayerDead ();
 			gameMgr.EndGame ();
 		} else if (gameMgr.AddLife (-1) >= 0) {
-			//AddPopup("LIFE - 1", gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpTextOffset.x , popUpTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpLifeGUIStyle);
+			allowInput = true;
+			allowInput_jump = false;
 			Invoke ("revive", 1f);
 		} else {
 			eventHandler.onPlayerDead ();
@@ -111,16 +122,30 @@ public class PlayerController : MonoBehaviour {
 
 	void revive()
 	{
+		StartCoroutine ("DoRevive");
+	}
+
+	IEnumerator DoRevive()
+	{
+		gameMgr.barGen.ActiveAllSpawnedBars (true);
+
 		if (lastBarStandOn != null)
 			gameObject.transform.position = lastBarStandOn.gameObject.transform.position + gameMgr.barGen.barHeight * 0.5f;
 		else
 			gameObject.transform.position = Vector3.zero;
-		isDead = false;
-		allowInput = true;
+
 		gameObject.layer = 10 + (int)currentColor;
+		spriteRenderer.enabled = true;
+		allowInput_jump = true;
+		isDead = false;
+		yield return new WaitForSeconds(1f);
+		
+
+
+
  
 		MyRigidBody.gravityScale = 1;
-		spriteRenderer.enabled = true;
+
 	}
 
 	void Update () 
@@ -156,37 +181,43 @@ public class PlayerController : MonoBehaviour {
 
 
 		// jump check
-		if ( Input.GetButton ("Jump") )
+		if(allowInput_jump)
 		{
-			ButtonJumpHold = true;
-		}
-		else
-		{
-			ButtonJumpHold = false;
+			if ( Input.GetButton ("Jump") )
+			{
+				ButtonJumpHold = true;
+			}
+			else
+			{
+				ButtonJumpHold = false;
+			}
+
+			if ( Input.GetButtonDown ("Jump") )
+			{
+				ButtonJumpDown = true;
+			}
+			else
+			{
+				ButtonJumpDown = false;
+			}
+
+			if ( Input.GetButtonUp ("Jump") )
+			{
+				ButtonJumpUp = true;
+			}
+			else
+			{
+				ButtonJumpUp = false;
+			}
 		}
 
-		if ( Input.GetButtonDown ("Jump") )
+		if(allowInput_color)
 		{
-			ButtonJumpDown = true;
-		}
-		else
-		{
-			ButtonJumpDown = false;
-		}
-
-		if ( Input.GetButtonUp ("Jump") )
-		{
-			ButtonJumpUp = true;
-		}
-		else
-		{
-			ButtonJumpUp = false;
-		}
-
-		if(Input.GetButtonDown("Fire1"))
-		{
-			playSound(audioClips[2]);
-			ChangeColor(-1,true);
+			if(Input.GetButtonDown("Fire1"))
+			{
+				playSound(audioClips[2]);
+				ChangeColor(-1,true);
+			}
 		}
 	
 
@@ -202,36 +233,39 @@ public class PlayerController : MonoBehaviour {
 				if (touch.position.x <= Screen.width / 2)
 				{
 					// jump
-					if (touch.phase == TouchPhase.Began)
+					if(allowInput_jump)
 					{
-						ButtonJumpDown = true;
-					}
-					else
-					{
-						ButtonJumpDown = false;
-					}
-					
-					if (touch.phase == TouchPhase.Ended)
-					{
-						ButtonJumpUp = true;
-					}
-					else
-					{
-						ButtonJumpUp = false;
-					}
-					
-					if (touch.phase == TouchPhase.Moved)
-					{
-						ButtonJumpHold = true;
-					}
-					else
-					{
-						ButtonJumpHold = false;
+						if (touch.phase == TouchPhase.Began)
+						{
+							ButtonJumpDown = true;
+						}
+						else
+						{
+							ButtonJumpDown = false;
+						}
+						
+						if (touch.phase == TouchPhase.Ended)
+						{
+							ButtonJumpUp = true;
+						}
+						else
+						{
+							ButtonJumpUp = false;
+						}
+						
+						if (touch.phase == TouchPhase.Moved)
+						{
+							ButtonJumpHold = true;
+						}
+						else
+						{
+							ButtonJumpHold = false;
+						}
 					}
 				}
 				else
 				{
-					if (touch.phase == TouchPhase.Ended)
+					if (allowInput_color && touch.phase == TouchPhase.Ended)
 					{
 						playSound(audioClips[2]);
 						ChangeColor(-1,true);
@@ -257,7 +291,7 @@ public class PlayerController : MonoBehaviour {
 			if(barC < EObjectColor.MAXCOLORNUM)
 				ChangeColor ((int)barC);
 
-			AddPopup("LIFE - 1", gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpTextOffset.x , popUpTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpLifeGUIStyle);
+			AddPopup("LIFE - 1", gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpLifeTextOffset.x , popUpLifeTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpLifeGUIStyle);
 
 
 			if( gameMgr.AddLife(-1) < 0)
@@ -298,14 +332,14 @@ public class PlayerController : MonoBehaviour {
 
 		eventHandler.onPlayerColorChanged(lastColor,getColorBuyColorEnum (currentColor),getColorBuyColorEnum (next));
 
-		if (jumped && playerChangeColor) {
+		if (wantColorCombo && jumped && playerChangeColor) {
 			combo += 1;
 			if(combo >= 2)
 			{
 				if(combo > 2)
 					CleanUpOtherComboText();
 
-				AddPopup("COMBO X "+combo.ToString(), gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpTextOffset.x , popUpTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpComboGUIStyle);
+				AddPopup("COMBO X "+combo.ToString(), gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpComboTextOffset.x , popUpComboTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpComboGUIStyle);
 			}
 		}
 		else
@@ -350,7 +384,25 @@ public class PlayerController : MonoBehaviour {
 
 		return rtColor;
 	}
-	
+
+	public void setJumpCombo(int i)
+	{
+		jumpCombo = i;
+	}
+
+	void checkJumpCombo(BarController lastBarStandOn)
+	{
+		if (Time.time - lastStandTime < jumpComboThreshold && !lastBarStandOn.isJumpedComboed) {
+			lastBarStandOn.isJumpedComboed = true;
+			jumpCombo += 1;
+			if(jumpCombo >= 2)
+				AddPopup("COMBO X "+jumpCombo.ToString(), gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpComboTextOffset.x , popUpComboTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpComboGUIStyle);
+
+		}
+		else
+			jumpCombo = 0;
+
+	}
 
 	void HandleInput(bool bButtonJumpDown, bool bButtonJumpHold, bool bButtonJumpUp)
 	{
@@ -358,8 +410,18 @@ public class PlayerController : MonoBehaviour {
 
 			jumped = true;
 			currentJumpCount += 1;
+			MyRigidBody.velocity = Vector3.Min(Vector3.zero, Vector3.Max(new Vector3(0,-2f,0),MyRigidBody.velocity));
 			MyRigidBody.AddForce(new Vector3(0,jumpPower * 100f,0));
 			playSound(audioClips[0]);
+			if(lastBarStandOn != null)
+			{
+				lastBarStandOn.onPlayerJumped();
+				if(wantJumpCombo)
+				{
+					checkJumpCombo(lastBarStandOn);
+				}
+
+			}
 
 		}
 		/*
@@ -419,7 +481,15 @@ public class PlayerController : MonoBehaviour {
 			currentJumpCount = Mathf.Min (Mathf.Max (0, num), maxJumpCount);
 			jumped = false;
 			combo = 0;
-			lastBarStandOn = barController;
+			if(barController != null)
+			{
+				lastBarStandOn = barController;
+				lastStandTime = Time.time;
+			}
+			else
+			{
+				jumpCombo = 0;
+			}
 		}
 
 
@@ -427,12 +497,12 @@ public class PlayerController : MonoBehaviour {
 
 	public void AddScore(int s)
 	{
-		int realScore = s > 0? s + s * (Mathf.Max(0,combo - 1)) : s;
+		int realScore = s > 0? s + s * (Mathf.Max(0,combo - 1)) + s * (Mathf.Max(0,jumpCombo - 1))  : s  ;
  		gameMgr.AddScore (realScore);
 
 		tempPlayerScore += realScore;
 	 
-		AddPopup ("SCORE "+ (realScore>0?"+ " : "") + realScore.ToString (), gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("S")), Time.time, popUpScoreGUIStyle);
+		AddPopup ((realScore>0?"+ " : "") + realScore.ToString (), gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("S")), Time.time, popUpScoreGUIStyle);
 				 
 		if (tempPlayerScore >= scoreToLife) {
 			tempPlayerScore -= scoreToLife;
@@ -497,13 +567,13 @@ public class PlayerController : MonoBehaviour {
 	Vector3 getPopUpOffSetByString(string s)
 	{
 		if (s [0] == 'L')//LIFE - 1
-			return new Vector3 (popUpTextOffset.x, popUpTextOffset.y * popUpScreenPos.Count, 0);
+			return new Vector3 (popUpLifeTextOffset.x, popUpLifeTextOffset.y * popUpScreenPos.Count, 0);
 		else if (s [0] == 'C')//AIR COMBO
-			return new Vector3 (popUpTextOffset.x, popUpTextOffset.y * popUpScreenPos.Count, 0);
+			return new Vector3 (popUpComboTextOffset.x, popUpComboTextOffset.y * popUpScreenPos.Count, 0);
 		else if (s [0] == 'S')
-			return new Vector3 (popUpTextOffset.x, popUpTextOffset.y * 0 , 0);
+			return new Vector3 (popUpScoreTextOffset.x, popUpScoreTextOffset.y , 0);
 		
-		return new Vector3 (popUpTextOffset.x, popUpTextOffset.y * popUpScreenPos.Count, 0);
+		return new Vector3 (popUpScoreTextOffset.x, popUpScoreTextOffset.y * popUpScreenPos.Count, 0);
 	}
 
 	void slowTimeFinished()

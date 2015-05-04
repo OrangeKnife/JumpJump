@@ -58,6 +58,7 @@ public class GameSceneEvents : MonoBehaviour {
 	}
 
 	void Awake() {
+		/*
 		if (Advertisement.isSupported) {
 			Advertisement.allowPrecache = true;
 			string UnityAdsId="";
@@ -75,12 +76,12 @@ public class GameSceneEvents : MonoBehaviour {
 			Debug.Log("Platform not supported");
 			UI_ScoreText.GetComponent<UnityEngine.UI.Text>().text = "Platform not supported";
 		}
-
+		*/
 		//ca-app-pub-7183026460514946/5522304910 is for IOS now
 		//ca-app-pub-7183026460514946/2010435315 is for android
 		// Create a 320x50 banner at the top of the screen.
 
-		string bannerAdsId="";
+		//string bannerAdsId="";
 		#if UNITY_IOS && !UNITY_EDITOR
 		//bannerAdsId = "ca-app-pub-7183026460514946/5522304910";
 		#endif

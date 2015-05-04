@@ -21,6 +21,10 @@ public class GameManager : MonoBehaviour {
 	public int currentLife { get; private set; }
 	public int bestScore { get; private set; }
 
+	public List<AudioClip> backgroundMusic;
+	int currentBGMindex = 0;
+	AudioSource audiosource;
+
 	SaveObject mysave;
 	void Start () {
 
@@ -34,7 +38,7 @@ public class GameManager : MonoBehaviour {
 			bestScore = mysave.bestScore;
 
 		//leaderboard
-#if UNITY_ANDROID || UNITY_IOS
+#if UNITY_IOS
 
 		Social.localUser.Authenticate (success => {
 			if (success) {
@@ -61,9 +65,19 @@ public class GameManager : MonoBehaviour {
 
 #endif
 
+		audiosource = GetComponent<AudioSource> ();
+
 	}
 
-	
+	void PlayBGM()
+	{
+		if (audiosource && backgroundMusic.Count > 0) {
+			audiosource.clip = backgroundMusic [currentBGMindex];
+			audiosource.Play ();
+			currentBGMindex++;
+			currentBGMindex =  currentBGMindex == backgroundMusic.Count ? 0 : currentBGMindex;
+		}
+	}
 
 	public void StartGame()
 	{
@@ -88,7 +102,7 @@ public class GameManager : MonoBehaviour {
 			bestScore = currentScore;
 			mysave.bestScore = bestScore;
 			GameFile.Save("save.data",mysave);
-
+#if UNITY_IOS
 			//leaderboard
 			ILeaderboard leaderboard = Social.CreateLeaderboard();
 			leaderboard.id = "Leaderboard1";
@@ -98,7 +112,7 @@ public class GameManager : MonoBehaviour {
 				foreach (IScore score in leaderboard.scores)
 					Debug.Log(score);
 			});
-
+#endif
 		}
 		eventHandler.onGameEnded ();
 	}
@@ -126,6 +140,8 @@ public class GameManager : MonoBehaviour {
 
 	void Update () {
 
+		if (!audiosource.isPlaying)
+			PlayBGM ();
 	}
 
 	void Awake(){
