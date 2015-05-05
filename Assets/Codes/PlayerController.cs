@@ -96,9 +96,6 @@ public class PlayerController : MonoBehaviour {
 
 	void Die()
 	{
-		playSound (audioClips [3]);
-
-
 		allowInput = false;
 		gameObject.layer = LayerMask.NameToLayer("NoCollision");
 		isDead = true;
@@ -109,11 +106,13 @@ public class PlayerController : MonoBehaviour {
 		if (gameMgr.currentLife < 0) {
 			eventHandler.onPlayerDead ();
 			gameMgr.EndGame ();
+
 		} else if (gameMgr.AddLife (-1) >= 0) {
 			allowInput = true;
 			allowInput_jump = false;
 			Invoke ("revive", 1f);
 		} else {
+			playSound (audioClips [3]);//die
 			eventHandler.onPlayerDead ();
 			gameMgr.EndGame ();
 		}
@@ -298,6 +297,8 @@ public class PlayerController : MonoBehaviour {
 			{
 				allowInput = false;
 				gameObject.layer = LayerMask.NameToLayer("NoCollision");
+				GetComponent<Animator>().Play("Spin");
+				playSound (audioClips [3]);//die
 			}
 			else
 			{
@@ -412,7 +413,7 @@ public class PlayerController : MonoBehaviour {
 			currentJumpCount += 1;
 			MyRigidBody.velocity = Vector3.Min(Vector3.zero, Vector3.Max(new Vector3(0,-2f,0),MyRigidBody.velocity));
 			MyRigidBody.AddForce(new Vector3(0,jumpPower * 100f,0));
-			playSound(audioClips[0]);
+			playSound(audioClips[0]); //jjump
 			if(lastBarStandOn != null)
 			{
 				lastBarStandOn.onPlayerJumped();
@@ -508,7 +509,7 @@ public class PlayerController : MonoBehaviour {
 			tempPlayerScore -= scoreToLife;
 			gameMgr.AddLife (1);
 
-			AddPopup ("LIFE + 1", gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("L")), Time.time, popUpLifeGUIStyle);
+			AddPopup (scoreToLife.ToString() + "SCORE:"+"LIFE + 1", gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("L")), Time.time, popUpLifeGUIStyle);
 
 		}
 	}
@@ -555,13 +556,13 @@ public class PlayerController : MonoBehaviour {
 	float getPopUpDisplayTimeByString(string s)
 	{
 		if (s [0] == 'L')//LIFE - 1
-			return 1f;
+			return 1.5f;
 		else if (s [0] == 'C')//AIR COMBO
 			return 0.5f;
 		else if (s [0] == 'S')
 			return 0.5f;
 
-		return 0.5f;
+		return 1f;
 	}
 
 	Vector3 getPopUpOffSetByString(string s)
