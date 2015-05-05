@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine.Advertisements;
 using GoogleMobileAds.Api;
+using GooglePlayGames;
 
 public class GameSceneEvents : MonoBehaviour {
 

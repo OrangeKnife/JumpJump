@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SocialPlatforms;
 using UnityEngine.SocialPlatforms.GameCenter;
+using GooglePlayGames;
+using GooglePlayGames.BasicApi;
 
 public class GameManager : MonoBehaviour {
 	public List<GameObject> PlayerTemplates;
@@ -31,6 +33,9 @@ public class GameManager : MonoBehaviour {
 
 	public Color fromCameraColor;//218,237,226
 	public Color towardsCameraColor;
+
+	static string leaderboardId = "";
+
 	void Start () {
 
 		SetCurrentPlayerTemplateByIdx (0);
@@ -42,33 +47,55 @@ public class GameManager : MonoBehaviour {
 		if (GameFile.Load ("save.data", ref mysave))
 			bestScore = mysave.bestScore;
 
+#if UNITY_ANDROID
+		PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder().Build();
+		/*	
+		// enables saving game progress.
+			.EnableSavedGames()
+				// registers a callback to handle game invitations received while the game is not running.
+				.WithInvitationDelegate(<callback method>)
+				// registers a callback for turn based match notifications received while the
+				// game is not running.
+				.WithMatchDelegate(<callback method>)
+				.Build();
+		*/
+		PlayGamesPlatform.InitializeInstance(config);
+		// recommended for debugging:
+		PlayGamesPlatform.DebugLogEnabled = true;
+		// Activate the Google Play Games platform
+		PlayGamesPlatform.Activate();
+#endif
 		//leaderboard
-#if UNITY_IOS
 
+#if UNITY_IOS
+		leaderboardId = "ColorJumpScore";
+#elif UNITY_ANDROID
+		leaderboardId = "CgkI_ab0x7wJEAIQAA";
+#endif
 		Social.localUser.Authenticate (success => {
 			if (success) {
-				Debug.Log ("Authentication successful");
+				Utils.addLog ("Authentication successful");
 				string userInfo = "Username: " + Social.localUser.userName + 
 					"\nUser ID: " + Social.localUser.id + 
 						"\nIsUnderage: " + Social.localUser.underage;
-				Debug.Log (userInfo);
+				Utils.addLog (userInfo);
 
 				ILeaderboard leaderboard = Social.CreateLeaderboard();
-				leaderboard.id = "ColorJumpScore";
+				leaderboard.id = leaderboardId;
 				leaderboard.LoadScores(result =>
 				                       {
-					Debug.Log("Received " + leaderboard.scores.Length + " scores");
+					Utils.addLog("Received " + leaderboard.scores.Length + " scores");
 					foreach (IScore score in leaderboard.scores)
-						Debug.Log(score);
+						Utils.addLog(score.ToString());
 				});
 
 			}
 			else
-				Debug.Log ("Authentication failed");
+				Utils.addLog("Authentication failed");
 		});
 
 
-#endif
+ 
 
 		audiosource = GetComponent<AudioSource> ();
 
@@ -118,7 +145,7 @@ public class GameManager : MonoBehaviour {
 		bGameStarted = false;
 		if (currentScore > bestScore) {
 
-			Social.ReportScore(currentScore,"ColorJumpScore",HighScoreCheck);
+			Social.ReportScore(currentScore,leaderboardId,HighScoreCheck);
 
 			bestScore = currentScore;
 			mysave.bestScore = bestScore;
