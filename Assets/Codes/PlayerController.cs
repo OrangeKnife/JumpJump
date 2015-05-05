@@ -64,6 +64,7 @@ public class PlayerController : MonoBehaviour {
 	BarController lastBarStandOn = null;
 	float lastStandTime = 0f;
 	public float jumpComboThreshold;
+
 	void Awake()
 	{
 		
@@ -150,6 +151,8 @@ public class PlayerController : MonoBehaviour {
 	void Update () 
 	{
 		bool ButtonJumpDown, ButtonJumpHold, ButtonJumpUp;
+
+		gameMgr.changeCameraBGColor(gameObject.transform.position.y);
 
 		if (bTimeSlowed) {
 			if (Time.timeScale < 1f)
@@ -346,7 +349,6 @@ public class PlayerController : MonoBehaviour {
 		else
 			combo = 0;
 
-
 	}
 
 	void CleanUpOtherComboText()
@@ -394,7 +396,7 @@ public class PlayerController : MonoBehaviour {
 	void checkJumpCombo(BarController lastBarStandOn)
 	{
 		if (Time.time - lastStandTime < jumpComboThreshold && !lastBarStandOn.isJumpedComboed) {
-			lastBarStandOn.isJumpedComboed = true;
+ 			lastBarStandOn.isJumpedComboed = true;
 			jumpCombo += 1;
 			if(jumpCombo >= 2)
 				AddPopup("COMBO X "+jumpCombo.ToString(), gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpComboTextOffset.x , popUpComboTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpComboGUIStyle);

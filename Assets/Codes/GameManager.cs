@@ -26,6 +26,11 @@ public class GameManager : MonoBehaviour {
 	AudioSource audiosource;
 
 	SaveObject mysave;
+
+	int gameMode = 0;
+
+	public Color fromCameraColor;//218,237,226
+	public Color towardsCameraColor;
 	void Start () {
 
 		SetCurrentPlayerTemplateByIdx (0);
@@ -83,7 +88,7 @@ public class GameManager : MonoBehaviour {
 	{
 		bGameStarted = true;
 		currentScore = 0;
-		currentLife = 3;
+		currentLife = 10;
 		eventHandler.UpdateUILife (currentLife);
 
 		RespawnPlayer ();
@@ -92,7 +97,13 @@ public class GameManager : MonoBehaviour {
 	
 		eventHandler.onGameStarted ();
 
+		MainCam.backgroundColor = fromCameraColor;
+	}
 
+	public void changeCameraBGColor(float playerHeight)
+	{
+		if(playerHeight <= 300f)
+			MainCam.backgroundColor = fromCameraColor + playerHeight / 300f * (towardsCameraColor - fromCameraColor);
 	}
 
 	public void EndGame()

@@ -29,6 +29,7 @@ public class Pickup : MonoBehaviour
 	void Start ()
 	{
 		audioSource = GetComponent<AudioSource> ();
+		audioSource.volume = 0.2f;
 
 	}
 	

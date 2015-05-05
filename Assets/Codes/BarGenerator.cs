@@ -63,6 +63,7 @@ public class BarGenerator : MonoBehaviour {
 	{
 		foreach (GameObject go in SpawnedBarsList) {
 			go.SetActive(wantToActive);
+			go.GetComponent<BarController>().faded = false;
 		}
 	}
 

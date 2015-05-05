@@ -27,6 +27,7 @@ public class BarController : MonoBehaviour
 	public float ScrollingColorSpeed;
 
 	public bool fadingAfterPlayerJumped;
+	public bool faded = false;
 
 	float lastTimeTick = 0f;
 	bool bIsDoingFlash = false;
@@ -41,15 +42,18 @@ public class BarController : MonoBehaviour
 		spriteRenderer = GetComponent<SpriteRenderer> ();
 
 		audioSource = GetComponent<AudioSource> ();
+		audioSource.volume = 0.2f;
 		ChangeColor ();
 
 
 	}
+	
 
 	public void onPlayerJumped()
 	{
 		if (fadingAfterPlayerJumped) {
 			gameObject.SetActive(false);
+			faded = true;
 		}
 	}
 
@@ -160,7 +164,7 @@ public class BarController : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-		if (Flashing) {
+		if (Flashing && !faded) {
 			if(Time.time - lastTimeTick > FlashingInterVal && !bIsDoingFlash)
 			{
 				DoFlashing();
@@ -230,10 +234,12 @@ public class BarController : MonoBehaviour
 			if (score > 0) {
 				score = -1;
 				audioSource.clip = audioClips [0];
+				audioSource.volume = 0.6f;
 				audioSource.Play ();
 			} else {
 				score --;
 				audioSource.clip = audioClips [1];
+				audioSource.volume = 0.2f;
 				audioSource.Play ();
 				
 			}
