@@ -35,19 +35,11 @@ public class GameManager : MonoBehaviour {
 	public Color towardsCameraColor;
 
 	static string leaderboardId = "";
+	ILeaderboard leaderboard;
 
-	void Start () {
-
-		SetCurrentPlayerTemplateByIdx (0);
-		MainCam = GameObject.Find ("Main Camera").GetComponent<Camera>();
-
-		barGen = GetComponent<BarGenerator> ();
-
-
-		if (GameFile.Load ("save.data", ref mysave))
-			bestScore = mysave.bestScore;
-
-#if UNITY_ANDROID
+	public void login()
+	{
+		#if UNITY_ANDROID
 		PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder().Build();
 		/*	
 		// enables saving game progress.
@@ -64,14 +56,14 @@ public class GameManager : MonoBehaviour {
 		PlayGamesPlatform.DebugLogEnabled = true;
 		// Activate the Google Play Games platform
 		PlayGamesPlatform.Activate();
-#endif
+		#endif
 		//leaderboard
-
-#if UNITY_IOS
+		
+		#if UNITY_IOS
 		leaderboardId = "ColorJumpScore";
-#elif UNITY_ANDROID
+		#elif UNITY_ANDROID
 		leaderboardId = "CgkI_ab0x7wJEAIQAA";
-#endif
+		#endif
 		Social.localUser.Authenticate (success => {
 			if (success) {
 				Utils.addLog ("Authentication successful");
@@ -79,26 +71,49 @@ public class GameManager : MonoBehaviour {
 					"\nUser ID: " + Social.localUser.id + 
 						"\nIsUnderage: " + Social.localUser.underage;
 				Utils.addLog (userInfo);
-
-				ILeaderboard leaderboard = Social.CreateLeaderboard();
+				
+				leaderboard = Social.CreateLeaderboard();
 				leaderboard.id = leaderboardId;
 				leaderboard.LoadScores(result =>
 				                       {
 					Utils.addLog("Received " + leaderboard.scores.Length + " scores");
 					foreach (IScore score in leaderboard.scores)
 						Utils.addLog(score.ToString());
+					
+					CheckLeaderboardsScore();
 				});
-
+				
+				
 			}
 			else
 				Utils.addLog("Authentication failed");
 		});
+		
+
+	}
+
+	void Start () {
+
+		SetCurrentPlayerTemplateByIdx (0);
+		MainCam = GameObject.Find ("Main Camera").GetComponent<Camera>();
+
+		barGen = GetComponent<BarGenerator> ();
 
 
+		if (GameFile.Load ("save.data", ref mysave))
+			bestScore = mysave.bestScore;
+
+		login ();
  
 
 		audiosource = GetComponent<AudioSource> ();
 
+	}
+
+	void CheckLeaderboardsScore()
+	{
+		if(bestScore > leaderboard.localUserScore.value )
+			Social.ReportScore(currentScore,leaderboardId,ScoreReported);
 	}
 
 	void PlayBGM()
@@ -133,11 +148,11 @@ public class GameManager : MonoBehaviour {
 			MainCam.backgroundColor = fromCameraColor + playerHeight / 300f * (towardsCameraColor - fromCameraColor);
 	}
 
-	public void HighScoreCheck(bool result) {
+	public void ScoreReported(bool result) {
 		if(result)
-			Debug.Log("score submission successful");
+			Utils.addLog("score submission successful");
 		else
-			Debug.Log("score submission failed");
+			Utils.addLog("score submission failed");
 	}
 
 	public void EndGame()
@@ -145,22 +160,13 @@ public class GameManager : MonoBehaviour {
 		bGameStarted = false;
 		if (currentScore > bestScore) {
 
-			Social.ReportScore(currentScore,leaderboardId,HighScoreCheck);
-
 			bestScore = currentScore;
+
+			CheckLeaderboardsScore();
+
 			mysave.bestScore = bestScore;
 			GameFile.Save("save.data",mysave);
-#if UNITY_IOS
-			//leaderboard
-			ILeaderboard leaderboard = Social.CreateLeaderboard();
-			leaderboard.id = "Leaderboard1";
-			leaderboard.LoadScores(result =>
-			                       {
-				Debug.Log("Received " + leaderboard.scores.Length + " scores");
-				foreach (IScore score in leaderboard.scores)
-					Debug.Log(score);
-			});
-#endif
+
 		}
 		eventHandler.onGameEnded ();
 	}

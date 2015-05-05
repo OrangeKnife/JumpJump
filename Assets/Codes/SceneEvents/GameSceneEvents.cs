@@ -247,6 +247,11 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onLeaderboardsButtonCilicked()
 	{
+		if (!Social.localUser.authenticated)
+			gameMgr.login ();
+
 		Social.ShowLeaderboardUI();
+
+
 	}
 }
