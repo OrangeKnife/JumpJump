@@ -106,9 +106,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 		try{
 
-			if(GameFile.Load ("save.data", ref mysave))
-				Utils.addLog("save.data loaded");
-			else
+			if(!GameFile.Load ("save.data", ref mysave))
 			{
 				mysave = new SaveObject(true);
 				GameFile.Save("save.data",mysave);
