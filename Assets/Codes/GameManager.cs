@@ -3,9 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SocialPlatforms;
 using UnityEngine.SocialPlatforms.GameCenter;
+#if UNITY_ANDROID
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
-
+#endif
 public class GameManager : MonoBehaviour {
 	public List<GameObject> PlayerTemplates;
 	private GameObject CurrentPlayer;
@@ -74,14 +75,18 @@ public class GameManager : MonoBehaviour {
 				
 				leaderboard = Social.CreateLeaderboard();
 				leaderboard.id = leaderboardId;
+				string[] userfilterstrings = new string[1];
+				userfilterstrings[0] = Social.localUser.id;
+				leaderboard.SetUserFilter(userfilterstrings);
 				leaderboard.LoadScores(result =>
-				                       {
+			     {
 					Utils.addLog("Received " + leaderboard.scores.Length + " scores");
 					foreach (IScore score in leaderboard.scores)
 						Utils.addLog(score.ToString());
-					
+
 					CheckLeaderboardsScore();
 				});
+
 				
 				
 			}
@@ -112,7 +117,7 @@ public class GameManager : MonoBehaviour {
 
 	void CheckLeaderboardsScore()
 	{
-		if(bestScore > leaderboard.localUserScore.value )
+		if(leaderboard != null && bestScore > leaderboard.localUserScore.value )
 			Social.ReportScore(currentScore,leaderboardId,ScoreReported);
 	}
 

@@ -2,10 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
-using UnityEngine.Advertisements;
+//using UnityEngine.Advertisements;
 using GoogleMobileAds.Api;
+#if UNITY_ANDROID
 using GooglePlayGames;
-
+#endif
 public class GameSceneEvents : MonoBehaviour {
 
 	[SerializeField]
@@ -196,6 +197,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void ShowAds()
 	{
+		/*
 		if(Advertisement.isReady())
 		{ 
 			UI_ScoreText.GetComponent<UnityEngine.UI.Text>().text = "ready";
@@ -211,7 +213,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 			UI_ScoreText.GetComponent<UnityEngine.UI.Text>().text = "not ready";
 		}
-
+*/
 	}
 
 	public void onGameStarted()
@@ -247,10 +249,12 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onLeaderboardsButtonCilicked()
 	{
-		if (!Social.localUser.authenticated)
-			gameMgr.login ();
-
-		Social.ShowLeaderboardUI();
+		if (!Social.localUser.authenticated) {
+			Utils.addLog("authenticated = " + Social.localUser.authenticated.ToString());
+			//gameMgr.login ();
+		}
+		else
+			Social.ShowLeaderboardUI();
 
 
 	}
