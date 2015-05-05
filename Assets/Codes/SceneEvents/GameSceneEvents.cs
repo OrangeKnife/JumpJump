@@ -36,7 +36,8 @@ public class GameSceneEvents : MonoBehaviour {
 	UnityEngine.UI.Image color2 = null; 
 	[SerializeField]
 	UnityEngine.UI.Image color3 = null; 
-
+	[SerializeField]
+	UnityEngine.UI.Image color4 = null; 
 
 	GameObject Player;
 
@@ -238,11 +239,20 @@ public class GameSceneEvents : MonoBehaviour {
 		tutorialRight.SetActive(wantToShow);
 	}
 
-	public void onPlayerColorChanged(Color lastColor, Color currentColor, Color nextColor)
+	public void onPlayerColorChanged(EObjectColor currentColor)
 	{
-		color1.color = lastColor;
-		color2.color = currentColor;
-		color3.color = nextColor;
+		color1.color = PlayerController.getColorBuyColorEnum (currentColor);
+		
+		EObjectColor next = currentColor;
+		next = next + 1;
+		next = next == EObjectColor.MAXCOLORNUM ? 0 : next;
+		color2.color = PlayerController.getColorBuyColorEnum (next);
+		next = next + 1;
+		next = next == EObjectColor.MAXCOLORNUM ? 0 : next;
+		color3.color = PlayerController.getColorBuyColorEnum (next);
+		next = next + 1;
+		next = next == EObjectColor.MAXCOLORNUM ? 0 : next;
+		color4.color = PlayerController.getColorBuyColorEnum (next);
 
 		//lifeImg.color = currentColor;
 	}
@@ -251,10 +261,10 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		if (!Social.localUser.authenticated) {
 			Utils.addLog("authenticated = " + Social.localUser.authenticated.ToString());
-			//gameMgr.login ();
+			gameMgr.login ();
 		}
-		else
-			Social.ShowLeaderboardUI();
+
+		Social.ShowLeaderboardUI();
 
 
 	}

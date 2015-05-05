@@ -331,10 +331,8 @@ public class PlayerController : MonoBehaviour {
 			gameObject.layer = 10 + (int)currentColor;
 			spriteRenderer.color = getColorBuyColorEnum (currentColor);
 
-		EObjectColor next = currentColor + 1;
-		next = next == EObjectColor.MAXCOLORNUM ? 0 : next;
 
-		eventHandler.onPlayerColorChanged(lastColor,getColorBuyColorEnum (currentColor),getColorBuyColorEnum (next));
+		eventHandler.onPlayerColorChanged(currentColor);
 
 		if (wantColorCombo && jumped && playerChangeColor) {
 			combo += 1;
@@ -367,7 +365,7 @@ public class PlayerController : MonoBehaviour {
 		}
 	}
 
-	Color getColorBuyColorEnum(EObjectColor oc)
+	public static Color getColorBuyColorEnum(EObjectColor oc)
 	{
 		Color rtColor = new Color();
 		switch (oc) {

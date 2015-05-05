@@ -77,7 +77,8 @@ public class GameManager : MonoBehaviour {
 				leaderboard.id = leaderboardId;
 				string[] userfilterstrings = new string[1];
 				userfilterstrings[0] = Social.localUser.id;
-				leaderboard.SetUserFilter(userfilterstrings);
+				if(Social.localUser.id != "")
+					leaderboard.SetUserFilter(userfilterstrings);
 				leaderboard.LoadScores(result =>
 			     {
 					Utils.addLog("Received " + leaderboard.scores.Length + " scores");
@@ -117,7 +118,7 @@ public class GameManager : MonoBehaviour {
 
 	void CheckLeaderboardsScore()
 	{
-		if(leaderboard != null && bestScore > leaderboard.localUserScore.value )
+		if(leaderboard.id != "" && bestScore > leaderboard.localUserScore.value )
 			Social.ReportScore(currentScore,leaderboardId,ScoreReported);
 	}
 
