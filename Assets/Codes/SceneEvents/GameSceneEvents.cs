@@ -245,4 +245,9 @@ public class GameSceneEvents : MonoBehaviour {
 
 		//lifeImg.color = currentColor;
 	}
+
+	public void onLeaderboardsButtonCilicked()
+	{
+		Social.ShowLeaderboardUI();
+	}
 }

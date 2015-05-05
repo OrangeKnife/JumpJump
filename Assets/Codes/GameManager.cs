@@ -54,7 +54,7 @@ public class GameManager : MonoBehaviour {
 				Debug.Log (userInfo);
 
 				ILeaderboard leaderboard = Social.CreateLeaderboard();
-				leaderboard.id = "Leaderboard001";
+				leaderboard.id = "ColorJumpScore";
 				leaderboard.LoadScores(result =>
 				                       {
 					Debug.Log("Received " + leaderboard.scores.Length + " scores");
@@ -106,10 +106,20 @@ public class GameManager : MonoBehaviour {
 			MainCam.backgroundColor = fromCameraColor + playerHeight / 300f * (towardsCameraColor - fromCameraColor);
 	}
 
+	public void HighScoreCheck(bool result) {
+		if(result)
+			Debug.Log("score submission successful");
+		else
+			Debug.Log("score submission failed");
+	}
+
 	public void EndGame()
 	{
 		bGameStarted = false;
 		if (currentScore > bestScore) {
+
+			Social.ReportScore(currentScore,"ColorJumpScore",HighScoreCheck);
+
 			bestScore = currentScore;
 			mysave.bestScore = bestScore;
 			GameFile.Save("save.data",mysave);
