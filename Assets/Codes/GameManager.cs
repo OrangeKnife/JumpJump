@@ -150,7 +150,7 @@ public class GameManager : MonoBehaviour {
 
 	public void changeCameraBGColor(float playerHeight)
 	{
-		if(playerHeight <= 300f)
+		if(playerHeight <= 80f)
 			MainCam.backgroundColor = fromCameraColor + playerHeight / 300f * (towardsCameraColor - fromCameraColor);
 	}
 

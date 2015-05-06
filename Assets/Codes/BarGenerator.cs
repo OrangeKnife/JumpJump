@@ -12,8 +12,8 @@ public class BarGenerator : MonoBehaviour {
 	private LinkedList<GameObject> SpawnedBarsList;
 
 	public Vector3 firstBarLocation,barHeight;
-	public float flashingBarChance,scrollingColorChance;
-	public int minimumBarCountForFlashingBar,minimumBarCountForScrollingColor,minimumBarCountForFadingBar;
+	public float flashingBarChance,scrollingColorChance,shackingBarChance;
+	public int minimumBarCountForFlashingBar,minimumBarCountForScrollingColor,minimumBarCountForFadingBar,minimumBarCountForShaking;
 	public int minimumBarCountHavingAdjacentSameColorBar,minimumBarCountForHavingAdjacentScrollingBar;
 	Vector3 lastBarLocation = Vector3.zero;
 	GameManager gameMgr;
@@ -23,6 +23,7 @@ public class BarGenerator : MonoBehaviour {
 	public float pickupChance;
 	bool lastBarFlashing = false;
 	List<GameObject> PickupList;
+
 	void Start () 
 	{
 		if (gameMgr == null)
@@ -59,11 +60,11 @@ public class BarGenerator : MonoBehaviour {
 		pickupCount = 1;
 	}
 	
-	public void ActiveAllSpawnedBars(bool wantToActive)
+	public void ActiveAllSpawnedBars()
 	{
 		foreach (GameObject go in SpawnedBarsList) {
-			go.SetActive(wantToActive);
-			go.GetComponent<BarController>().faded = false;
+			go.SetActive(true);
+			go.GetComponent<BarController>().ResetBar();
 		}
 	}
 
@@ -99,6 +100,7 @@ public class BarGenerator : MonoBehaviour {
 			GameObject newBar = Instantiate (template);
 
 			BarController bc = newBar.GetComponent<BarController>();
+
 			if(bc.getColor() == lastBarColor && barCount <= minimumBarCountHavingAdjacentSameColorBar)
 				bc.ChangeColor();
 
@@ -111,8 +113,9 @@ public class BarGenerator : MonoBehaviour {
 			}
 			else if(!lastBarFlashing && barCount > minimumBarCountForFlashingBar && Random.Range(0f,1f) < flashingBarChance)
 				bc.enableFlashing(true);
-
-			if(barCount > minimumBarCountForFadingBar)
+			else if(barCount > minimumBarCountForShaking)
+				bc.enableShaking(true);
+			else if(barCount > minimumBarCountForFadingBar)
 				bc.fadingAfterPlayerJumped = true;
 
 			lastBarFlashing = bc.Flashing;
@@ -121,6 +124,8 @@ public class BarGenerator : MonoBehaviour {
 			lastBarLocation = newBar.transform.position;
 			SpawnedBarsList.AddLast(newBar);
 			barCount++;
+
+			bc.setBarNum(barCount);
 			lastBarController = newBar.GetComponent<BarController>();
 
 

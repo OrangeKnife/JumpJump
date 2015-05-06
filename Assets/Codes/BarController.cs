@@ -34,6 +34,10 @@ public class BarController : MonoBehaviour
 
 	public bool isJumpedComboed = false;
 
+	public float beforeShakingTime,shakingDuration;
+	bool shaking = false;
+
+	public GameObject barNumObj;
 	void Awake ()
 	{
 		barColor = (EObjectColor)Random.Range (0,(int)EObjectColor.MAXCOLORNUM);
@@ -48,13 +52,28 @@ public class BarController : MonoBehaviour
 
 
 	}
-	
+
+	public void setBarNum(int n)
+	{
+		if(n % 10 == 0)
+			barNumObj.GetComponent<TextMesh>().text = n.ToString();
+
+		score *= (n + 9) / 10;
+	}
 
 	public void onPlayerJumped()
 	{
 		if (fadingAfterPlayerJumped) {
 			gameObject.SetActive(false);
 			faded = true;
+		}
+
+		if (shaking) {
+			gameObject.GetComponent<Animator> ().Play ("Regular");
+			gameObject.transform.rotation = Quaternion.identity; //remove shaking effect
+			CancelInvoke("ShakingThenDisappear");
+			CancelInvoke("DoShaking");
+
 		}
 	}
 
@@ -76,6 +95,11 @@ public class BarController : MonoBehaviour
 			spriteRenderer.material = FlashingMaterial;
 			spriteRenderer.material.SetColor("_Color",getColorByColorEnum (barColor));
 		}
+	}
+
+	public void enableShaking(bool en)
+	{
+		shaking = en;
 	}
 
 	public EObjectColor getColor()
@@ -176,15 +200,15 @@ public class BarController : MonoBehaviour
 		if (Flashing && !faded) {
 			if(Time.time - lastTimeFlashCheck > FlashingInterVal && !bIsDoingFlash)
 			{
-				DoFlashing();
-				lastTimeFlashCheck = Time.time;
+				Invoke("DoFlashing", Random.Range(0f,1f));//just have some random
+
 			}
-			 
 		}
 	}
 
 	void DoFlashing()
 	{
+		lastTimeFlashCheck = Time.time;
 		bIsDoingFlash = true;
 		gameObject.GetComponent<Animator> ().Play ("FlashingBarAnimation");
 
@@ -195,9 +219,38 @@ public class BarController : MonoBehaviour
 	}
 
 
-	void OnTriggerEnter2D(Collider2D  other) 
+	public void ResetBar()
 	{
-/*
+		faded = false;
+		CancelInvoke ();
+		if (Flashing) {
+			stopFlashing();
+		}
+
+	}
+
+	void OnTriggerExit2D(Collider2D  other) 
+	{
+		if (other.gameObject.tag == "Player") 
+		{
+			if (shaking)
+			{
+				if (other.gameObject.GetComponent<Rigidbody2D> ().velocity.y < 0)
+				{
+					Utils.addLog ("player fall through one bar");
+
+					gameObject.GetComponent<Animator> ().Play ("Regular");
+					gameObject.transform.rotation = Quaternion.identity; //remove shaking effect
+					CancelInvoke("ShakingThenDisappear");
+					CancelInvoke("DoShaking");
+				}
+			}
+		}
+	}
+
+	/*	void OnTriggerEnter2D(Collider2D  other) 
+	{
+
 		if (other.gameObject.tag == "Player") {
 			if(other.gameObject.GetComponent<Rigidbody2D>().velocity.y > 0)
 				return;
@@ -225,9 +278,9 @@ public class BarController : MonoBehaviour
 
 			other.gameObject.GetComponent<PlayerController> ().ResetJumpCount (0, this);
 		}
-		 */
 
-	}
+
+	}	 */
 
 	void OnCollisionEnter2D(Collision2D other)
 	{
@@ -257,8 +310,34 @@ public class BarController : MonoBehaviour
 			}
 			
 			other.gameObject.GetComponent<PlayerController> ().ResetJumpCount (0, this);
+
+
+			if(shaking)
+			{
+				CancelInvoke("DoShaking");
+				CancelInvoke("ShakingThenDisappear");
+				Invoke("DoShaking",beforeShakingTime);
+				Utils.addLog("Start check shaking");
+				GetComponent<Animator>().Play("oneTimeShaking");
+			}
 		}
 	}
+
+	void DoShaking()
+	{
+		Utils.addLog("now is shaking");
+		gameObject.GetComponent<Animator> ().Play ("shaking");
+		Invoke ("ShakingThenDisappear", shakingDuration);
+	}
+
+	void ShakingThenDisappear()
+	{
+		Utils.addLog("ShakingThenDisappear");
+		gameObject.transform.rotation = Quaternion.identity; //remove shaking effect
+		gameObject.SetActive (false);
+		faded = true;
+	}
+
 
 	public void NotifyBarColorChanged (Vector2 offset)
 	{

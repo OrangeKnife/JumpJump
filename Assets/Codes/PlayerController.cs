@@ -57,7 +57,7 @@ public class PlayerController : MonoBehaviour {
 
 	int tempPlayerScore = 0;
 	public int scoreToLife;
-
+	public bool wantScoreToLife;
 	bool bTimeSlowed;
 	float slowTimeRecoverySpeed;
 	int slowtimeAudioSourceIdx = -1;
@@ -127,7 +127,7 @@ public class PlayerController : MonoBehaviour {
 
 	IEnumerator DoRevive()
 	{
-		gameMgr.barGen.ActiveAllSpawnedBars (true);
+		gameMgr.barGen.ActiveAllSpawnedBars ();
 
 		if (lastBarStandOn != null)
 			gameObject.transform.position = lastBarStandOn.gameObject.transform.position + gameMgr.barGen.barHeight * 0.5f;
@@ -152,7 +152,7 @@ public class PlayerController : MonoBehaviour {
 	{
 		bool ButtonJumpDown, ButtonJumpHold, ButtonJumpUp;
 
-		gameMgr.changeCameraBGColor(gameObject.transform.position.y);
+		//gameMgr.changeCameraBGColor(gameObject.transform.position.y);
 
 		if (bTimeSlowed) {
 			if (Time.timeScale < 1f)
@@ -503,9 +503,10 @@ public class PlayerController : MonoBehaviour {
 
 		tempPlayerScore += realScore;
 	 
-		AddPopup ((realScore>0?"+ " : "") + realScore.ToString (), gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("S")), Time.time, popUpScoreGUIStyle);
+		string jumpComboString = jumpCombo >= 2 ? " X " + jumpCombo.ToString () : "";
+		AddPopup ((realScore>0?"+ " : "") + s.ToString ()+ jumpComboString, gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("S")), Time.time, popUpScoreGUIStyle);
 				 
-		if (tempPlayerScore >= scoreToLife) {
+		if (wantScoreToLife && tempPlayerScore >= scoreToLife) {
 			tempPlayerScore -= scoreToLife;
 			gameMgr.AddLife (1);
 
