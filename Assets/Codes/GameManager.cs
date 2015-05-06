@@ -78,10 +78,12 @@ public class GameManager : MonoBehaviour {
 				
 				leaderboard = Social.CreateLeaderboard();
 				leaderboard.id = leaderboardId;
+				#if UNITY_IOS
 				string[] userfilterstrings = new string[1];
 				userfilterstrings[0] = Social.localUser.id;
 				if(userfilterstrings[0] != "")
 					leaderboard.SetUserFilter(userfilterstrings);
+
 				leaderboard.LoadScores(result =>
 			     {
 					Utils.addLog("Received " + leaderboard.scores.Length + " scores");
@@ -90,7 +92,7 @@ public class GameManager : MonoBehaviour {
 
 					CheckLeaderboardsScore();
 				});
-
+				#endif
 				
 				
 			}
@@ -121,12 +123,19 @@ public class GameManager : MonoBehaviour {
 
 	void CheckLeaderboardsScore()
 	{
+#if UNITY_IOS
 		if (leaderboard.id != "" && bestScore > (int)leaderboard.localUserScore.value) {
 			Utils.addLog ("new score sent to leaderboard " + bestScore.ToString());
 			Social.ReportScore (bestScore, leaderboardId, ScoreReported);
 		} else {
 			Utils.addLog ("current leaderboard socre is higher " + leaderboard.localUserScore.value.ToString());
 		}
+#elif UNITY_ANDROID
+		if (currentScore >= bestScore) {
+			Utils.addLog ("new score sent to leaderboard " + currentScore.ToString());
+			Social.ReportScore (currentScore, leaderboardId, ScoreReported);
+		}
+#endif
 	}
  
 
@@ -183,10 +192,11 @@ public class GameManager : MonoBehaviour {
 	{
 		bGameStarted = false;
 		if (currentScore > bestScore) {
+			CheckLeaderboardsScore();
 
 			bestScore = currentScore;
 
-			CheckLeaderboardsScore();
+
 
 			mysave.bestScore = bestScore;
 			GameFile.Save("save.data",mysave);
