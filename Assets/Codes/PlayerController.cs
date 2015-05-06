@@ -152,6 +152,8 @@ public class PlayerController : MonoBehaviour {
 	{
 		bool ButtonJumpDown, ButtonJumpHold, ButtonJumpUp;
 
+		if (gameMgr.bGamePaused)
+			return;
 		//gameMgr.changeCameraBGColor(gameObject.transform.position.y);
 
 		if (bTimeSlowed) {
@@ -231,46 +233,48 @@ public class PlayerController : MonoBehaviour {
 			for (int i = 0; i < Input.touchCount; ++i)
 			{
 				Touch touch = Input.GetTouch(i);
-
-				if (touch.position.x <= Screen.width / 2)
+				if(touch.position.y < Screen.width *0.8f)
 				{
-					// jump
-					if(allowInput_jump)
+					if (touch.position.x <= Screen.width / 2 )
 					{
-						if (touch.phase == TouchPhase.Began)
+						// jump
+						if(allowInput_jump)
 						{
-							ButtonJumpDown = true;
-						}
-						else
-						{
-							ButtonJumpDown = false;
-						}
-						
-						if (touch.phase == TouchPhase.Ended)
-						{
-							ButtonJumpUp = true;
-						}
-						else
-						{
-							ButtonJumpUp = false;
-						}
-						
-						if (touch.phase == TouchPhase.Moved)
-						{
-							ButtonJumpHold = true;
-						}
-						else
-						{
-							ButtonJumpHold = false;
+							if (touch.phase == TouchPhase.Began)
+							{
+								ButtonJumpDown = true;
+							}
+							else
+							{
+								ButtonJumpDown = false;
+							}
+							
+							if (touch.phase == TouchPhase.Ended)
+							{
+								ButtonJumpUp = true;
+							}
+							else
+							{
+								ButtonJumpUp = false;
+							}
+							
+							if (touch.phase == TouchPhase.Moved)
+							{
+								ButtonJumpHold = true;
+							}
+							else
+							{
+								ButtonJumpHold = false;
+							}
 						}
 					}
-				}
-				else
-				{
-					if (allowInput_color && touch.phase == TouchPhase.Ended)
+					else
 					{
-						playSound(audioClips[2]);
-						ChangeColor(-1,true);
+						if (allowInput_color && touch.phase == TouchPhase.Ended)
+						{
+							playSound(audioClips[2]);
+							ChangeColor(-1,true);
+						}
 					}
 				}
 				 

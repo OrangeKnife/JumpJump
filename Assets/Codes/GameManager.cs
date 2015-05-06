@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour {
 	public int currentScore {get; private set;}
 	public int currentLife { get; private set; }
 	public int bestScore { get; private set; }
+	public bool bGamePaused { get; private set; }
 
 	public List<AudioClip> backgroundMusic;
 	int currentBGMindex = 0;
@@ -31,12 +32,14 @@ public class GameManager : MonoBehaviour {
 	SaveObject mysave;
 
 	int gameMode = 0;
+	float savedTimeScale = 1f;
 
 	public Color fromCameraColor;//218,237,226
 	public Color towardsCameraColor;
 
 	static string leaderboardId = "";
 	ILeaderboard leaderboard;
+	public int playerLife;
 
 	public void login()
 	{
@@ -77,7 +80,7 @@ public class GameManager : MonoBehaviour {
 				leaderboard.id = leaderboardId;
 				string[] userfilterstrings = new string[1];
 				userfilterstrings[0] = Social.localUser.id;
-				if(Social.localUser.id != "")
+				if(userfilterstrings[0] != "")
 					leaderboard.SetUserFilter(userfilterstrings);
 				leaderboard.LoadScores(result =>
 			     {
@@ -118,9 +121,14 @@ public class GameManager : MonoBehaviour {
 
 	void CheckLeaderboardsScore()
 	{
-		if(leaderboard.id != "" && bestScore > leaderboard.localUserScore.value )
-			Social.ReportScore(currentScore,leaderboardId,ScoreReported);
+		if (leaderboard.id != "" && bestScore > (int)leaderboard.localUserScore.value) {
+			Utils.addLog ("new score sent to leaderboard " + bestScore.ToString());
+			Social.ReportScore (bestScore, leaderboardId, ScoreReported);
+		} else {
+			Utils.addLog ("current leaderboard socre is higher " + leaderboard.localUserScore.value.ToString());
+		}
 	}
+ 
 
 	void PlayBGM()
 	{
@@ -136,7 +144,7 @@ public class GameManager : MonoBehaviour {
 	{
 		bGameStarted = true;
 		currentScore = 0;
-		currentLife = 10;
+		currentLife = playerLife;
 		eventHandler.UpdateUILife (currentLife);
 
 		RespawnPlayer ();
@@ -159,6 +167,16 @@ public class GameManager : MonoBehaviour {
 			Utils.addLog("score submission successful");
 		else
 			Utils.addLog("score submission failed");
+	}
+
+	public void BackToMainMenu()
+	{
+		if (CurrentPlayer != null)
+			GameObject.Destroy(CurrentPlayer);
+
+		barGen.DestoryAllBarsAndPickups ();
+
+		eventHandler.showTutorial (false);
 	}
 
 	public void EndGame()
@@ -248,5 +266,19 @@ public class GameManager : MonoBehaviour {
 		currentLife += l;
 		eventHandler.UpdateUILife (currentLife);
 		return currentLife;
+	}
+
+	public void PauseGame()
+	{
+		savedTimeScale = Time.timeScale;
+		Time.timeScale = 0;
+		bGamePaused = true;
+	}
+
+	public void UnPauseGame()
+	{
+		Time.timeScale = savedTimeScale;
+		savedTimeScale = 1f;
+		bGamePaused = false;
 	}
 }

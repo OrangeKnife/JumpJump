@@ -38,17 +38,22 @@ public class BarGenerator : MonoBehaviour {
 
 	}
 
-	public void onGameStarted()
+	public void DestoryAllBarsAndPickups()
 	{
 		foreach (GameObject obj in SpawnedBarsList) {
 			Destroy (obj);
 		}
 		SpawnedBarsList.Clear ();
-
+		
 		foreach (GameObject obj in PickupList) {
 			Destroy (obj);
 		}
 		PickupList.Clear ();
+	}
+
+	public void onGameStarted()
+	{
+		DestoryAllBarsAndPickups ();
 
 		player = gameMgr.GetCurrentPlayer();
 

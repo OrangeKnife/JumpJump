@@ -10,6 +10,8 @@ using GooglePlayGames;
 public class GameSceneEvents : MonoBehaviour {
 
 	[SerializeField]
+	GameObject UI_PausePanel = null;
+	[SerializeField]
 	GameObject UI_DeathPanel = null;
 	[SerializeField]
 	GameObject UI_ScorePanel = null;
@@ -48,8 +50,10 @@ public class GameSceneEvents : MonoBehaviour {
 	List<GameObject> abilityUISlots = new List<GameObject>();
 
 
-	BannerView bannerView;
+	BannerView bannerView,bannerViewBottom;
 	AdRequest request;
+
+
 	void Start () {
 
 
@@ -60,7 +64,39 @@ public class GameSceneEvents : MonoBehaviour {
 
 	}
 
-	void Awake() {
+	void requestNewBannerAds(BannerView aBannerView)
+	{
+		request = new AdRequest.Builder ().Build ();
+		// Load the banner with the request.
+		aBannerView.LoadAd (request);
+	}
+
+	void ShowOneOfTheBannerViews(bool forceTop = false)
+	{
+		if (UnityEngine.Random.Range (0, 2) == 0 || forceTop) {
+			if(bannerView != null)
+			{
+				requestNewBannerAds (bannerView);
+				bannerView.Show ();
+			}
+		} else {
+			if(bannerViewBottom != null)
+			{
+				requestNewBannerAds (bannerViewBottom);
+				bannerViewBottom.Show ();
+			}
+		}
+	}
+
+	void HideAllBannerViews()
+	{
+		if(bannerView != null)
+			bannerView.Hide ();
+		if(bannerViewBottom != null)
+			bannerViewBottom.Hide ();
+	}
+		
+		void Awake() {
 		/*
 		if (Advertisement.isSupported) {
 			Advertisement.allowPrecache = true;
@@ -80,30 +116,35 @@ public class GameSceneEvents : MonoBehaviour {
 			UI_ScoreText.GetComponent<UnityEngine.UI.Text>().text = "Platform not supported";
 		}
 		*/
-		//ca-app-pub-7183026460514946/5522304910 is for IOS now
-		//ca-app-pub-7183026460514946/2010435315 is for android
+
 		// Create a 320x50 banner at the top of the screen.
 
-		//string bannerAdsId="";
+		string bannerAdsId="";
 		#if UNITY_IOS && !UNITY_EDITOR
-		//bannerAdsId = "ca-app-pub-7183026460514946/5522304910";
+		bannerAdsId = "ca-app-pub-7183026460514946/4970464516";
 		#endif
 		#if UNITY_ANDROID && !UNITY_EDITOR
-		//bannerAdsId = "ca-app-pub-7183026460514946/2010435315";
+		bannerAdsId = "ca-app-pub-7183026460514946/9400664114";
 		#endif
-		/*
+
 		if (bannerView == null) {
 			bannerView = new BannerView (
-			bannerAdsId, AdSize.Banner, AdPosition.Top);
-			// Create an empty ad request.
-			request = new AdRequest.Builder ().Build ();
-			// Load the banner with the request.
-			bannerView.LoadAd (request);
-			bannerView.Hide ();
+			bannerAdsId, AdSize.SmartBanner, AdPosition.Top);
+
+
+
+				
+
+			bannerViewBottom = new BannerView (
+				bannerAdsId, AdSize.SmartBanner, AdPosition.Bottom);
+			
+			HideAllBannerViews();
+
+			ShowOneOfTheBannerViews(true);
 		}
-		else
-			bannerView.Hide ();
-			*/
+
+
+			
 
 
 
@@ -145,15 +186,13 @@ public class GameSceneEvents : MonoBehaviour {
 		yourScore.text = gameMgr.currentScore.ToString ();
 		yourBest.text = gameMgr.bestScore.ToString ();
 
-		if(bannerView!=null)
-			bannerView.Show ();
+		ShowOneOfTheBannerViews ();
 
 	}
 
 	public void OnTryAgainButtonClicked()
 	{
-		if(bannerView!=null)
-			bannerView.Hide ();
+		HideAllBannerViews ();
 
 
 		gameMgr.StartGame ();
@@ -162,17 +201,6 @@ public class GameSceneEvents : MonoBehaviour {
 
 
 	}
-
-	public void OnChangeCharacterButtonClicked()
-	{
-		
-		if(bannerView!=null)
-			bannerView.Hide ();
-
-
-		gameMgr.EndGame ();
-	}
-	
 
 	public void UpdateUISocre(int newScore)
 	{
@@ -194,6 +222,8 @@ public class GameSceneEvents : MonoBehaviour {
 		UI_StartPanel.SetActive (false);
 		gameMgr.RespawnPlayer ();
 		gameMgr.StartGame ();
+
+		HideAllBannerViews ();
 	}
 
 	public void ShowAds()
@@ -266,6 +296,45 @@ public class GameSceneEvents : MonoBehaviour {
 
 		Social.ShowLeaderboardUI();
 
+
+	}
+
+	public void onPauseButtonClicked()
+	{
+		UI_PausePanel.SetActive (true);
+		UI_ScorePanel.SetActive (false);
+		ShowOneOfTheBannerViews(true);
+		gameMgr.PauseGame ();
+
+	}
+
+	public void onRestartButtonClicked()
+	{
+		onResumebuttonClicked ();
+		OnTryAgainButtonClicked ();
+	}
+
+	public void onResumebuttonClicked()
+	{
+		UI_PausePanel.SetActive (false);
+		UI_ScorePanel.SetActive (true);
+		HideAllBannerViews();
+		gameMgr.UnPauseGame ();
+	}
+
+	public void onBackButtonClicked()
+	{
+		//back to main menu
+		gameMgr.BackToMainMenu ();
+		UI_PausePanel.SetActive (false);
+		UI_ScorePanel.SetActive (false);
+		UI_StartPanel.SetActive (true);
+
+		gameMgr.UnPauseGame ();
+	}
+
+	public void onNoAdsButtonClicked()
+	{
 
 	}
 }
