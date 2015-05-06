@@ -20,7 +20,7 @@ public class BarController : MonoBehaviour
 	public bool minusScore;
 	public bool Flashing;
 	public float FlashingInterVal;
-	public float FlashingDuration;
+	public float FlashingDuration,DisappearDurationAfterFlashing;
 	public Material FlashingMaterial;
 
 	public bool ScrollingColor;
@@ -29,10 +29,11 @@ public class BarController : MonoBehaviour
 	public bool fadingAfterPlayerJumped;
 	public bool faded = false;
 
-	float lastTimeTick = 0f;
+	float lastTimeFlashCheck = 0f;
 	bool bIsDoingFlash = false;
 
 	public bool isJumpedComboed = false;
+
 	void Awake ()
 	{
 		barColor = (EObjectColor)Random.Range (0,(int)EObjectColor.MAXCOLORNUM);
@@ -82,11 +83,19 @@ public class BarController : MonoBehaviour
 		return barColor;
 	}
 
-	public void StopFlashing()
+	public void FlashingOut()
+	{
+
+		spriteRenderer.enabled = false;
+	}
+
+
+	public void stopFlashing()
 	{
 		bIsDoingFlash = false;
 		gameObject.layer = LayerMask.NameToLayer("CollideAll");
 		gameObject.GetComponent<Animator> ().Play ("Regular");
+		spriteRenderer.enabled = true;
 	}
 
 
@@ -165,10 +174,10 @@ public class BarController : MonoBehaviour
 	void Update ()
 	{
 		if (Flashing && !faded) {
-			if(Time.time - lastTimeTick > FlashingInterVal && !bIsDoingFlash)
+			if(Time.time - lastTimeFlashCheck > FlashingInterVal && !bIsDoingFlash)
 			{
 				DoFlashing();
-				lastTimeTick = Time.time;
+				lastTimeFlashCheck = Time.time;
 			}
 			 
 		}
@@ -178,8 +187,11 @@ public class BarController : MonoBehaviour
 	{
 		bIsDoingFlash = true;
 		gameObject.GetComponent<Animator> ().Play ("FlashingBarAnimation");
+
 		gameObject.layer = LayerMask.NameToLayer("NoCollision");
-		Invoke("StopFlashing",FlashingDuration);
+		Invoke("FlashingOut",FlashingDuration);//disappear
+		 
+		Invoke("stopFlashing",FlashingDuration + DisappearDurationAfterFlashing);//come back !
 	}
 
 
