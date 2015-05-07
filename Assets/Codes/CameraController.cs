@@ -12,11 +12,9 @@ public class CameraController : MonoBehaviour {
 	private Transform playerTransform;
 	private PlayerController playerCon;
 
-	Animator camAnimator;
-	// Use this for initialization
+
 	void Start () 
 	{
-		camAnimator = GetComponent<Animator> ();
 	}
 
 	public void ResetCamera(GameObject inPlayer)

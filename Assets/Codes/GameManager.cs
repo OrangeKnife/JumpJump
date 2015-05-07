@@ -32,14 +32,14 @@ public class GameManager : MonoBehaviour {
 
 	SaveObject mysave;
 
-	int gameMode = 0;//0 normal, 1 hard core
+	public int gameMode { get; private set;}//0 normal, 1 hard core
 	float savedTimeScale = 1f;
 
 	public Color fromCameraColor;//218,237,226
 	public Color towardsCameraColor;
 
-	static string leaderboardId = "";
-	static string leaderboardId_hardcore = "";
+	public static string leaderboardId = "";
+	public static string leaderboardId_hardcore = "";
 	ILeaderboard leaderboard;
 	ILeaderboard leaderboard_hardcore;
 	public int playerLife,hardCoreLife;
@@ -83,20 +83,24 @@ public class GameManager : MonoBehaviour {
 						"\nIsUnderage: " + Social.localUser.underage;
 				Utils.addLog (userInfo);
 				
+
+
+
+				/*
+				#if UNITY_IOS
 				leaderboard = Social.CreateLeaderboard();
 				leaderboard.id = leaderboardId;
 
-				leaderboard_hardcore = Social.CreateLeaderboard();
-				leaderboard_hardcore.id = leaderboardId_hardcore;
 
-				#if UNITY_IOS
+
 				string[] userfilterstrings = new string[1];
 				userfilterstrings[0] = Social.localUser.id;
+
 				if(userfilterstrings[0] != "")
-				{
 					leaderboard.SetUserFilter(userfilterstrings);
-					leaderboard_hardcore.SetUserFilter(userfilterstrings);
-				}
+
+
+
 
 				leaderboard.LoadScores(result =>
 			     {
@@ -104,17 +108,28 @@ public class GameManager : MonoBehaviour {
 					foreach (IScore score in leaderboard.scores)
 						Utils.addLog(score.ToString());
 
-				});
 
-				leaderboard_hardcore.LoadScores(result =>
-				                       {
-					Utils.addLog("Received " + leaderboard_hardcore.scores.Length + " scores");
-					foreach (IScore score in leaderboard_hardcore.scores)
-						Utils.addLog(score.ToString());
+					//do hard core here
+
+					leaderboard_hardcore = Social.CreateLeaderboard();
+					leaderboard_hardcore.id = leaderboardId_hardcore;
+					
+					if(userfilterstrings[0] != "")
+						leaderboard_hardcore.SetUserFilter(userfilterstrings);
+					
+					leaderboard_hardcore.LoadScores(result2 =>
+					                                {
+						Utils.addLog("hard core score Received " + leaderboard_hardcore.scores.Length + " scores");
+						foreach (IScore score in leaderboard_hardcore.scores)
+							Utils.addLog(score.ToString());
+						
+					});
 
 				});
-				#endif
 				
+
+				#endif
+				*/
 				
 			}
 			else
@@ -146,29 +161,19 @@ public class GameManager : MonoBehaviour {
 
 	}
 
+	public string getCurrentLeaderBoardId()
+	{
+		if (gameMode == 0)
+			return leaderboardId;
+		else if (gameMode == 1)
+			return leaderboardId_hardcore;
+
+		return leaderboardId;
+	}
+
 	void CheckLeaderboardsScore()
 	{
-#if UNITY_IOS
-		if(gameMode == 0)
-		{
-			if (leaderboard.id != "" && bestScore > (int)leaderboard.localUserScore.value) {
-				Utils.addLog ("new score sent to leaderboard " + bestScore.ToString());
-				Social.ReportScore (bestScore, leaderboardId, ScoreReported);
-			} else {
-				Utils.addLog ("current leaderboard socre is higher " + leaderboard.localUserScore.value.ToString());
-			}
-		}
-		else if(gameMode == 1)
-		{
-			if (leaderboard.id != "" && bestScore > (int)leaderboardId_hardcore.localUserScore.value) {
-				Utils.addLog ("new score sent to leaderboard hardcore " + bestScore.ToString());
-				Social.ReportScore (currentScore, leaderboardId_hardcore, ScoreReported);
-			} else {
-				Utils.addLog ("current leaderboard socre is higher " + leaderboardId_hardcore.localUserScore.value.ToString());
-			}
-		}
-
-#elif UNITY_ANDROID
+ 
 		if(gameMode == 0)
 		{
 			if (currentScore >= bestScore) {
@@ -183,7 +188,7 @@ public class GameManager : MonoBehaviour {
 				Social.ReportScore (currentScore, leaderboardId_hardcore, ScoreReported);
 			}
 		}
-#endif
+ 
 	}
  
 
@@ -215,6 +220,14 @@ public class GameManager : MonoBehaviour {
 	{
 		if(mode >= 0)
 			gameMode = mode;
+
+		if (gameMode == 0) {
+			leaderboard = Social.CreateLeaderboard ();
+			leaderboard.id = leaderboardId;
+		} else if (gameMode == 1) {
+			leaderboard_hardcore = Social.CreateLeaderboard();
+			leaderboard_hardcore.id = leaderboardId_hardcore;
+		}
 
 		bGameStarted = true;
 		currentScore = 0;

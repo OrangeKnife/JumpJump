@@ -229,13 +229,13 @@ public class PlayerController : MonoBehaviour {
 
 		#elif UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
 
-		if (Input.touchCount > 0) 
+		if (Input.touchCount > 0 ) 
 		{
 
 			for (int i = 0; i < Input.touchCount; ++i)
 			{
 				Touch touch = Input.GetTouch(i);
-				if(touch.position.y < Screen.width *0.8f)
+				if(touch.position.y < Screen.height *0.8f)
 				{
 					if (touch.position.x <= Screen.width / 2 )
 					{
@@ -272,7 +272,7 @@ public class PlayerController : MonoBehaviour {
 					}
 					else
 					{
-						if (allowInput_color && touch.phase == TouchPhase.Ended)
+						if (allowInput_color && touch.phase == TouchPhase.Began)
 						{
 							playSound(audioClips[2]);
 							ChangeColor(-1,true);
@@ -326,7 +326,7 @@ public class PlayerController : MonoBehaviour {
 
 	void ChangeColor(int newColor = -1, bool playerChangeColor = false)
 	{
-		Color lastColor  = getColorBuyColorEnum (currentColor);
+		//Color lastColor  = getColorBuyColorEnum (currentColor);
 		if (newColor < 0) {
 			currentColor = currentColor + 1;
 			if (currentColor == EObjectColor.MAXCOLORNUM)

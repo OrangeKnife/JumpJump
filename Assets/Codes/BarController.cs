@@ -45,7 +45,7 @@ public class BarController : MonoBehaviour
 	void Awake ()
 	{
 		barColor = (EObjectColor)Random.Range (0,(int)EObjectColor.MAXCOLORNUM);
-		Utils.addLog (((int)barColor).ToString());
+		//Utils.addLog (((int)barColor).ToString());
 		gameObject.layer = 10 + (int)barColor;
 
 

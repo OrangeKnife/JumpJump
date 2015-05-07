@@ -7,8 +7,15 @@ using GoogleMobileAds.Api;
 #if UNITY_ANDROID
 using GooglePlayGames;
 #endif
+#if UNITY_IOS
+using UnityEngine.SocialPlatforms.GameCenter;
+#endif
 public class GameSceneEvents : MonoBehaviour {
 
+	[SerializeField]
+	GameObject yellowboardsButton = null;
+	[SerializeField]
+	GameObject UI_SmallLeaderBoardsPanel = null;
 	[SerializeField]
 	GameObject UI_PausePanel = null;
 	[SerializeField]
@@ -303,8 +310,41 @@ public class GameSceneEvents : MonoBehaviour {
 			gameMgr.login ();
 		}
 
-		Social.ShowLeaderboardUI();
+		GameCenterPlatform.ShowLeaderboardUI(gameMgr.getCurrentLeaderBoardId(),UnityEngine.SocialPlatforms.TimeScope.AllTime);
+		//Social.ShowLeaderboardUI();
+ 
 
+	}
+
+	public void onLeaderboardsButton_mainMenu_Clicked()
+	{
+		if (!Social.localUser.authenticated) {
+			Utils.addLog("authenticated = " + Social.localUser.authenticated.ToString());
+			gameMgr.login ();
+		}
+		
+		#if UNITY_ANDROID
+		Social.ShowLeaderboardUI();
+		#elif UNITY_IOS
+		GameCenterPlatform.ShowLeaderboardUI("",UnityEngine.SocialPlatforms.TimeScope.AllTime);
+
+		//UI_SmallLeaderBoardsPanel.SetActive (true);
+		//yellowboardsButton.SetActive (false);
+		#endif
+
+
+	}
+
+	public void onLeaderboardButton_normalClicked()
+	{
+		if (Social.localUser.authenticated)
+			GameCenterPlatform.ShowLeaderboardUI(GameManager.leaderboardId,UnityEngine.SocialPlatforms.TimeScope.AllTime);
+	}
+
+	public void onLeaderboardButton_hardlClicked()
+	{
+		if (Social.localUser.authenticated)
+			GameCenterPlatform.ShowLeaderboardUI(GameManager.leaderboardId_hardcore,UnityEngine.SocialPlatforms.TimeScope.AllTime);
 
 	}
 
