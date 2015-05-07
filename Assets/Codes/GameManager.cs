@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SocialPlatforms;
 using UnityEngine.SocialPlatforms.GameCenter;
-#if UNITY_ANDROID
+#if UNITY_ANDROID && !UNITY_EDITOR
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 #endif
@@ -48,7 +48,7 @@ public class GameManager : MonoBehaviour {
 
 	public void login()
 	{
-		#if UNITY_ANDROID
+		#if UNITY_ANDROID && !UNITY_EDITOR
 		PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder().Build();
 		/*	
 		// enables saving game progress.
@@ -68,10 +68,10 @@ public class GameManager : MonoBehaviour {
 		#endif
 		//leaderboard
 		
-		#if UNITY_IOS
+		#if UNITY_IOS && !UNITY_EDITOR
 		leaderboardId = "ColorJumpScore";
 		leaderboardId_hardcore = "ColorJumpScore_HardCore";
-		#elif UNITY_ANDROID
+		#elif UNITY_ANDROID && !UNITY_EDITOR
 		leaderboardId = "CgkI_ab0x7wJEAIQAA";
 		leaderboardId_hardcore = "CgkI_ab0x7wJEAIQBw";
 		#endif
@@ -220,7 +220,7 @@ public class GameManager : MonoBehaviour {
 	{
 		if(mode >= 0)
 			gameMode = mode;
-
+#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
 		if (gameMode == 0) {
 			leaderboard = Social.CreateLeaderboard ();
 			leaderboard.id = leaderboardId;
@@ -228,6 +228,7 @@ public class GameManager : MonoBehaviour {
 			leaderboard_hardcore = Social.CreateLeaderboard();
 			leaderboard_hardcore.id = leaderboardId_hardcore;
 		}
+#endif
 
 		bGameStarted = true;
 		currentScore = 0;
