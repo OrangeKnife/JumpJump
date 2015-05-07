@@ -12,10 +12,11 @@ public class CameraController : MonoBehaviour {
 	private Transform playerTransform;
 	private PlayerController playerCon;
 
+	Animator camAnimator;
 	// Use this for initialization
 	void Start () 
 	{
-
+		camAnimator = GetComponent<Animator> ();
 	}
 
 	public void ResetCamera(GameObject inPlayer)
@@ -23,6 +24,7 @@ public class CameraController : MonoBehaviour {
 		player = inPlayer;
 		playerTransform = player.transform;
 		transform.position = new Vector3 (playerTransform.position.x, playerTransform.position.y, -10) + CamOffset;
+ 
 	}
 
 	void Update () 
@@ -38,4 +40,5 @@ public class CameraController : MonoBehaviour {
 		}
 
 	}
+	
 }

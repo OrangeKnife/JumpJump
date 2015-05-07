@@ -41,17 +41,25 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	UnityEngine.UI.Image color4 = null; 
 
+	[SerializeField]
+	GameObject UI_ColorIndicationPanel = null; 
+	[SerializeField]
+	GameObject UI_NoColorIndicationText = null;
 	GameObject Player;
 
 
 	GameManager gameMgr;
 	SaveObject mysave;
-
-	List<GameObject> abilityUISlots = new List<GameObject>();
+	
 
 
 	BannerView bannerView,bannerViewBottom;
 	AdRequest request;
+
+	[SerializeField]
+	GameObject transitionImg = null; 
+
+
 
 
 	void Start () {
@@ -178,6 +186,7 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		UpdateUISocre (0);
 		showTutorial (true);
+		SetColorIndicationPanel (true);//auto show
 	}
 
 	void ShowDeathPanel()
@@ -195,7 +204,7 @@ public class GameSceneEvents : MonoBehaviour {
 		HideAllBannerViews ();
 
 
-		gameMgr.StartGame ();
+		gameMgr.StartGame (-1);
 
 		UI_DeathPanel.SetActive (false);
 
@@ -212,19 +221,19 @@ public class GameSceneEvents : MonoBehaviour {
 		UI_LifeText.GetComponent<UnityEngine.UI.Text> ().text = newLife.ToString ();
 	}
 
-	public void CleanUpAbilityUISlots()
+
+
+
+	public void DoTransition(TransitionController.myTransitionDelegate func)
 	{
-		abilityUISlots.Clear ();
+		TransitionController tc = transitionImg.GetComponent<TransitionController> ();
+		if (!tc.doingTransition) {
+			tc.startTransition();
+			tc.transitionDelegates += func;		
+		}
 	}
 
-	public void OnTapToStartButtonClicked()
-	{
-		UI_StartPanel.SetActive (false);
-		gameMgr.RespawnPlayer ();
-		gameMgr.StartGame ();
 
-		HideAllBannerViews ();
-	}
 
 	public void ShowAds()
 	{
@@ -302,6 +311,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onPauseButtonClicked()
 	{
 		UI_PausePanel.SetActive (true);
+		UI_PausePanel.GetComponent<Animator> ().Play ("PausePanelOpened");
 		UI_ScorePanel.SetActive (false);
 		ShowOneOfTheBannerViews(true);
 		gameMgr.PauseGame ();
@@ -326,9 +336,7 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		//back to main menu
 		gameMgr.BackToMainMenu ();
-		UI_PausePanel.SetActive (false);
-		UI_ScorePanel.SetActive (false);
-		UI_StartPanel.SetActive (true);
+
 
 		gameMgr.UnPauseGame ();
 	}
@@ -336,5 +344,67 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onNoAdsButtonClicked()
 	{
 
+	}
+
+	public void onRateButtonClicked()
+	{
+		Utils.rateGame ();
+	}
+
+	public void onHardcoreClicked()
+	{
+		DoTransition (DoHardCoreButton);
+	}
+
+	public void OnStartButtonClicked()
+	{
+		DoTransition (DoStartButton);
+	}
+
+	void DoHardCoreButton()
+	{
+		UI_StartPanel.SetActive (false);
+		
+		gameMgr.StartGame (1);
+		
+		HideAllBannerViews ();
+	}
+	
+	void DoStartButton()
+	{
+		UI_StartPanel.SetActive (false);
+		
+		gameMgr.StartGame (0);
+		
+		HideAllBannerViews ();
+		
+		
+		
+	}
+
+	public void SetPausePanel(bool bActive)
+	{
+		UI_PausePanel.SetActive (bActive);
+	}
+
+	public void SetScorePanel(bool bActive)
+	{
+		UI_ScorePanel.SetActive (bActive);
+	}
+
+	public void SetDeathPanel(bool bActive)
+	{
+		UI_DeathPanel.SetActive (bActive);
+	}
+
+	public void SetStartPanel(bool bActive)
+	{
+		UI_StartPanel.SetActive (bActive);
+	}
+
+	public void SetColorIndicationPanel(bool bActive)
+	{
+		UI_ColorIndicationPanel.SetActive (bActive);
+		UI_NoColorIndicationText.SetActive (!bActive);
 	}
 }

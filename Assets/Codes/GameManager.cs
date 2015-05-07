@@ -31,7 +31,7 @@ public class GameManager : MonoBehaviour {
 
 	SaveObject mysave;
 
-	int gameMode = 0;
+	int gameMode = 0;//0 normal, 1 hard core
 	float savedTimeScale = 1f;
 
 	public Color fromCameraColor;//218,237,226
@@ -39,7 +39,9 @@ public class GameManager : MonoBehaviour {
 
 	static string leaderboardId = "";
 	ILeaderboard leaderboard;
-	public int playerLife;
+	public int playerLife,hardCoreLife;
+
+	bool bColorIndication = true;
 
 	public void login()
 	{
@@ -119,6 +121,8 @@ public class GameManager : MonoBehaviour {
 
 		audiosource = GetComponent<AudioSource> ();
 
+		eventHandler = GameObject.Find ("eventHandler").GetComponent<GameSceneEvents>();
+
 	}
 
 	void CheckLeaderboardsScore()
@@ -149,11 +153,28 @@ public class GameManager : MonoBehaviour {
 		}
 	}
 
-	public void StartGame()
+	int getPlayerLifeByMode(int mode)
 	{
+		switch (mode) {
+		case 0:
+			return 5;
+		case 1:
+			return 1;
+		case 2:
+			return 30;
+		}
+
+		return 3;
+	}
+
+	public void StartGame(int mode)
+	{
+		if(mode >= 0)
+			gameMode = mode;
+
 		bGameStarted = true;
 		currentScore = 0;
-		currentLife = playerLife;
+		currentLife = getPlayerLifeByMode(gameMode);
 		eventHandler.UpdateUILife (currentLife);
 
 		RespawnPlayer ();
@@ -180,16 +201,32 @@ public class GameManager : MonoBehaviour {
 
 	public void BackToMainMenu()
 	{
+		bGameStarted = false;
+
+
+
+		eventHandler.DoTransition(BackToMainMenuFromGame);
+	}
+
+
+	void BackToMainMenuFromGame()
+	{
 		if (CurrentPlayer != null)
 			GameObject.Destroy(CurrentPlayer);
-
-		barGen.DestoryAllBarsAndPickups ();
-
+		
+		 barGen.DestoryAllBarsAndPickups ();
+		
 		eventHandler.showTutorial (false);
+		eventHandler.SetPausePanel (false);
+		eventHandler.SetScorePanel (false);
+		eventHandler.SetDeathPanel (false);
+		eventHandler.SetStartPanel (true);
 	}
 
 	public void EndGame()
 	{
+		Utils.clearLog ();
+
 		bGameStarted = false;
 		if (currentScore > bestScore) {
 			CheckLeaderboardsScore();
@@ -246,9 +283,6 @@ public class GameManager : MonoBehaviour {
 			Destroy(CurrentPlayer);
 		}
 
-		if(eventHandler == null)
-			eventHandler = GameObject.Find ("eventHandler").GetComponent<GameSceneEvents>();
-
 		CurrentPlayer = Instantiate(CurrentPlayerTemplate);
 		MainCam.gameObject.GetComponent<CameraController> ().ResetCamera (CurrentPlayer);
 
@@ -290,5 +324,16 @@ public class GameManager : MonoBehaviour {
 		Time.timeScale = savedTimeScale;
 		savedTimeScale = 1f;
 		bGamePaused = false;
+	}
+
+	public void SetColorIndication(bool visiable)
+	{
+		if (!bColorIndication && visiable) {
+			bColorIndication = visiable;
+			eventHandler.SetColorIndicationPanel (true);
+		} else if (bColorIndication && !visiable) {
+			bColorIndication = visiable;
+			eventHandler.SetColorIndicationPanel (false);
+		}
 	}
 }

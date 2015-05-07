@@ -65,6 +65,8 @@ public class PlayerController : MonoBehaviour {
 	float lastStandTime = 0f;
 	public float jumpComboThreshold;
 
+	int maxBarNum = 0;
+	public int minimumBarCountForHidingColorIndicatoin;
 	void Awake()
 	{
 		
@@ -104,11 +106,11 @@ public class PlayerController : MonoBehaviour {
 		MyRigidBody.velocity = Vector3.zero;
 		spriteRenderer.enabled = false;
 
-		if (gameMgr.currentLife < 0) {
+		if (gameMgr.currentLife < 1) {
 			eventHandler.onPlayerDead ();
 			gameMgr.EndGame ();
 
-		} else if (gameMgr.AddLife (-1) >= 0) {
+		} else if (gameMgr.AddLife (-1) >= 1) {
 			allowInput = true;
 			allowInput_jump = false;
 			Invoke ("revive", 1f);
@@ -300,7 +302,7 @@ public class PlayerController : MonoBehaviour {
 			AddPopup("LIFE - 1", gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpLifeTextOffset.x , popUpLifeTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpLifeGUIStyle);
 
 
-			if( gameMgr.AddLife(-1) < 0)
+			if( gameMgr.AddLife(-1) < 1)
 			{
 				allowInput = false;
 				gameObject.layer = LayerMask.NameToLayer("NoCollision");
@@ -490,6 +492,10 @@ public class PlayerController : MonoBehaviour {
 			{
 				lastBarStandOn = barController;
 				lastStandTime = Time.time;
+				maxBarNum = Mathf.Max(maxBarNum, lastBarStandOn.barNum);
+
+				if(maxBarNum > minimumBarCountForHidingColorIndicatoin)
+					gameMgr.SetColorIndication(false);// I am good enough to do this
 			}
 			else
 			{

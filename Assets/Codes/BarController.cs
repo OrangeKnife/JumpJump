@@ -38,9 +38,14 @@ public class BarController : MonoBehaviour
 	bool shaking = false;
 
 	public GameObject barNumObj;
+	public int barNum {get; private set;}
+
+	Rigidbody2D shakingRigidBody;
+	Vector3 savedShakingPos;
 	void Awake ()
 	{
 		barColor = (EObjectColor)Random.Range (0,(int)EObjectColor.MAXCOLORNUM);
+		Utils.addLog (((int)barColor).ToString());
 		gameObject.layer = 10 + (int)barColor;
 
 
@@ -55,6 +60,7 @@ public class BarController : MonoBehaviour
 
 	public void setBarNum(int n)
 	{
+		barNum = n;
 		if(n % 10 == 0)
 			barNumObj.GetComponent<TextMesh>().text = n.ToString();
 
@@ -227,6 +233,16 @@ public class BarController : MonoBehaviour
 			stopFlashing();
 		}
 
+		if (shaking) {
+			if(shakingRigidBody != null)
+			{
+				gameObject.GetComponent<Animator> ().Play ("Regular");
+				gameObject.layer = 10 + (int)barColor;
+				gameObject.transform.position = savedShakingPos;
+				GameObject.Destroy(shakingRigidBody);
+			}
+		}
+
 	}
 
 	void OnTriggerExit2D(Collider2D  other) 
@@ -334,8 +350,12 @@ public class BarController : MonoBehaviour
 	{
 		Utils.addLog("ShakingThenDisappear");
 		gameObject.transform.rotation = Quaternion.identity; //remove shaking effect
-		gameObject.SetActive (false);
+		//gameObject.SetActive (false);
 		faded = true;
+
+		savedShakingPos = gameObject.transform.position;
+		shakingRigidBody = gameObject.AddComponent<Rigidbody2D>();
+		gameObject.layer = LayerMask.NameToLayer("NoCollision");
 	}
 
 
