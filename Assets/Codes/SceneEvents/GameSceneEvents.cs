@@ -12,10 +12,10 @@ using UnityEngine.SocialPlatforms.GameCenter;
 #endif
 public class GameSceneEvents : MonoBehaviour {
 
-	[SerializeField]
-	GameObject yellowboardsButton = null;
-	[SerializeField]
-	GameObject UI_SmallLeaderBoardsPanel = null;
+	//[SerializeField]
+	//GameObject yellowboardsButton = null;
+	//[SerializeField]
+	//GameObject UI_SmallLeaderBoardsPanel = null;
 	[SerializeField]
 	GameObject UI_PausePanel = null;
 	[SerializeField]
@@ -309,10 +309,11 @@ public class GameSceneEvents : MonoBehaviour {
 			Utils.addLog("authenticated = " + Social.localUser.authenticated.ToString());
 			gameMgr.login ();
 		}
-
+#if UNITY_ANDROID
+		Social.ShowLeaderboardUI();
+#elif UNITY_IOS
 		GameCenterPlatform.ShowLeaderboardUI(gameMgr.getCurrentLeaderBoardId(),UnityEngine.SocialPlatforms.TimeScope.AllTime);
-		//Social.ShowLeaderboardUI();
- 
+#endif
 
 	}
 
@@ -337,15 +338,18 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onLeaderboardButton_normalClicked()
 	{
+#if UNITY_IOS
 		if (Social.localUser.authenticated)
 			GameCenterPlatform.ShowLeaderboardUI(GameManager.leaderboardId,UnityEngine.SocialPlatforms.TimeScope.AllTime);
+#endif
 	}
 
 	public void onLeaderboardButton_hardlClicked()
 	{
+#if UNITY_IOS
 		if (Social.localUser.authenticated)
 			GameCenterPlatform.ShowLeaderboardUI(GameManager.leaderboardId_hardcore,UnityEngine.SocialPlatforms.TimeScope.AllTime);
-
+#endif
 	}
 
 	public void onPauseButtonClicked()
