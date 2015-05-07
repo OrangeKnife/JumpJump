@@ -221,6 +221,8 @@ public class GameManager : MonoBehaviour {
 		eventHandler.SetScorePanel (false);
 		eventHandler.SetDeathPanel (false);
 		eventHandler.SetStartPanel (true);
+		eventHandler.ShowOneOfTheBannerViews(true);
+
 	}
 
 	public void EndGame()

@@ -79,7 +79,7 @@ public class GameSceneEvents : MonoBehaviour {
 		aBannerView.LoadAd (request);
 	}
 
-	void ShowOneOfTheBannerViews(bool forceTop = false)
+	public void ShowOneOfTheBannerViews(bool forceTop = false)
 	{
 		if (UnityEngine.Random.Range (0, 2) == 0 || forceTop) {
 			if(bannerView != null)
@@ -313,7 +313,7 @@ public class GameSceneEvents : MonoBehaviour {
 		UI_PausePanel.SetActive (true);
 		UI_PausePanel.GetComponent<Animator> ().Play ("PausePanelOpened");
 		UI_ScorePanel.SetActive (false);
-		ShowOneOfTheBannerViews(true);
+		ShowOneOfTheBannerViews();
 		gameMgr.PauseGame ();
 
 	}
