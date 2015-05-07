@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour {
 	public int currentScore {get; private set;}
 	public int currentLife { get; private set; }
 	public int bestScore { get; private set; }
+	public int bestScore_hardcore { get; private set; }
 	public bool bGamePaused { get; private set; }
 
 	public List<AudioClip> backgroundMusic;
@@ -38,7 +39,9 @@ public class GameManager : MonoBehaviour {
 	public Color towardsCameraColor;
 
 	static string leaderboardId = "";
+	static string leaderboardId_hardcore = "";
 	ILeaderboard leaderboard;
+	ILeaderboard leaderboard_hardcore;
 	public int playerLife,hardCoreLife;
 
 	bool bColorIndication = true;
@@ -67,8 +70,10 @@ public class GameManager : MonoBehaviour {
 		
 		#if UNITY_IOS
 		leaderboardId = "ColorJumpScore";
+		leaderboardId_hardcore = "ColorJumpScore_HardCore";
 		#elif UNITY_ANDROID
 		leaderboardId = "CgkI_ab0x7wJEAIQAA";
+		leaderboardId_hardcore = "CgkI_ab0x7wJEAIQBw";
 		#endif
 		Social.localUser.Authenticate (success => {
 			if (success) {
@@ -80,11 +85,18 @@ public class GameManager : MonoBehaviour {
 				
 				leaderboard = Social.CreateLeaderboard();
 				leaderboard.id = leaderboardId;
+
+				leaderboard_hardcore = Social.CreateLeaderboard();
+				leaderboard_hardcore.id = leaderboardId_hardcore;
+
 				#if UNITY_IOS
 				string[] userfilterstrings = new string[1];
 				userfilterstrings[0] = Social.localUser.id;
 				if(userfilterstrings[0] != "")
+				{
 					leaderboard.SetUserFilter(userfilterstrings);
+					leaderboard_hardcore.SetUserFilter(userfilterstrings);
+				}
 
 				leaderboard.LoadScores(result =>
 			     {
@@ -92,7 +104,14 @@ public class GameManager : MonoBehaviour {
 					foreach (IScore score in leaderboard.scores)
 						Utils.addLog(score.ToString());
 
-					CheckLeaderboardsScore();
+				});
+
+				leaderboard_hardcore.LoadScores(result =>
+				                       {
+					Utils.addLog("Received " + leaderboard_hardcore.scores.Length + " scores");
+					foreach (IScore score in leaderboard_hardcore.scores)
+						Utils.addLog(score.ToString());
+
 				});
 				#endif
 				
@@ -113,8 +132,10 @@ public class GameManager : MonoBehaviour {
 		barGen = GetComponent<BarGenerator> ();
 
 
-		if (GameFile.Load ("save.data", ref mysave))
+		if (GameFile.Load ("save.data", ref mysave)) {
 			bestScore = mysave.bestScore;
+			bestScore_hardcore = mysave.bestScore_hardcore;
+		}
 
 		login ();
  
@@ -128,16 +149,39 @@ public class GameManager : MonoBehaviour {
 	void CheckLeaderboardsScore()
 	{
 #if UNITY_IOS
-		if (leaderboard.id != "" && bestScore > (int)leaderboard.localUserScore.value) {
-			Utils.addLog ("new score sent to leaderboard " + bestScore.ToString());
-			Social.ReportScore (bestScore, leaderboardId, ScoreReported);
-		} else {
-			Utils.addLog ("current leaderboard socre is higher " + leaderboard.localUserScore.value.ToString());
+		if(gameMode == 0)
+		{
+			if (leaderboard.id != "" && bestScore > (int)leaderboard.localUserScore.value) {
+				Utils.addLog ("new score sent to leaderboard " + bestScore.ToString());
+				Social.ReportScore (bestScore, leaderboardId, ScoreReported);
+			} else {
+				Utils.addLog ("current leaderboard socre is higher " + leaderboard.localUserScore.value.ToString());
+			}
 		}
+		else if(gameMode == 1)
+		{
+			if (leaderboard.id != "" && bestScore > (int)leaderboardId_hardcore.localUserScore.value) {
+				Utils.addLog ("new score sent to leaderboard hardcore " + bestScore.ToString());
+				Social.ReportScore (currentScore, leaderboardId_hardcore, ScoreReported);
+			} else {
+				Utils.addLog ("current leaderboard socre is higher " + leaderboardId_hardcore.localUserScore.value.ToString());
+			}
+		}
+
 #elif UNITY_ANDROID
-		if (currentScore >= bestScore) {
-			Utils.addLog ("new score sent to leaderboard " + currentScore.ToString());
-			Social.ReportScore (currentScore, leaderboardId, ScoreReported);
+		if(gameMode == 0)
+		{
+			if (currentScore >= bestScore) {
+				Utils.addLog ("new score sent to leaderboard " + currentScore.ToString());
+			 	Social.ReportScore (currentScore, leaderboardId, ScoreReported);
+			}
+		}
+		else if(gameMode == 1)
+		{
+			if (currentScore >= bestScore_hardcore) {
+				Utils.addLog ("new score sent to leaderboard_hardcore" + currentScore.ToString());
+				Social.ReportScore (currentScore, leaderboardId_hardcore, ScoreReported);
+			}
 		}
 #endif
 	}
@@ -225,6 +269,17 @@ public class GameManager : MonoBehaviour {
 
 	}
 
+	void setBestScore(int score)
+	{
+		if (gameMode == 0) {
+			bestScore = score;
+			mysave.bestScore = bestScore;
+		} else if (gameMode == 1) {
+			bestScore_hardcore = score;
+			mysave.bestScore_hardcore = bestScore_hardcore;
+		}
+	}
+
 	public void EndGame()
 	{
 		Utils.clearLog ();
@@ -233,11 +288,8 @@ public class GameManager : MonoBehaviour {
 		if (currentScore > bestScore) {
 			CheckLeaderboardsScore();
 
-			bestScore = currentScore;
+			setBestScore(currentScore);
 
-
-
-			mysave.bestScore = bestScore;
 			GameFile.Save("save.data",mysave);
 
 		}
@@ -337,5 +389,15 @@ public class GameManager : MonoBehaviour {
 			bColorIndication = visiable;
 			eventHandler.SetColorIndicationPanel (false);
 		}
+	}
+
+	public int getBestScore ()
+	{
+		if (gameMode == 0)
+			return bestScore;
+		else if (gameMode == 1)
+			return bestScore_hardcore;
+
+		return bestScore;
 	}
 }

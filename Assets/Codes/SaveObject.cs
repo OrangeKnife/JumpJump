@@ -8,8 +8,9 @@ public class SaveObject
 	{
 		firstRun = inFirstRun;
 		bestScore = 0;
+		bestScore_hardcore = 0;
 	}
 	public bool firstRun;
-	public int bestScore;
+	public int bestScore,bestScore_hardcore;
 }
 

@@ -81,6 +81,8 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void ShowOneOfTheBannerViews(bool forceTop = false)
 	{
+		HideAllBannerViews();
+
 		if (UnityEngine.Random.Range (0, 2) == 0 || forceTop) {
 			if(bannerView != null)
 			{
@@ -146,8 +148,6 @@ public class GameSceneEvents : MonoBehaviour {
 			bannerViewBottom = new BannerView (
 				bannerAdsId, AdSize.SmartBanner, AdPosition.Bottom);
 			
-			HideAllBannerViews();
-
 			ShowOneOfTheBannerViews(true);
 		}
 
@@ -193,7 +193,7 @@ public class GameSceneEvents : MonoBehaviour {
 	{	
 		UI_DeathPanel.SetActive (true);
 		yourScore.text = gameMgr.currentScore.ToString ();
-		yourBest.text = gameMgr.bestScore.ToString ();
+		yourBest.text = gameMgr.getBestScore ().ToString();
 
 		ShowOneOfTheBannerViews ();
 
