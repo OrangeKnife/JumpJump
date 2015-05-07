@@ -109,7 +109,7 @@ public class BarController : MonoBehaviour
 
 	public void FlashingOut()
 	{
-
+		gameObject.layer = LayerMask.NameToLayer("NoCollision");
 		spriteRenderer.enabled = false;
 	}
 
@@ -212,7 +212,7 @@ public class BarController : MonoBehaviour
 		bIsDoingFlash = true;
 		gameObject.GetComponent<Animator> ().Play ("FlashingBarAnimation");
 
-		gameObject.layer = LayerMask.NameToLayer("NoCollision");
+		//gameObject.layer = LayerMask.NameToLayer("NoCollision");
 		Invoke("FlashingOut",FlashingDuration);//disappear
 		 
 		Invoke("stopFlashing",FlashingDuration + DisappearDurationAfterFlashing);//come back !
