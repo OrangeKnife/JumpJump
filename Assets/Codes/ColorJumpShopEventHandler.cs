@@ -10,7 +10,7 @@ public class ColorJumpShopEventHandler {
 
 	GameManager gameMgr;
 	
-	public void setUpCharacterSelector(GameManager inGM)
+	public void setUpGameMgr(GameManager inGM)
 	{
 		gameMgr = inGM;
 	}

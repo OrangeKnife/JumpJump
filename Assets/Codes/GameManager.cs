@@ -172,6 +172,9 @@ public class GameManager : MonoBehaviour {
 
 		if (!NoAds)
 			eventHandler.InitAds ();
+
+		ColorJumpShopEventHandler shopHandler = new ColorJumpShopEventHandler ();
+		shopHandler.setUpGameMgr (this);
 	}
 
 	public string getCurrentLeaderBoardId()
