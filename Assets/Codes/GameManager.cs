@@ -429,6 +429,17 @@ public class GameManager : MonoBehaviour {
 		return bestScore;
 	}
 
+	public void onMarketPurchase(string itemId)
+	{
+		NoAds = StoreInventory.GetItemBalance (ColorJumpStoreAssets.NO_ADS_LTVG.ItemId) > 0;
+		if (NoAds)
+			eventHandler.DestoryAllAds ();
+	}
+
+	public void CancelPurchase(string itemId)
+	{
+	}
+
 	public void RemoveAds()
 	{
 		try{

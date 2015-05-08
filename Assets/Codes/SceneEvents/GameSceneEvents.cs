@@ -66,7 +66,14 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject transitionImg = null; 
 
-	
+	public void DestoryAllAds()
+	{
+		if (bannerView != null)
+			bannerView.Destroy ();
+
+		if (bannerViewBottom != null)
+			bannerViewBottom.Destroy ();
+	}
 
 	public void InitAds()
 	{
