@@ -347,7 +347,7 @@ public class PlayerController : MonoBehaviour {
 				if(combo > 2)
 					CleanUpOtherComboText();
 
-				AddPopup("COMBO X "+combo.ToString(), gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpComboTextOffset.x , popUpComboTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpComboGUIStyle);
+				AddPopup("COMBO x "+combo.ToString(), gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpComboTextOffset.x , popUpComboTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpComboGUIStyle);
 			}
 		}
 		else
@@ -403,7 +403,7 @@ public class PlayerController : MonoBehaviour {
  			lastBarStandOn.isJumpedComboed = true;
 			jumpCombo += 1;
 			if(jumpCombo >= 2)
-				AddPopup("COMBO X "+jumpCombo.ToString(), gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpComboTextOffset.x , popUpComboTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpComboGUIStyle);
+				AddPopup("COMBO x "+jumpCombo.ToString(), gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpComboTextOffset.x , popUpComboTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpComboGUIStyle);
 
 		}
 		else
@@ -513,7 +513,7 @@ public class PlayerController : MonoBehaviour {
 
 		tempPlayerScore += realScore;
 	 
-		string jumpComboString = jumpCombo >= 2 ? " X " + jumpCombo.ToString () : "";
+		string jumpComboString = jumpCombo >= 2 ? " x " + jumpCombo.ToString () : "";
 		AddPopup ((realScore>0?"+ " : "") + s.ToString ()+ jumpComboString, gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("S")), Time.time, popUpScoreGUIStyle);
 				 
 		if (wantScoreToLife && tempPlayerScore >= scoreToLife) {
