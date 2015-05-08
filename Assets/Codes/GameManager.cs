@@ -51,6 +51,8 @@ public class GameManager : MonoBehaviour {
 
 	public bool NoAds { get; private set; }
 
+	ColorJumpShopEventHandler shopHandler ;
+
 	public void login()
 	{
 		#if UNITY_ANDROID && !UNITY_EDITOR
@@ -173,7 +175,7 @@ public class GameManager : MonoBehaviour {
 		if (!NoAds)
 			eventHandler.InitAds ();
 
-		ColorJumpShopEventHandler shopHandler = new ColorJumpShopEventHandler ();
+		shopHandler = new ColorJumpShopEventHandler ();
 		shopHandler.setUpGameMgr (this);
 	}
 
@@ -434,7 +436,8 @@ public class GameManager : MonoBehaviour {
 
 	public void onMarketPurchase(string itemId)
 	{
-		NoAds = StoreInventory.GetItemBalance (ColorJumpStoreAssets.NO_ADS_LTVG.ItemId) > 0;
+		NoAds = itemId == ColorJumpStoreAssets.NO_ADS_LTVG.ItemId;
+		Utils.addLog ("new NoAds = " + NoAds.ToString ());
 		if (NoAds)
 			eventHandler.DestoryAllAds ();
 	}

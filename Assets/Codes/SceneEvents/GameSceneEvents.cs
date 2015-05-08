@@ -49,6 +49,9 @@ public class GameSceneEvents : MonoBehaviour {
 	UnityEngine.UI.Image color4 = null; 
 
 	[SerializeField]
+	GameObject RemoveAdsButton = null; 
+
+	[SerializeField]
 	GameObject UI_ColorIndicationPanel = null; 
 	[SerializeField]
 	GameObject UI_NoColorIndicationText = null;
@@ -73,10 +76,13 @@ public class GameSceneEvents : MonoBehaviour {
 
 		if (bannerViewBottom != null)
 			bannerViewBottom.Destroy ();
+
+		RemoveAdsButton.SetActive (false);
 	}
 
 	public void InitAds()
 	{
+		RemoveAdsButton.SetActive (true);
 		//init ads
 		string bannerAdsId = "";
 		#if UNITY_IOS && !UNITY_EDITOR

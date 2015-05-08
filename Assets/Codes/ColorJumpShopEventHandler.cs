@@ -77,7 +77,7 @@ public class ColorJumpShopEventHandler {
 	/// <param name="purchaseToken">Purchase token.</param>
 	public void onMarketPurchase(PurchasableVirtualItem pvi, string payload, Dictionary<string, string> extra) {
 		Utils.addLog ("onMarketPurchase called: itemid=" + pvi.ItemId);
-		if (gameMgr)
+		if (gameMgr != null)
 			gameMgr.onMarketPurchase (pvi.ItemId);
 	}
 	
@@ -95,6 +95,7 @@ public class ColorJumpShopEventHandler {
 	/// <param name="pvi">Purchasable virtual item.</param>
 	public void onItemPurchased(PurchasableVirtualItem pvi, string payload) {
 		Utils.addLog ("onItemPurchased called: itemid=" + pvi.ItemId+",payload="+payload);
+
 	}
 	
 	/// <summary>
