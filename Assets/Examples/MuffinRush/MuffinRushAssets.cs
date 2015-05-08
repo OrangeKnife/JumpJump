@@ -42,21 +42,21 @@ namespace Soomla.Store.Example {
 		/// see parent.
 		/// </summary>
 	    public VirtualGood[] GetGoods() {
-			return new VirtualGood[] {/*MUFFINCAKE_GOOD, PAVLOVA_GOOD,CHOCLATECAKE_GOOD, CREAMCUP_GOOD, */NO_ADS_LTVG};
+			return new VirtualGood[] {MUFFINCAKE_GOOD, PAVLOVA_GOOD,CHOCLATECAKE_GOOD, CREAMCUP_GOOD, NO_ADS_LTVG};
 		}
 
 		/// <summary>
 		/// see parent.
 		/// </summary>
 	    public VirtualCurrencyPack[] GetCurrencyPacks() {
-			return new VirtualCurrencyPack[] {/*TENMUFF_PACK, FIFTYMUFF_PACK, FOURHUNDMUFF_PACK, THOUSANDMUFF_PACK*/};
+			return new VirtualCurrencyPack[] {TENMUFF_PACK, FIFTYMUFF_PACK, FOURHUNDMUFF_PACK, THOUSANDMUFF_PACK};
 		}
 
 		/// <summary>
 		/// see parent.
 		/// </summary>
 	    public VirtualCategory[] GetCategories() {
-			return new VirtualCategory[]{/*GENERAL_CATEGORY*/};
+			return new VirtualCategory[]{GENERAL_CATEGORY};
 		}
 
 	    /** Static Final Members **/
@@ -79,7 +79,7 @@ namespace Soomla.Store.Example {
 
 	    public const string CREAMCUP_ITEM_ID   = "cream_cup";
 
-		public const string NO_ADS_LIFETIME_PRODUCT_ID = "colorjump_remove_ads";
+		public const string NO_ADS_LIFETIME_PRODUCT_ID = "no_ads";
 
 
 	    /** Virtual Currencies **/
