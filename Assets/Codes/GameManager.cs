@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SocialPlatforms;
 using UnityEngine.SocialPlatforms.GameCenter;
+
+using Soomla.Store;
+
 #if UNITY_ANDROID && !UNITY_EDITOR
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
@@ -45,6 +48,8 @@ public class GameManager : MonoBehaviour {
 	public int playerLife,hardCoreLife;
 
 	bool bColorIndication = true;
+
+	public bool NoAds { get; private set; }
 
 	public void login()
 	{
@@ -159,6 +164,14 @@ public class GameManager : MonoBehaviour {
 
 		eventHandler = GameObject.Find ("eventHandler").GetComponent<GameSceneEvents>();
 
+		if(!SoomlaStore.Initialized)
+			SoomlaStore.Initialize(new ColorJumpStoreAssets());
+
+		NoAds = StoreInventory.GetItemBalance (ColorJumpStoreAssets.NO_ADS_LTVG.ItemId) > 0;
+		Utils.addLog ("balance = " + StoreInventory.GetItemBalance (ColorJumpStoreAssets.NO_ADS_LTVG.ItemId));
+
+		if (!NoAds)
+			eventHandler.InitAds ();
 	}
 
 	public string getCurrentLeaderBoardId()
@@ -206,11 +219,11 @@ public class GameManager : MonoBehaviour {
 	{
 		switch (mode) {
 		case 0:
-			return 5;
+			return playerLife;
 		case 1:
-			return 1;
+			return hardCoreLife;
 		case 2:
-			return 30;
+			return 30;//???
 		}
 
 		return 3;
@@ -220,7 +233,8 @@ public class GameManager : MonoBehaviour {
 	{
 		if(mode >= 0)
 			gameMode = mode;
-#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
+		/*
+#if(UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
 		if (gameMode == 0) {
 			leaderboard = Social.CreateLeaderboard ();
 			leaderboard.id = leaderboardId;
@@ -229,7 +243,7 @@ public class GameManager : MonoBehaviour {
 			leaderboard_hardcore.id = leaderboardId_hardcore;
 		}
 #endif
-
+*/
 		bGameStarted = true;
 		currentScore = 0;
 		currentLife = getPlayerLifeByMode(gameMode);
@@ -413,5 +427,14 @@ public class GameManager : MonoBehaviour {
 			return bestScore_hardcore;
 
 		return bestScore;
+	}
+
+	public void RemoveAds()
+	{
+		try{
+			StoreInventory.BuyItem(ColorJumpStoreAssets.NO_ADS_LTVG.ItemId);
+		} catch (System.Exception e) {
+			Utils.addLog ("SOOMLA/UNITY " + e.Message);
+		}
 	}
 }

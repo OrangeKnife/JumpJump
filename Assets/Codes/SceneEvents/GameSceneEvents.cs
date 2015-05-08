@@ -66,8 +66,34 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject transitionImg = null; 
 
+	
 
-
+	public void InitAds()
+	{
+		//init ads
+		string bannerAdsId = "";
+		#if UNITY_IOS && !UNITY_EDITOR
+		bannerAdsId = "ca-app-pub-7183026460514946/4970464516";
+		#endif
+		#if UNITY_ANDROID && !UNITY_EDITOR
+		bannerAdsId = "ca-app-pub-7183026460514946/9400664114";
+		#endif
+		
+		if (bannerView == null) {
+			bannerView = new BannerView (
+				bannerAdsId, AdSize.SmartBanner, AdPosition.Top);
+			
+			
+			
+			
+			
+			bannerViewBottom = new BannerView (
+				bannerAdsId, AdSize.SmartBanner, AdPosition.Bottom);
+			
+			ShowOneOfTheBannerViews (true);
+			
+		}
+	}
 
 	void Start () {
 
@@ -113,7 +139,7 @@ public class GameSceneEvents : MonoBehaviour {
 			bannerViewBottom.Hide ();
 	}
 		
-		void Awake() {
+	void Awake() {
 		/*
 		if (Advertisement.isSupported) {
 			Advertisement.allowPrecache = true;
@@ -133,34 +159,6 @@ public class GameSceneEvents : MonoBehaviour {
 			UI_ScoreText.GetComponent<UnityEngine.UI.Text>().text = "Platform not supported";
 		}
 		*/
-
-		// Create a 320x50 banner at the top of the screen.
-
-		string bannerAdsId="";
-		#if UNITY_IOS && !UNITY_EDITOR
-		bannerAdsId = "ca-app-pub-7183026460514946/4970464516";
-		#endif
-		#if UNITY_ANDROID && !UNITY_EDITOR
-		bannerAdsId = "ca-app-pub-7183026460514946/9400664114";
-		#endif
-
-		if (bannerView == null) {
-			bannerView = new BannerView (
-			bannerAdsId, AdSize.SmartBanner, AdPosition.Top);
-
-
-
-				
-
-			bannerViewBottom = new BannerView (
-				bannerAdsId, AdSize.SmartBanner, AdPosition.Bottom);
-			
-			ShowOneOfTheBannerViews(true);
-		}
-
-
-			
-
 
 
 		try{
@@ -387,6 +385,10 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onNoAdsButtonClicked()
 	{
+	/*	#if UNITY_EDITOR
+		PlayerPrefs.DeleteAll ();
+		#endif*/
+		gameMgr.RemoveAds ();
 
 	}
 
