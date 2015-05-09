@@ -292,6 +292,7 @@ public class PlayerController : MonoBehaviour {
 
 		GameObject bar = HeadKnocked ();
 		if (bar != null) {
+			Utils.addLog("knock into bar: " + bar.GetComponent<BarController>().getColor());
 			playSound(audioClips[1]);
 			fullScreenFlashImage.GetComponent<Animator>().Play("fading",0);
 			MyRigidBody.velocity = Vector3.zero;// -MyRigidBody.velocity * 0.1f;
@@ -493,6 +494,8 @@ public class PlayerController : MonoBehaviour {
 				lastBarStandOn = barController;
 				lastStandTime = Time.time;
 				maxBarNum = Mathf.Max(maxBarNum, lastBarStandOn.barNum);
+
+				Utils.addLog("stand on bar:" + barController.getColor());
 
 				if(maxBarNum > minimumBarCountForHidingColorIndicatoin)
 					gameMgr.SetColorIndication(false);// I am good enough to do this

@@ -253,7 +253,7 @@ public class BarController : MonoBehaviour
 			{
 				if (other.gameObject.GetComponent<Rigidbody2D> ().velocity.y < 0)
 				{
-					Utils.addLog ("player fall through one bar");
+					//Utils.addLog ("player fall through one bar");
 
 					gameObject.GetComponent<Animator> ().Play ("Regular");
 					gameObject.transform.rotation = Quaternion.identity; //remove shaking effect
@@ -333,7 +333,7 @@ public class BarController : MonoBehaviour
 				CancelInvoke("DoShaking");
 				CancelInvoke("ShakingThenDisappear");
 				Invoke("DoShaking",beforeShakingTime);
-				Utils.addLog("Start check shaking");
+				//Utils.addLog("Start check shaking");
 				GetComponent<Animator>().Play("oneTimeShaking");
 			}
 		}
@@ -341,14 +341,14 @@ public class BarController : MonoBehaviour
 
 	void DoShaking()
 	{
-		Utils.addLog("now is shaking");
+		//Utils.addLog("now is shaking");
 		gameObject.GetComponent<Animator> ().Play ("shaking");
 		Invoke ("ShakingThenDisappear", shakingDuration);
 	}
 
 	void ShakingThenDisappear()
 	{
-		Utils.addLog("ShakingThenDisappear");
+		//Utils.addLog("ShakingThenDisappear");
 		gameObject.transform.rotation = Quaternion.identity; //remove shaking effect
 		//gameObject.SetActive (false);
 		faded = true;
