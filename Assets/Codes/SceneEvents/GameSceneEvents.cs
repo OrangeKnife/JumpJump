@@ -2,7 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
-//using UnityEngine.Advertisements;
+using UnityEngine.Advertisements;
+
 using GoogleMobileAds.Api;
 #if UNITY_ANDROID
 using GooglePlayGames;
@@ -16,6 +17,9 @@ public class GameSceneEvents : MonoBehaviour {
 	//GameObject yellowboardsButton = null;
 	//[SerializeField]
 	//GameObject UI_SmallLeaderBoardsPanel = null;
+
+	[SerializeField]
+	GameObject UI_AdsQuestion = null;
 	[SerializeField]
 	GameObject UI_PausePanel = null;
 	[SerializeField]
@@ -55,6 +59,16 @@ public class GameSceneEvents : MonoBehaviour {
 	GameObject UI_ColorIndicationPanel = null; 
 	[SerializeField]
 	GameObject UI_NoColorIndicationText = null;
+
+	[SerializeField]
+	UnityEngine.UI.Text ExtraInfoText = null;
+
+	[SerializeField]
+	UnityEngine.UI.Text UnityAdsYesNumText = null;
+
+	int UnityAdsYesNum;
+
+
 	GameObject Player;
 
 
@@ -153,25 +167,24 @@ public class GameSceneEvents : MonoBehaviour {
 	}
 		
 	void Awake() {
-		/*
+
 		if (Advertisement.isSupported) {
 			Advertisement.allowPrecache = true;
 			string UnityAdsId="";
 			#if UNITY_IOS && !UNITY_EDITOR
-			//UnityAdsId = "33340";
+			UnityAdsId = "37628";
 			#endif
 			#if UNITY_ANDROID && !UNITY_EDITOR
-			//UnityAdsId = "34245";
+			UnityAdsId = "37626";
 			#endif
 
 
 			Advertisement.Initialize(UnityAdsId);
-			UI_ScoreText.GetComponent<UnityEngine.UI.Text>().text = "Platform supported";
+
 		} else {
-			Debug.Log("Platform not supported");
-			UI_ScoreText.GetComponent<UnityEngine.UI.Text>().text = "Platform not supported";
+			Utils.addLog("UnityAds Platform not supported");
 		}
-		*/
+
 
 
 		try{
@@ -466,4 +479,66 @@ public class GameSceneEvents : MonoBehaviour {
 		UI_ColorIndicationPanel.SetActive (bActive);
 		UI_NoColorIndicationText.SetActive (!bActive);
 	}
+
+	public void SetExtraInfoText(string ExtraInfoStr)
+	{
+		ExtraInfoText.text = ExtraInfoStr;
+	}
+
+	public void onAdsQuestionPopup()
+	{
+		UI_AdsQuestion.SetActive (true);
+		UnityAdsYesNum = 10;
+		UnityAdsYesNumText.GetComponent<Animator> ().Play ("FlashingTextOneSecondAnimation");
+		TickingUnityAdsYesButton ();
+	}
+
+	public void UnityAdsYesButtonClicked()
+	{
+#if UNITY_EDITOR
+		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().AfterWatchAds();
+		UI_AdsQuestion.SetActive (false);
+		return;
+#endif
+
+		CancelInvoke ("TickingUnityAdsYesButton");
+		//UnityADS
+		if(Advertisement.isReady())
+		{ 
+			Advertisement.Show(null, new ShowOptions{ pause = true,
+				resultCallback = ShowResult =>{
+
+					gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().AfterWatchAds();
+				}
+			});
+
+			UI_AdsQuestion.SetActive (false);
+		}
+		else
+		{
+			UI_AdsQuestion.SetActive (false);
+			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().DoDeath ();
+		 
+		}
+
+	}
+	
+	public void UnityAdsNoButtonClicked()
+	{
+		UI_AdsQuestion.SetActive (false);
+		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().DoDeath ();
+	}
+
+	void TickingUnityAdsYesButton()
+	{
+		UnityAdsYesNumText.text = (UnityAdsYesNum).ToString();
+		UnityAdsYesNum -= 1;
+
+		if (UnityAdsYesNum >= 0)
+			Invoke ("TickingUnityAdsYesButton", 1f);
+		else {
+			UI_AdsQuestion.SetActive (false);
+			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().DoDeath ();
+		}
+		}
 }

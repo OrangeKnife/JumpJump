@@ -88,56 +88,7 @@ public class GameManager : MonoBehaviour {
 				string userInfo = "Username: " + Social.localUser.userName + 
 					"\nUser ID: " + Social.localUser.id + 
 						"\nIsUnderage: " + Social.localUser.underage;
-				Utils.addLog (userInfo);
-				
-
-
-
-				/*
-				#if UNITY_IOS
-				leaderboard = Social.CreateLeaderboard();
-				leaderboard.id = leaderboardId;
-
-
-
-				string[] userfilterstrings = new string[1];
-				userfilterstrings[0] = Social.localUser.id;
-
-				if(userfilterstrings[0] != "")
-					leaderboard.SetUserFilter(userfilterstrings);
-
-
-
-
-				leaderboard.LoadScores(result =>
-			     {
-					Utils.addLog("Received " + leaderboard.scores.Length + " scores");
-					foreach (IScore score in leaderboard.scores)
-						Utils.addLog(score.ToString());
-
-
-					//do hard core here
-
-					leaderboard_hardcore = Social.CreateLeaderboard();
-					leaderboard_hardcore.id = leaderboardId_hardcore;
-					
-					if(userfilterstrings[0] != "")
-						leaderboard_hardcore.SetUserFilter(userfilterstrings);
-					
-					leaderboard_hardcore.LoadScores(result2 =>
-					                                {
-						Utils.addLog("hard core score Received " + leaderboard_hardcore.scores.Length + " scores");
-						foreach (IScore score in leaderboard_hardcore.scores)
-							Utils.addLog(score.ToString());
-						
-					});
-
-				});
-				
-
-				#endif
-				*/
-				
+				Utils.addLog (userInfo);	
 			}
 			else
 				Utils.addLog("Authentication failed");
@@ -153,6 +104,8 @@ public class GameManager : MonoBehaviour {
 
 		barGen = GetComponent<BarGenerator> ();
 
+		//PlayerPrefs.DeleteAll ();
+		//GameFile.Save ("save.data", new SaveObject (true));
 
 		if (GameFile.Load ("save.data", ref mysave)) {
 			bestScore = mysave.bestScore;
@@ -194,14 +147,14 @@ public class GameManager : MonoBehaviour {
  
 		if(gameMode == 0)
 		{
-			if (currentScore >= bestScore) {
+			if (currentScore >= getBestScore()) {
 				Utils.addLog ("new score sent to leaderboard " + currentScore.ToString());
 			 	Social.ReportScore (currentScore, leaderboardId, ScoreReported);
 			}
 		}
 		else if(gameMode == 1)
 		{
-			if (currentScore >= bestScore_hardcore) {
+			if (currentScore >= getBestScore()) {
 				Utils.addLog ("new score sent to leaderboard_hardcore" + currentScore.ToString());
 				Social.ReportScore (currentScore, leaderboardId_hardcore, ScoreReported);
 			}
@@ -220,7 +173,7 @@ public class GameManager : MonoBehaviour {
 		}
 	}
 
-	int getPlayerLifeByMode(int mode)
+	public int getPlayerLifeByMode(int mode)
 	{
 		switch (mode) {
 		case 0:
@@ -318,7 +271,7 @@ public class GameManager : MonoBehaviour {
 		Utils.clearLog ();
 
 		bGameStarted = false;
-		if (currentScore > bestScore) {
+		if (currentScore > getBestScore()) {
 			CheckLeaderboardsScore();
 
 			setBestScore(currentScore);
@@ -360,6 +313,8 @@ public class GameManager : MonoBehaviour {
 #if UNITY_ANDROID || UNITY_IOS
 		System.Environment.SetEnvironmentVariable("MONO_REFLECTION_SERIALIZER", "yes");
 #endif
+
+
 		DontDestroyOnLoad(gameObject);
 	}
 

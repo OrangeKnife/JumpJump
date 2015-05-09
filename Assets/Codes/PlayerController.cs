@@ -48,7 +48,7 @@ public class PlayerController : MonoBehaviour {
 	static Color BlueColor = new Color(119f/255f,196f/255f,211f/255f);
 	static Color GreenColor = new Color(102f/255f,196f/255f,50f/255f);
 	static Color YellowColor = new Color(246f/255f,247f/255f,74f/255f);
-	static Color BlackColor = new Color(0f,0f,0f);
+	//static Color BlackColor = new Color(0f,0f,0f);
 
 	List<string> popUpText = new List<string>();
 	List<Vector3> popUpScreenPos = new List<Vector3>();
@@ -68,6 +68,10 @@ public class PlayerController : MonoBehaviour {
 
 	int maxBarNum = 0;
 	public int minimumBarCountForHidingColorIndicatoin;
+
+	public int maximumUnityAdsCanWatch = 1;
+	int currentUnityAdsWatched = 0;
+	bool deathSoundPlayed = false;
 	void Awake()
 	{
 		
@@ -97,7 +101,36 @@ public class PlayerController : MonoBehaviour {
 
 	}
 
+	void AskUnityAdsQuestion()
+	{
 
+
+		if (currentUnityAdsWatched < maximumUnityAdsCanWatch) {
+			MyRigidBody.velocity = Vector3.zero;
+			MyRigidBody.gravityScale = 0;
+			currentUnityAdsWatched++;
+			eventHandler.onAdsQuestionPopup ();
+		} else {
+			DoDeath();
+
+		}
+	}
+
+	public void DoDeath()
+	{
+		eventHandler.onPlayerDead ();
+		gameMgr.EndGame ();
+	}
+
+	
+	public void AfterWatchAds()
+	{
+		gameMgr.AddLife (gameMgr.getPlayerLifeByMode(gameMgr.gameMode));
+		allowInput = true;
+		allowInput_jump = false;
+		Invoke ("revive", 1f);
+	}
+	
 	void Die()
 	{
 		allowInput = false;
@@ -108,20 +141,23 @@ public class PlayerController : MonoBehaviour {
 		spriteRenderer.enabled = false;
 
 		if (gameMgr.currentLife < 1) {
-			eventHandler.onPlayerDead ();
-			gameMgr.EndGame ();
+			AskUnityAdsQuestion();
 
 		} else if (gameMgr.AddLife (-1) >= 1) {
 			allowInput = true;
 			allowInput_jump = false;
 			Invoke ("revive", 1f);
 		} else {
-			playSound (audioClips [3]);//die
-			eventHandler.onPlayerDead ();
-			gameMgr.EndGame ();
+			if(!deathSoundPlayed)
+			{
+				playSound (audioClips [3]);//die cuz fall through
+				deathSoundPlayed = true;
+			}
+			Invoke("AskUnityAdsQuestion",1f);
 		}
 
 	}
+
 
 	void revive()
 	{
@@ -134,13 +170,16 @@ public class PlayerController : MonoBehaviour {
 
 		if (lastBarFallThrough != null)
 			gameObject.transform.position = lastBarFallThrough.gameObject.transform.position + gameMgr.barGen.barHeight * 0.5f;
-		else
+		else {
 			gameObject.transform.position = Vector3.zero;
-
+			gameMgr.MainCam.gameObject.GetComponent<CameraController> ().ResetCamera (gameObject);
+		}
+		GetComponent<Animator>().Play("Regular");
 		gameObject.layer = 10 + (int)currentColor;
 		spriteRenderer.enabled = true;
 		allowInput_jump = true;
 		isDead = false;
+		deathSoundPlayed = false;
 		yield return new WaitForSeconds(1f);
 		
 
@@ -323,7 +362,11 @@ public class PlayerController : MonoBehaviour {
 				allowInput = false;
 				gameObject.layer = LayerMask.NameToLayer("NoCollision");
 				GetComponent<Animator>().Play("Spin");
-				playSound (audioClips [3]);//die
+				if(!deathSoundPlayed)
+				{
+					playSound (audioClips [3]);//die
+					deathSoundPlayed = true;
+				}
 			}
 			else
 			{
@@ -411,19 +454,28 @@ public class PlayerController : MonoBehaviour {
 	public void setJumpCombo(int i)
 	{
 		jumpCombo = i;
+		if(jumpCombo <= 1)
+			eventHandler.SetExtraInfoText("NO BONUS");
+		else
+			eventHandler.SetExtraInfoText("SCORE x "+jumpCombo);//combo bonus
+	}
+
+	void checkStandTime()
+	{
+		setJumpCombo (0);
 	}
 
 	void checkJumpCombo(BarController lastBarStandOn)
 	{
 		if (Time.time - lastStandTime < jumpComboThreshold && !lastBarStandOn.isJumpedComboed) {
  			lastBarStandOn.isJumpedComboed = true;
-			jumpCombo += 1;
+			setJumpCombo(jumpCombo + 1);
 			if(jumpCombo >= 2)
 				AddPopup("COMBO x "+jumpCombo.ToString(), gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpComboTextOffset.x , popUpComboTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpComboGUIStyle);
 
 		}
 		else
-			jumpCombo = 0;
+			setJumpCombo(0);
 
 	}
 
@@ -438,6 +490,7 @@ public class PlayerController : MonoBehaviour {
 			playSound(audioClips[0]); //jjump
 			if(lastBarStandOn != null)
 			{
+				CancelInvoke("checkStandTime");
 				lastBarStandOn.onPlayerJumped();
 				if(wantJumpCombo)
 				{
@@ -515,12 +568,14 @@ public class PlayerController : MonoBehaviour {
 
 				Utils.addLog("stand on bar:" + barController.getColor());
 
+				Invoke("checkStandTime",jumpComboThreshold);
+
 				if(maxBarNum > minimumBarCountForHidingColorIndicatoin)
 					gameMgr.SetColorIndication(false);// I am good enough to do this
 			}
 			else
 			{
-				jumpCombo = 0;
+				setJumpCombo(0);
 			}
 		}
 
@@ -535,7 +590,7 @@ public class PlayerController : MonoBehaviour {
 		tempPlayerScore += realScore;
 	 
 		string jumpComboString = jumpCombo >= 2 ? " x " + jumpCombo.ToString () : "";
-		AddPopup ((realScore>0?"+ " : "") + s.ToString ()+ jumpComboString, gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("S")), Time.time, popUpScoreGUIStyle);
+		AddPopup ((realScore>0?"" : "") + s.ToString ()+ jumpComboString, gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("S")), Time.time, popUpScoreGUIStyle);
 				 
 		if (wantScoreToLife && tempPlayerScore >= scoreToLife) {
 			tempPlayerScore -= scoreToLife;
@@ -551,6 +606,11 @@ public class PlayerController : MonoBehaviour {
 		audioSourceList[AudioSourceIdx].clip = ac;
 		audioSourceList[AudioSourceIdx].loop = loop;
 		audioSourceList[AudioSourceIdx].Play();
+	}
+
+	bool IsPlaying(AudioClip ac, int AudioSourceIdx = 0)
+	{
+		return audioSourceList [AudioSourceIdx].clip == ac && audioSourceList [AudioSourceIdx].isPlaying;
 	}
 
 	public void stopSound(int AudioSourceIdx = 0)
@@ -589,12 +649,12 @@ public class PlayerController : MonoBehaviour {
 	{
 		if (s [0] == 'L')//LIFE - 1
 			return 1.5f;
-		else if (s [0] == 'C')//AIR COMBO
-			return 0.5f;
-		else if (s [0] == 'S')
-			return 0.5f;
+		else if (s [0] == 'C')//COMBO
+			return 1f;
+		else if (s [0] == 'S')//SCORE
+			return 0.25f;
 
-		return 1f;
+		return 2f;//other pick ups
 	}
 
 	Vector3 getPopUpOffSetByString(string s)
