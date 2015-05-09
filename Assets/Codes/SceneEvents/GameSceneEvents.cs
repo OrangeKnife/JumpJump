@@ -525,6 +525,7 @@ public class GameSceneEvents : MonoBehaviour {
 	
 	public void UnityAdsNoButtonClicked()
 	{
+		CancelInvoke ("TickingUnityAdsYesButton");
 		UI_AdsQuestion.SetActive (false);
 		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().DoDeath ();
 	}

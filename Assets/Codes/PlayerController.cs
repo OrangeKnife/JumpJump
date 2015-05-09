@@ -103,7 +103,7 @@ public class PlayerController : MonoBehaviour {
 
 	void AskUnityAdsQuestion()
 	{
-
+		CleanUpAllPopup ();
 
 		if (currentUnityAdsWatched < maximumUnityAdsCanWatch) {
 			MyRigidBody.velocity = Vector3.zero;
@@ -404,7 +404,7 @@ public class PlayerController : MonoBehaviour {
 			if(combo >= 2)
 			{
 				if(combo > 2)
-					CleanUpOtherComboText();
+					CleanUpPopupStartWith('C');
 
 				AddPopup("COMBO x "+combo.ToString(), gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpComboTextOffset.x , popUpComboTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpComboGUIStyle);
 			}
@@ -414,11 +414,11 @@ public class PlayerController : MonoBehaviour {
 
 	}
 
-	void CleanUpOtherComboText()
+	void CleanUpPopupStartWith(char firstchar)
 	{
 		for(int i = 0; i < popUpText.Count; ++i)
 		{ 
-			if(popUpText[i][0] == 'C')//AIR COMBO
+			if(popUpText[i][0] == firstchar)//AIR COMBO
 			{
 				popUpText.RemoveAt(i);
 				popUpScreenPos.RemoveAt(i);
@@ -590,7 +590,9 @@ public class PlayerController : MonoBehaviour {
 		tempPlayerScore += realScore;
 	 
 		string jumpComboString = jumpCombo >= 2 ? " x " + jumpCombo.ToString () : "";
-		AddPopup ((realScore>0?"" : "") + s.ToString ()+ jumpComboString, gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("S")), Time.time, popUpScoreGUIStyle);
+
+		CleanUpPopupStartWith ('S');//hack for score :D
+		AddPopup ((realScore>0?"S" : "") + s.ToString ()+ jumpComboString, gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("S")), Time.time, popUpScoreGUIStyle);
 				 
 		if (wantScoreToLife && tempPlayerScore >= scoreToLife) {
 			tempPlayerScore -= scoreToLife;
@@ -618,13 +620,26 @@ public class PlayerController : MonoBehaviour {
 		audioSourceList [AudioSourceIdx].Stop ();
 	}
 
+	void CleanUpAllPopup()
+	{
+		 
+		popUpText.Clear ();
+		popUpScreenPos.Clear ();
+		popUpGUIStyle.Clear ();
+		popUpShowedTime.Clear ();
+		 
+	}
+
 	void OnGUI() {
 
 
 		if (popUpText.Count > 0) {
 			for(int i = 0; i < popUpText.Count; i++)
 			{
-				GUI.Label(new Rect (popUpScreenPos[i].x, Screen.height - popUpScreenPos[i].y, 255, 20), popUpText[i],popUpGUIStyle[i]);
+				string myText = popUpText[i];
+				if(myText[0] == 'S')//Score
+					myText = myText.TrimStart('S');
+				GUI.Label(new Rect (popUpScreenPos[i].x, Screen.height - popUpScreenPos[i].y, 1, 1), myText ,popUpGUIStyle[i]);
 			}
 		}
 
@@ -652,7 +667,7 @@ public class PlayerController : MonoBehaviour {
 		else if (s [0] == 'C')//COMBO
 			return 1f;
 		else if (s [0] == 'S')//SCORE
-			return 0.25f;
+			return 1.25f;
 
 		return 2f;//other pick ups
 	}
