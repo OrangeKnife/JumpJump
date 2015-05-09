@@ -365,11 +365,12 @@ public class BarController : MonoBehaviour
 		if (c < EObjectColor.MAXCOLORNUM && barColor != c)
 			SetBarColorAndLayerByColor (c);
 
+
 	}
 
 	EObjectColor getColorByTextureOffset(Vector2 offset)
 	{
-		if ((0 - offset.x) < 0.001f && (0 - offset.x) > -0.001f)
+		/*if ((0 - offset.x) < 0.001f && (0 - offset.x) > -0.001f)
 			return EObjectColor.RED;
 		if ((-6f/16f - offset.x)  < 0.001f && (-6f/16f - offset.x) > -0.001f)	 
 			return EObjectColor.BLUE;
@@ -377,17 +378,20 @@ public class BarController : MonoBehaviour
 			return EObjectColor.GREEN;
 		if ((-2f/16f - offset.x) < 0.001f && (-2f/16f - offset.x) > -0.001f)	 
 			return EObjectColor.YELLOW;
-		/*
-		if ((offset - new Vector2 (0.3f, 0)).sqrMagnitude < 0.0001f)
-			return EObjectColor.RED;
-		if ((offset - new Vector2 (-0.3f, 0)).sqrMagnitude < 0.0001f)	 
-			return EObjectColor.BLUE;
-		if ((offset - new Vector2(-0.1f,0)).sqrMagnitude < 0.0001f)	 
-			return EObjectColor.GREEN;
-		if ((offset - new Vector2 (0.1f, 0)).sqrMagnitude < 0.0001f)	 
-			return EObjectColor.YELLOW;
 */
-		
+
+		if (offset.x > 0 && offset.x < 1f / 8f || offset.x > -4f/8f && offset.x < -3f/8f)
+			return EObjectColor.RED;
+		if (offset.x > -3f/8f && offset.x < -2f/8f)
+			return EObjectColor.BLUE;
+		if (offset.x > -2f/8f && offset.x < -1f/8f) 
+			return EObjectColor.GREEN;
+		if (offset.x > -1f/8f && offset.x < 0)  
+			return EObjectColor.YELLOW;
+		 
+
+		Utils.addLog ("Color is wrong!");
+
 		return EObjectColor.MAXCOLORNUM;
 	}
 

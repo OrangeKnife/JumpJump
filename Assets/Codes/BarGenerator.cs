@@ -21,6 +21,7 @@ public class BarGenerator : MonoBehaviour {
 	int pickupCount = 1;
 	public int barCountPerPickUp = 25;
 	public float pickupChance;
+	public float scrollingBarCountFactor;
 	bool lastBarFlashing = false;
 	List<GameObject> PickupList;
 
@@ -114,6 +115,7 @@ public class BarGenerator : MonoBehaviour {
 			if(barCount > minimumBarCountForScrollingColor && Random.Range(0f,1f) < scrollingColorChance  
 			   && (barCount > minimumBarCountForHavingAdjacentScrollingBar || (lastBarController == null || (lastBarController != null && !lastBarController.ScrollingColor))))
 			{
+				newBar.GetComponent<MaterialScrollingController>().SetScrollingSpeedMultiplier( 1f + (float)barCount / scrollingBarCountFactor);
 				bc.enableScrollingColor(true);
 			}
 			else if(!lastBarFlashing && barCount > minimumBarCountForFlashingBar && Random.Range(0f,1f) < flashingBarChance)

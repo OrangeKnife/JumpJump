@@ -6,7 +6,10 @@ public class MaterialScrollingController : MonoBehaviour {
 	private SpriteRenderer barSpriteRenderer;
 	private Transform playerTransform;
 
-	private float scrollSpeed = 0.1f;
+	private float scrollSpeed = 0.05f;
+
+	private float srollSpeedMultiplier = 1f;
+
 	private Vector2 savedOffset;
 
 	private float currentOffset;
@@ -24,7 +27,7 @@ public class MaterialScrollingController : MonoBehaviour {
 	
 	void Update () 
 	{
-		currentOffset = currentOffset + (Time.deltaTime * scrollSpeed);
+		currentOffset = currentOffset + (Time.deltaTime * scrollSpeed * srollSpeedMultiplier);
 		//float x = Mathf.Repeat (Time.time * scrollSpeed, 1);
 		float x = Mathf.Repeat (currentOffset + 7f / 16f, 8f / 16f) - 7f / 16f;
 		Vector2 offset = new Vector2 (x, savedOffset.y);
@@ -39,5 +42,9 @@ public class MaterialScrollingController : MonoBehaviour {
 		scrollSpeed = speed;
 	}
 
+	public void SetScrollingSpeedMultiplier(float mul)
+	{
+		srollSpeedMultiplier = mul;
+	}
 	 
 }
