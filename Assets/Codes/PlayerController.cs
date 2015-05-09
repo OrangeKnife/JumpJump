@@ -62,6 +62,7 @@ public class PlayerController : MonoBehaviour {
 	float slowTimeRecoverySpeed;
 	int slowtimeAudioSourceIdx = -1;
 	BarController lastBarStandOn = null;
+	BarController lastBarFallThrough = null;
 	float lastStandTime = 0f;
 	public float jumpComboThreshold;
 
@@ -131,8 +132,8 @@ public class PlayerController : MonoBehaviour {
 	{
 		gameMgr.barGen.ActiveAllSpawnedBars ();
 
-		if (lastBarStandOn != null)
-			gameObject.transform.position = lastBarStandOn.gameObject.transform.position + gameMgr.barGen.barHeight * 0.5f;
+		if (lastBarFallThrough != null)
+			gameObject.transform.position = lastBarFallThrough.gameObject.transform.position + gameMgr.barGen.barHeight * 0.5f;
 		else
 			gameObject.transform.position = Vector3.zero;
 
@@ -287,7 +288,21 @@ public class PlayerController : MonoBehaviour {
 
 		HandleInput (ButtonJumpDown, ButtonJumpHold, ButtonJumpUp);
 
-		
+		GameObject obj_foot = FootTouched ();
+		if (obj_foot != null) {
+			BarController bc = obj_foot.GetComponent<BarController> ();
+
+			if(lastBarFallThrough == null)
+				lastBarFallThrough = bc;
+			else if(bc != null)
+			{
+				if(bc.gameObject.transform.position.y > lastBarFallThrough.gameObject.transform.position.y)
+				{
+					lastBarFallThrough = bc;
+					//Utils.addLog("lastBarFallThrough changed");
+				}
+			}
+		}
 
 
 		GameObject bar = HeadKnocked ();
@@ -461,7 +476,7 @@ public class PlayerController : MonoBehaviour {
 	{
 		float halfPlayerSizeY = getHalfPlayerSizeY ();
 		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y + halfPlayerSizeY);
-		Debug.DrawLine (myPos, myPos + Vector2.up * 0.15f,new Color(1,0,0,1));
+		//Debug.DrawLine (myPos, myPos + Vector2.up * 0.15f,new Color(1,0,0,1));
 
 		LayerMask lmask = (~(1 << (gameObject.layer))) - (1 <<  LayerMask.NameToLayer("NoCollision")) - (1 <<LayerMask.NameToLayer("Pickup"));
 
@@ -473,12 +488,15 @@ public class PlayerController : MonoBehaviour {
 
 	GameObject FootTouched()
 	{
+		if (MyRigidBody.velocity.y >= 0)
+			return null;
+
 		float halfPlayerSizeY = getHalfPlayerSizeY ();
-		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y + halfPlayerSizeY);
+		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y - halfPlayerSizeY - 0.05f);
 		
-		RaycastHit2D hitup = Physics2D.Raycast (myPos, -Vector2.up, 0.1f,~(1 <<  (gameObject.layer)));
-		if (hitup.collider != null )
-			return hitup.collider.gameObject;//knock into bar
+		RaycastHit2D hitDown = Physics2D.Raycast (myPos, -Vector2.up, 0.1f);
+		if (hitDown.collider != null && hitDown.collider.gameObject != gameObject )
+			return hitDown.collider.gameObject;//foot touch into bar
 		return null;
 	}
 
