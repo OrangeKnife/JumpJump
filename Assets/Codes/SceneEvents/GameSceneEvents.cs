@@ -473,7 +473,7 @@ public class GameSceneEvents : MonoBehaviour {
 		if(gameMgr.hardCoreUnlocked)
 			DoTransition (DoHardCoreButton);
 		else
-			ShowAutoMessage("HARDCORE  MODE  CAN  BE  UNLOCKED  BY  BEATING THE NORMAL MODE");
+			ShowAutoMessage("HARDCORE  MODE\n  CAN  BE  UNLOCKED\n  BY  BEATING THE\n NORMAL MODE");
 	}
 
 	public void OnStartButtonClicked()
@@ -668,4 +668,13 @@ public class GameSceneEvents : MonoBehaviour {
 		AutoMessageText.text = message;
 	}
 
+	public void onCreditButtonClicked()
+	{
+		ShowAutoMessage("DEVELOPED BY\n ORANGEKNIFE\n MUSIC BY\n SHADYDAVE");
+	}
+
+	public void ToggleDebug()
+	{
+		Utils.bDebug = !Utils.bDebug;
+	}
 }

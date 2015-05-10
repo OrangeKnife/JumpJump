@@ -9,8 +9,13 @@ public class Utils {
 	static int LogMaxLine = 30;
 
 	static string appId;
+
+	public static bool bDebug;
 	public static void addLog(string logstring)
 	{
+		if (!bDebug)
+			return;
+
 		stringLog.Add(logstring);
 		
 		GameObject logText = GameObject.Find ("LogText");
