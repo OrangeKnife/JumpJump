@@ -670,7 +670,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onCreditButtonClicked()
 	{
-		ShowAutoMessage("DEVELOPED BY\n ORANGEKNIFE\n MUSIC BY\n SHADYDAVE");
+		ShowAutoMessage("DEVELOPED  BY\n JUNSHENG YAO\n MUSIC  BY\n SHADY DAVE");
 	}
 
 	public void ToggleDebug()
