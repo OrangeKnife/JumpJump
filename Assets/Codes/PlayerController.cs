@@ -78,7 +78,6 @@ public class PlayerController : MonoBehaviour {
 		audioSourceList = new List<AudioSource>();
 
 		audioSourceList.Add( gameObject.AddComponent<AudioSource>() );
-		audioSourceList [audioSourceList.Count - 1].volume = 0.2f;
 
 	}
 	void Start () 
@@ -161,7 +160,7 @@ public class PlayerController : MonoBehaviour {
 
 	void revive()
 	{
-		StartCoroutine ("DoRevive");
+		StartCoroutine (DoRevive ());
 	}
 
 	IEnumerator DoRevive()
@@ -487,7 +486,7 @@ public class PlayerController : MonoBehaviour {
 			currentJumpCount += 1;
 			MyRigidBody.velocity = Vector3.Min(Vector3.zero, Vector3.Max(new Vector3(0,-2f,0),MyRigidBody.velocity));
 			MyRigidBody.AddForce(new Vector3(0,jumpPower * 100f,0));
-			playSound(audioClips[0]); //jjump
+			playSound(audioClips[0],0,false,0.1f); //jjump
 			if(lastBarStandOn != null)
 			{
 				CancelInvoke("checkStandTime");
@@ -603,10 +602,12 @@ public class PlayerController : MonoBehaviour {
 		}
 	}
 
-	public void playSound( AudioClip ac, int AudioSourceIdx = 0, bool loop = false)
+	public void playSound( AudioClip ac, int AudioSourceIdx = 0, bool loop = false , float overwriteVolume = 0.2f)
 	{
 		audioSourceList[AudioSourceIdx].clip = ac;
 		audioSourceList[AudioSourceIdx].loop = loop;
+
+		audioSourceList [AudioSourceIdx].volume = overwriteVolume;
 		audioSourceList[AudioSourceIdx].Play();
 	}
 

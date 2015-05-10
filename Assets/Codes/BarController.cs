@@ -52,7 +52,7 @@ public class BarController : MonoBehaviour
 		spriteRenderer = GetComponent<SpriteRenderer> ();
 
 		audioSource = GetComponent<AudioSource> ();
-		audioSource.volume = 0.2f;
+		//audioSource.volume = 0.2f;
 		ChangeColor ();
 
 
@@ -315,12 +315,12 @@ public class BarController : MonoBehaviour
 			if (score > 0) {
 				score = -1;
 				audioSource.clip = audioClips [0];
-				audioSource.volume = 0.6f;
+				audioSource.volume = 0.8f;
 				audioSource.Play ();
 			} else {
 				score --;
 				audioSource.clip = audioClips [1];
-				audioSource.volume = 0.2f;
+				audioSource.volume = 0.1f;
 				audioSource.Play ();
 				
 			}

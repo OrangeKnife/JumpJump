@@ -58,12 +58,12 @@ public class GameManager : MonoBehaviour {
 
 		//leaderboard
 		
-		StartCoroutine ("DoLoginAuthenticate");
+		Invoke ("DoLoginAuthenticate",0.1f);
 		
 
 	}
 
-	IEnumerator DoLoginAuthenticate()
+	void DoLoginAuthenticate()
 	{
 		#if UNITY_IOS && !UNITY_EDITOR
 		leaderboardId = "ColorJumpScore";
@@ -84,7 +84,7 @@ public class GameManager : MonoBehaviour {
 			else
 				Utils.addLog("Authentication failed");
 		});
-		return null;
+
 	}
 
 	void Start () {
@@ -126,7 +126,7 @@ public class GameManager : MonoBehaviour {
 		login ();
  
 
-		audiosource = GetComponent<AudioSource> ();
+
 
 		eventHandler = GameObject.Find ("eventHandler").GetComponent<GameSceneEvents>();
 
@@ -327,6 +327,8 @@ public class GameManager : MonoBehaviour {
 
 
 		DontDestroyOnLoad(gameObject);
+
+		audiosource = GetComponent<AudioSource> ();
 	}
 
 	public void RespawnPlayer()

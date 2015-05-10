@@ -83,6 +83,11 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject transitionImg = null; 
 
+	public AudioClip menuClickedSound;
+
+	
+	AudioSource audioSource;
+
 	public void DestoryAllAds()
 	{
 		if (bannerView != null)
@@ -124,6 +129,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	void Start () {
 
+		audioSource = GetComponent<AudioSource> ();
 
 		UI_DeathPanel.SetActive (false);
 
@@ -133,9 +139,16 @@ public class GameSceneEvents : MonoBehaviour {
 		StartCoroutine(initUnityAds());
 	}
 
+	public void playMenuClickedSound()
+	{
+		audioSource.clip = menuClickedSound;
+		audioSource.Play ();
+	}
+
 	IEnumerator initUnityAds()
 	{
-		if (Advertisement.isSupported) {
+		if (Advertisement.isSupported && Application.internetReachability != NetworkReachability.NotReachable )
+		{
 			Advertisement.allowPrecache = true;
 			string UnityAdsId="";
 			#if UNITY_IOS && !UNITY_EDITOR
@@ -145,18 +158,19 @@ public class GameSceneEvents : MonoBehaviour {
 			UnityAdsId = "37626";
 			#endif
 			
-			Utils.addLog("UnityAds Platform supported");
+
 			Advertisement.Initialize(UnityAdsId);
-			
+			Utils.addLog("UnityAds initialized = " + Advertisement.isInitialized);
 		} else {
-			Utils.addLog("UnityAds Platform not supported");
+			Utils.addLog("no internet or platform not supported");
 		}
 
-		yield return new WaitForSeconds(10f);
 
-		Utils.addLog ("Advertisement.isInitialized=" + Advertisement.isInitialized.ToString ());
+		yield return new WaitForSeconds(2f);
+
+
 		if (!Advertisement.isInitialized)
-			StartCoroutine ("initUnityds");
+			StartCoroutine (initUnityAds());
 	}
 
 	void requestNewBannerAds(BannerView aBannerView)
@@ -244,6 +258,8 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void OnTryAgainButtonClicked()
 	{
+		playMenuClickedSound ();
+
 		HideAllBannerViews ();
 
 
@@ -355,6 +371,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onLeaderboardsButton_mainMenu_Clicked()
 	{
+		playMenuClickedSound ();
 		if (!Social.localUser.authenticated) {
 			Utils.addLog("authenticated = " + Social.localUser.authenticated.ToString());
 			gameMgr.login ();
@@ -374,6 +391,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onLeaderboardButton_normalClicked()
 	{
+		playMenuClickedSound ();
 		#if UNITY_IOS && !UNITY_EDITOR
 		if (Social.localUser.authenticated)
 			GameCenterPlatform.ShowLeaderboardUI(GameManager.leaderboardId,UnityEngine.SocialPlatforms.TimeScope.AllTime);
@@ -382,6 +400,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onLeaderboardButton_hardlClicked()
 	{
+		playMenuClickedSound ();
 		#if UNITY_IOS && !UNITY_EDITOR
 		if (Social.localUser.authenticated)
 			GameCenterPlatform.ShowLeaderboardUI(GameManager.leaderboardId_hardcore,UnityEngine.SocialPlatforms.TimeScope.AllTime);
@@ -390,6 +409,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onPauseButtonClicked()
 	{
+		playMenuClickedSound ();
 		UI_PausePanel.SetActive (true);
 		UI_PausePanel.GetComponent<Animator> ().Play ("PausePanelOpened");
 		UI_ScorePanel.SetActive (false);
@@ -400,12 +420,14 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onRestartButtonClicked()
 	{
+		playMenuClickedSound ();
 		onResumebuttonClicked ();
 		OnTryAgainButtonClicked ();
 	}
 
 	public void onResumebuttonClicked()
 	{
+		playMenuClickedSound ();
 		UI_PausePanel.SetActive (false);
 		UI_ScorePanel.SetActive (true);
 		HideAllBannerViews();
@@ -415,6 +437,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onBackButtonClicked()
 	{
 		//back to main menu
+		playMenuClickedSound ();
 		gameMgr.BackToMainMenu ();
 
 
@@ -426,22 +449,26 @@ public class GameSceneEvents : MonoBehaviour {
 	/*	#if UNITY_EDITOR
 		PlayerPrefs.DeleteAll ();
 		#endif*/
+		playMenuClickedSound ();
 		gameMgr.RemoveAds ();
 
 	}
 
 	public void onRateButtonClicked()
 	{
+		playMenuClickedSound ();
 		Utils.rateGame ();
 	}
 
 	public void onHardcoreClicked()
 	{
+		playMenuClickedSound ();
 		DoTransition (DoHardCoreButton);
 	}
 
 	public void OnStartButtonClicked()
 	{
+		playMenuClickedSound ();
 		DoTransition (DoStartButton);
 	}
 
@@ -511,7 +538,7 @@ public class GameSceneEvents : MonoBehaviour {
 			TickingUnityAdsYesButton ();
 		} else {
 			Utils.addLog("ads not ready!");
-			UnityAdsNoButtonClicked ();
+			NoAdsContinueDie();
 		}
 	}
 
@@ -564,6 +591,12 @@ public class GameSceneEvents : MonoBehaviour {
 	
 	public void UnityAdsNoButtonClicked()
 	{
+		playMenuClickedSound ();
+		NoAdsContinueDie ();
+	}
+
+	void NoAdsContinueDie()
+	{
 		CancelInvoke ("TickingUnityAdsYesButton");
 		UI_AdsQuestion.SetActive (false);
 		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().DoDeath ();
@@ -571,6 +604,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	void TickingUnityAdsYesButton()
 	{
+		//playMenuClickedSound ();
 		UnityAdsYesNumText.text = (UnityAdsYesNum).ToString();
 		UnityAdsYesNum -= 1;
 
