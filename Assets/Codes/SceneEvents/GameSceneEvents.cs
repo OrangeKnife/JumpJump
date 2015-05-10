@@ -21,7 +21,7 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject UI_RateQuestion = null;
 	[SerializeField]
-	GameObject UI_AdsQuestion = null;
+	GameObject UI_UnityAdsQuestion = null;
 	[SerializeField]
 	GameObject UI_PausePanel = null;
 	[SerializeField]
@@ -133,7 +133,6 @@ public class GameSceneEvents : MonoBehaviour {
 
 		audioSource = GetComponent<AudioSource> ();
 
-		UI_DeathPanel.SetActive (false);
 
 		if (gameMgr == null)
 			InitGameMgr ();
@@ -250,7 +249,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	void ShowDeathPanel()
 	{	
-		UI_DeathPanel.SetActive (true);
+		SetDeathPanel (true);
 		yourScore.text = gameMgr.currentScore.ToString ();
 		yourBest.text = gameMgr.getBestScore ().ToString();
 
@@ -508,6 +507,8 @@ public class GameSceneEvents : MonoBehaviour {
 	public void SetDeathPanel(bool bActive)
 	{
 		UI_DeathPanel.SetActive (bActive);
+		if(bActive)
+			UI_DeathPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 	}
 
 	public void SetStartPanel(bool bActive)
@@ -534,7 +535,10 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onAdsQuestionPopup()
 	{
 		if (Advertisement.isReady ()) {
-			UI_AdsQuestion.SetActive (true);
+			UI_UnityAdsQuestion.SetActive (true);
+
+			UI_UnityAdsQuestion.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+
 			UnityAdsYesNum = 10;
 			UnityAdsYesNumText.GetComponent<Animator> ().Play ("FlashingTextOneSecondAnimation");
 			TickingUnityAdsYesButton ();
@@ -548,7 +552,7 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 #if UNITY_EDITOR
 		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().AfterWatchAds();
-		UI_AdsQuestion.SetActive (false);
+		UI_UnityAdsQuestion.SetActive (false);
 		return;
 #elif UNITY_ANDROID || UNITY_IOS
 
@@ -563,7 +567,7 @@ public class GameSceneEvents : MonoBehaviour {
 		}
 		else
 		{
-			UI_AdsQuestion.SetActive (false);
+			UI_UnityAdsQuestion.SetActive (false);
 			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().DoDeath ();
 		 
 		}
@@ -583,13 +587,13 @@ public class GameSceneEvents : MonoBehaviour {
 			Utils.addLog("The ad was skipped before reaching the end.");
 			break;
 		case ShowResult.Failed:
-			UI_AdsQuestion.SetActive (false);
+			UI_UnityAdsQuestion.SetActive (false);
 			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().DoDeath ();
 			Utils.addLog("The ad failed to be shown.");
 			break;
 		}
 
-		UI_AdsQuestion.SetActive (false);
+		UI_UnityAdsQuestion.SetActive (false);
 	}
 	
 	public void UnityAdsNoButtonClicked()
@@ -601,7 +605,7 @@ public class GameSceneEvents : MonoBehaviour {
 	void NoAdsContinueDie()
 	{
 		CancelInvoke ("TickingUnityAdsYesButton");
-		UI_AdsQuestion.SetActive (false);
+		UI_UnityAdsQuestion.SetActive (false);
 		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().DoDeath ();
 	}
 
@@ -614,7 +618,7 @@ public class GameSceneEvents : MonoBehaviour {
 		if (UnityAdsYesNum >= 0)
 			Invoke ("TickingUnityAdsYesButton", 1f);
 		else {
-			UI_AdsQuestion.SetActive (false);
+			UI_UnityAdsQuestion.SetActive (false);
 			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().DoDeath ();
 		}
 	}
@@ -635,8 +639,11 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void setRateQuestionPanel(bool bActive)
 	{
-		if (bActive)
+		if (bActive) {
 			gameMgr.PauseGame ();
+
+			UI_RateQuestion.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+		}
 		UI_RateQuestion.SetActive (bActive);
 	}
 

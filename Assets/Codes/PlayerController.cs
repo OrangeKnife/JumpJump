@@ -199,6 +199,8 @@ public class PlayerController : MonoBehaviour {
 	{
 		bool ButtonJumpDown, ButtonJumpHold, ButtonJumpUp;
 
+
+
 		if (gameMgr.bGamePaused)
 			return;
 		//gameMgr.changeCameraBGColor(gameObject.transform.position.y);
@@ -596,8 +598,8 @@ public class PlayerController : MonoBehaviour {
 	 
 		string jumpComboString = jumpCombo >= 2 ? " x " + jumpCombo.ToString () : "";
 
-		CleanUpPopupStartWith ('S');//hack for score :D
-		AddPopup ((realScore>0?"S" : "") + s.ToString ()+ jumpComboString, gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("S")), Time.time, popUpScoreGUIStyle);
+		CleanUpPopupStartWith ('#');//hack for score :D
+		AddPopup ((realScore>0?"#" : "") + s.ToString ()+ jumpComboString, gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("S")), Time.time, popUpScoreGUIStyle);
 				 
 		if (wantScoreToLife && tempPlayerScore >= scoreToLife) {
 			tempPlayerScore -= scoreToLife;
@@ -644,8 +646,8 @@ public class PlayerController : MonoBehaviour {
 			for(int i = 0; i < popUpText.Count; i++)
 			{
 				string myText = popUpText[i];
-				if(myText[0] == 'S')//Score
-					myText = myText.TrimStart('S');
+				if(myText[0] == '#')//Score
+					myText = myText.TrimStart('#');
 				GUI.Label(new Rect (popUpScreenPos[i].x, Screen.height - popUpScreenPos[i].y, 1, 1), myText ,popUpGUIStyle[i]);
 			}
 		}
@@ -673,7 +675,7 @@ public class PlayerController : MonoBehaviour {
 			return 1.5f;
 		else if (s [0] == 'C')//COMBO
 			return 1f;
-		else if (s [0] == 'S')//SCORE
+		else if (s [0] == '#')//SCORE
 			return 1.25f;
 
 		return 2f;//other pick ups
@@ -685,7 +687,7 @@ public class PlayerController : MonoBehaviour {
 			return new Vector3 (popUpLifeTextOffset.x, popUpLifeTextOffset.y * popUpScreenPos.Count, 0);
 		else if (s [0] == 'C')//AIR COMBO
 			return new Vector3 (popUpComboTextOffset.x, popUpComboTextOffset.y * popUpScreenPos.Count, 0);
-		else if (s [0] == 'S')
+		else if (s [0] == '#')//for score
 			return new Vector3 (popUpScoreTextOffset.x, popUpScoreTextOffset.y , 0);
 		
 		return new Vector3 (popUpScoreTextOffset.x, popUpScoreTextOffset.y * popUpScreenPos.Count, 0);

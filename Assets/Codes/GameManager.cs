@@ -256,6 +256,8 @@ public class GameManager : MonoBehaviour {
 			GameObject.Destroy(CurrentPlayer);
 		
 		 barGen.DestoryAllBarsAndPickups ();
+
+		MainCam.GetComponent<CameraController> ().ResetCamera (null,true);
 		
 		eventHandler.showTutorial (false);
 		eventHandler.SetPausePanel (false);
@@ -315,6 +317,8 @@ public class GameManager : MonoBehaviour {
 	}
 
 	void Update () {
+
+		if (Input.GetKeyDown(KeyCode.Escape)) { Application.Quit(); }
 
 		if (!audiosource.isPlaying)
 			PlayBGM ();

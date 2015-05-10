@@ -17,12 +17,17 @@ public class CameraController : MonoBehaviour {
 	{
 	}
 
-	public void ResetCamera(GameObject inPlayer)
+	public void ResetCamera(GameObject inPlayer, bool forceBackZero = false)
 	{
-		player = inPlayer;
-		playerTransform = player.transform;
-		transform.position = new Vector3 (playerTransform.position.x, playerTransform.position.y, -10) + CamOffset;
- 
+		if (forceBackZero) {
+			transform.position = new Vector3 (0, 0, -10) + CamOffset;
+		}
+
+		if (inPlayer != null) {
+			player = inPlayer;
+			playerTransform = player.transform;
+			transform.position = new Vector3 (playerTransform.position.x, playerTransform.position.y, -10) + CamOffset;
+		}
 	}
 
 	void Update () 
