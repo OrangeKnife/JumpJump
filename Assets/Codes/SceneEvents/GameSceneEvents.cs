@@ -670,11 +670,18 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onCreditButtonClicked()
 	{
+		playMenuClickedSound ();
 		ShowAutoMessage("DEVELOPED  BY\n JUNSHENG YAO\n MUSIC  BY\n SHADY DAVE");
 	}
 
 	public void ToggleDebug()
 	{
 		Utils.bDebug = !Utils.bDebug;
+	}
+
+	public void onAutoMessageOKButtonClicked()
+	{
+		playMenuClickedSound ();
+		UI_AutoMessage.SetActive (false);
 	}
 }
