@@ -550,7 +550,7 @@ public class GameSceneEvents : MonoBehaviour {
 		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().AfterWatchAds();
 		UI_AdsQuestion.SetActive (false);
 		return;
-#endif
+#elif UNITY_ANDROID || UNITY_IOS
 
 		CancelInvoke ("TickingUnityAdsYesButton");
 		//UnityADS
@@ -567,7 +567,7 @@ public class GameSceneEvents : MonoBehaviour {
 			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().DoDeath ();
 		 
 		}
-
+#endif
 	}
 
 	public void HandleShowResult (ShowResult result)

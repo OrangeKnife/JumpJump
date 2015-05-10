@@ -433,4 +433,5 @@ public class GameManager : MonoBehaviour {
 		mysave.deathCount += d;
 		GameFile.Save ("save.data",mysave);
 	}
+	
 }

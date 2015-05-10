@@ -72,6 +72,8 @@ public class PlayerController : MonoBehaviour {
 	public int maximumUnityAdsCanWatch = 1;
 	int currentUnityAdsWatched = 0;
 	bool deathSoundPlayed = false;
+
+	float playerStartPlayTime;//track how long player survive
 	void Awake()
 	{
 		
@@ -98,13 +100,16 @@ public class PlayerController : MonoBehaviour {
 		currentColor = (EObjectColor)Random.Range (0,(int)EObjectColor.MAXCOLORNUM);
 		ChangeColor ();
 
+		playerStartPlayTime = Time.time;
 	}
 
 	void AskUnityAdsQuestion()
 	{
 		CleanUpAllPopup ();
 
-		if (currentUnityAdsWatched < maximumUnityAdsCanWatch && eventHandler.IsUnityAdsReady()) {
+		if (currentUnityAdsWatched < maximumUnityAdsCanWatch && eventHandler.IsUnityAdsReady()
+		    && (Time.time - playerStartPlayTime > 20f && gameMgr.currentScore > 5 || gameMgr.currentScore > 25) )
+		{
 			MyRigidBody.velocity = Vector3.zero;
 			MyRigidBody.gravityScale = 0;
 			currentUnityAdsWatched++;
