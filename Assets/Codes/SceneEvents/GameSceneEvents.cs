@@ -130,6 +130,32 @@ public class GameSceneEvents : MonoBehaviour {
 		if (gameMgr == null)
 			InitGameMgr ();
 
+		StartCoroutine("initUnityds");
+	}
+
+	IEnumerator initUnityAds()
+	{
+		if (Advertisement.isSupported) {
+			Advertisement.allowPrecache = true;
+			string UnityAdsId="";
+			#if UNITY_IOS && !UNITY_EDITOR
+			UnityAdsId = "37628";
+			#endif
+			#if UNITY_ANDROID && !UNITY_EDITOR
+			UnityAdsId = "37626";
+			#endif
+			
+			
+			Advertisement.Initialize(UnityAdsId);
+			
+		} else {
+			Utils.addLog("UnityAds Platform not supported");
+		}
+
+		yield return new WaitForSeconds(10f);
+
+		if (!Advertisement.isInitialized)
+			StartCoroutine ("initUnityds");
 	}
 
 	void requestNewBannerAds(BannerView aBannerView)
@@ -168,22 +194,7 @@ public class GameSceneEvents : MonoBehaviour {
 		
 	void Awake() {
 
-		if (Advertisement.isSupported) {
-			Advertisement.allowPrecache = true;
-			string UnityAdsId="";
-			#if UNITY_IOS && !UNITY_EDITOR
-			UnityAdsId = "37628";
-			#endif
-			#if UNITY_ANDROID && !UNITY_EDITOR
-			UnityAdsId = "37626";
-			#endif
 
-
-			Advertisement.Initialize(UnityAdsId);
-
-		} else {
-			Utils.addLog("UnityAds Platform not supported");
-		}
 
 
 
@@ -485,12 +496,20 @@ public class GameSceneEvents : MonoBehaviour {
 		ExtraInfoText.text = ExtraInfoStr;
 	}
 
+	public bool IsUnityAdsReady()
+	{
+		return Advertisement.isReady ();
+	}
+
 	public void onAdsQuestionPopup()
 	{
-		UI_AdsQuestion.SetActive (true);
-		UnityAdsYesNum = 10;
-		UnityAdsYesNumText.GetComponent<Animator> ().Play ("FlashingTextOneSecondAnimation");
-		TickingUnityAdsYesButton ();
+		if (Advertisement.isReady ()) {
+			UI_AdsQuestion.SetActive (true);
+			UnityAdsYesNum = 10;
+			UnityAdsYesNumText.GetComponent<Animator> ().Play ("FlashingTextOneSecondAnimation");
+			TickingUnityAdsYesButton ();
+		} else
+			UnityAdsNoButtonClicked ();
 	}
 
 	public void UnityAdsYesButtonClicked()
@@ -505,14 +524,10 @@ public class GameSceneEvents : MonoBehaviour {
 		//UnityADS
 		if(Advertisement.isReady())
 		{ 
-			Advertisement.Show(null, new ShowOptions{ pause = true,
-				resultCallback = ShowResult =>{
-
-					gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().AfterWatchAds();
-				}
-			});
-
-			UI_AdsQuestion.SetActive (false);
+			ShowOptions options = new ShowOptions();
+			options.pause = true;                        // Pauses game while ads are shown
+			options.resultCallback = HandleShowResult;   // Triggered when the ad is closed
+			Advertisement.Show(null,options);
 		}
 		else
 		{
@@ -521,6 +536,27 @@ public class GameSceneEvents : MonoBehaviour {
 		 
 		}
 
+	}
+
+	public void HandleShowResult (ShowResult result)
+	{
+		switch (result)
+		{
+		case ShowResult.Finished:
+			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().AfterWatchAds();
+			Utils.addLog("The ad was successfully shown.");
+			break;
+		case ShowResult.Skipped:
+			Utils.addLog("The ad was skipped before reaching the end.");
+			break;
+		case ShowResult.Failed:
+			UI_AdsQuestion.SetActive (false);
+			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().DoDeath ();
+			Utils.addLog("The ad failed to be shown.");
+			break;
+		}
+
+		UI_AdsQuestion.SetActive (false);
 	}
 	
 	public void UnityAdsNoButtonClicked()

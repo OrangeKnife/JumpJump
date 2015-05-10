@@ -105,7 +105,7 @@ public class PlayerController : MonoBehaviour {
 	{
 		CleanUpAllPopup ();
 
-		if (currentUnityAdsWatched < maximumUnityAdsCanWatch) {
+		if (currentUnityAdsWatched < maximumUnityAdsCanWatch && eventHandler.IsUnityAdsReady()) {
 			MyRigidBody.velocity = Vector3.zero;
 			MyRigidBody.gravityScale = 0;
 			currentUnityAdsWatched++;

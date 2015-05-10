@@ -55,6 +55,35 @@ public class GameManager : MonoBehaviour {
 
 	public void login()
 	{
+
+		//leaderboard
+		
+		#if UNITY_IOS && !UNITY_EDITOR
+		leaderboardId = "ColorJumpScore";
+		leaderboardId_hardcore = "ColorJumpScore_HardCore";
+		#elif UNITY_ANDROID && !UNITY_EDITOR
+		leaderboardId = "CgkI_ab0x7wJEAIQAA";
+		leaderboardId_hardcore = "CgkI_ab0x7wJEAIQBw";
+		#endif
+
+		Social.localUser.Authenticate (success => {
+			if (success) {
+				Utils.addLog ("Authentication successful");
+				string userInfo = "Username: " + Social.localUser.userName + 
+					"\nUser ID: " + Social.localUser.id + 
+						"\nIsUnderage: " + Social.localUser.underage;
+				Utils.addLog (userInfo);	
+			}
+			else
+				Utils.addLog("Authentication failed");
+		});
+		
+
+	}
+
+	void Start () {
+		//inti google play
+
 		#if UNITY_ANDROID && !UNITY_EDITOR
 		PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder().Build();
 		/*	
@@ -73,31 +102,7 @@ public class GameManager : MonoBehaviour {
 		// Activate the Google Play Games platform
 		PlayGamesPlatform.Activate();
 		#endif
-		//leaderboard
-		
-		#if UNITY_IOS && !UNITY_EDITOR
-		leaderboardId = "ColorJumpScore";
-		leaderboardId_hardcore = "ColorJumpScore_HardCore";
-		#elif UNITY_ANDROID && !UNITY_EDITOR
-		leaderboardId = "CgkI_ab0x7wJEAIQAA";
-		leaderboardId_hardcore = "CgkI_ab0x7wJEAIQBw";
-		#endif
-		Social.localUser.Authenticate (success => {
-			if (success) {
-				Utils.addLog ("Authentication successful");
-				string userInfo = "Username: " + Social.localUser.userName + 
-					"\nUser ID: " + Social.localUser.id + 
-						"\nIsUnderage: " + Social.localUser.underage;
-				Utils.addLog (userInfo);	
-			}
-			else
-				Utils.addLog("Authentication failed");
-		});
-		
 
-	}
-
-	void Start () {
 
 		SetCurrentPlayerTemplateByIdx (0);
 		MainCam = GameObject.Find ("Main Camera").GetComponent<Camera>();
