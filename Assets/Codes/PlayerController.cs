@@ -44,10 +44,10 @@ public class PlayerController : MonoBehaviour {
 	public List<AudioClip> audioClips = new List<AudioClip>();
 	GameObject fullScreenFlashImage;
 
-	static Color RedColor = new Color(234f/255f,46f/255f,73f/255f);
-	static Color BlueColor = new Color(119f/255f,196f/255f,211f/255f);
-	static Color GreenColor = new Color(102f/255f,196f/255f,50f/255f);
-	static Color YellowColor = new Color(246f/255f,247f/255f,74f/255f);
+	static Color RedColor = new Color(236f/255f,27f/255f,35f/255f); //new Color(234f/255f,46f/255f,73f/255f);
+	static Color BlueColor = new Color(0f/255f,161f/255f,231f/255f); //new Color(119f/255f,196f/255f,211f/255f);
+	static Color GreenColor = new Color(33f/255f,177f/255f,74f/255f); //new Color(102f/255f,196f/255f,50f/255f);
+	static Color YellowColor = new Color(255f/255f,242f/255f,0f/255f); //new Color(246f/255f,247f/255f,74f/255f);
 	//static Color BlackColor = new Color(0f,0f,0f);
 
 	List<string> popUpText = new List<string>();
@@ -598,7 +598,7 @@ public class PlayerController : MonoBehaviour {
 			tempPlayerScore -= scoreToLife;
 			gameMgr.AddLife (1);
 
-			AddPopup (scoreToLife.ToString() + "SCORE:"+"LIFE + 1", gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("L")), Time.time, popUpLifeGUIStyle);
+			AddPopup (scoreToLife.ToString() + "SCORE:"+"LIFE x 1", gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("L")), Time.time, popUpLifeGUIStyle);
 
 		}
 	}
