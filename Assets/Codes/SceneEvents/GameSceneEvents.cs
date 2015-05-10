@@ -130,7 +130,7 @@ public class GameSceneEvents : MonoBehaviour {
 		if (gameMgr == null)
 			InitGameMgr ();
 
-		StartCoroutine("initUnityds");
+		StartCoroutine(initUnityAds());
 	}
 
 	IEnumerator initUnityAds()
@@ -145,7 +145,7 @@ public class GameSceneEvents : MonoBehaviour {
 			UnityAdsId = "37626";
 			#endif
 			
-			
+			Utils.addLog("UnityAds Platform supported");
 			Advertisement.Initialize(UnityAdsId);
 			
 		} else {
@@ -154,6 +154,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 		yield return new WaitForSeconds(10f);
 
+		Utils.addLog ("Advertisement.isInitialized=" + Advertisement.isInitialized.ToString ());
 		if (!Advertisement.isInitialized)
 			StartCoroutine ("initUnityds");
 	}
@@ -508,8 +509,10 @@ public class GameSceneEvents : MonoBehaviour {
 			UnityAdsYesNum = 10;
 			UnityAdsYesNumText.GetComponent<Animator> ().Play ("FlashingTextOneSecondAnimation");
 			TickingUnityAdsYesButton ();
-		} else
+		} else {
+			Utils.addLog("ads not ready!");
 			UnityAdsNoButtonClicked ();
+		}
 	}
 
 	public void UnityAdsYesButtonClicked()

@@ -58,6 +58,13 @@ public class GameManager : MonoBehaviour {
 
 		//leaderboard
 		
+		StartCoroutine ("DoLoginAuthenticate");
+		
+
+	}
+
+	IEnumerator DoLoginAuthenticate()
+	{
 		#if UNITY_IOS && !UNITY_EDITOR
 		leaderboardId = "ColorJumpScore";
 		leaderboardId_hardcore = "ColorJumpScore_HardCore";
@@ -65,7 +72,7 @@ public class GameManager : MonoBehaviour {
 		leaderboardId = "CgkI_ab0x7wJEAIQAA";
 		leaderboardId_hardcore = "CgkI_ab0x7wJEAIQBw";
 		#endif
-
+		
 		Social.localUser.Authenticate (success => {
 			if (success) {
 				Utils.addLog ("Authentication successful");
@@ -77,8 +84,7 @@ public class GameManager : MonoBehaviour {
 			else
 				Utils.addLog("Authentication failed");
 		});
-		
-
+		return null;
 	}
 
 	void Start () {
