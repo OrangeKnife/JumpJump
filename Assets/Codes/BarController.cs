@@ -13,7 +13,7 @@ public class BarController : MonoBehaviour
 
 	static Color RedColor = new Color(236f/255f,27f/255f,35f/255f); //new Color(234f/255f,46f/255f,73f/255f);
 	static Color BlueColor = new Color(0f/255f,161f/255f,231f/255f); //new Color(119f/255f,196f/255f,211f/255f);
-	static Color GreenColor = new Color(33f/255f,177f/255f,74f/255f); //new Color(102f/255f,196f/255f,50f/255f);
+	static Color GreenColor = new Color(33f/255f,227f/255f,74f/255f); //new Color(102f/255f,196f/255f,50f/255f);
 	static Color YellowColor = new Color(255f/255f,242f/255f,0f/255f); //new Color(246f/255f,247f/255f,74f/255f);
 	static Color BlackColor = new Color(0f,0f,0f);//collide all colors
 
