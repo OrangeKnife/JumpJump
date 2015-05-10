@@ -119,6 +119,7 @@ public class PlayerController : MonoBehaviour {
 	{
 		eventHandler.onPlayerDead ();
 		gameMgr.EndGame ();
+		gameMgr.AddDeathCount (1);
 	}
 
 	

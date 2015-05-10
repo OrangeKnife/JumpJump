@@ -19,6 +19,8 @@ public class GameSceneEvents : MonoBehaviour {
 	//GameObject UI_SmallLeaderBoardsPanel = null;
 
 	[SerializeField]
+	GameObject UI_RateQuestion = null;
+	[SerializeField]
 	GameObject UI_AdsQuestion = null;
 	[SerializeField]
 	GameObject UI_PausePanel = null;
@@ -577,6 +579,7 @@ public class GameSceneEvents : MonoBehaviour {
 			Utils.addLog("The ad was successfully shown.");
 			break;
 		case ShowResult.Skipped:
+			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().AfterWatchAds();
 			Utils.addLog("The ad was skipped before reaching the end.");
 			break;
 		case ShowResult.Failed:
@@ -614,5 +617,32 @@ public class GameSceneEvents : MonoBehaviour {
 			UI_AdsQuestion.SetActive (false);
 			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().DoDeath ();
 		}
-		}
+	}
+
+	public void onRateQuestionYesClicked()
+	{
+		onRateButtonClicked ();
+		UI_RateQuestion.SetActive (false);
+		gameMgr.UnPauseGame ();
+	}
+
+	public void onRateQuestionNoClicked()
+	{
+		playMenuClickedSound ();
+		UI_RateQuestion.SetActive (false);
+		gameMgr.UnPauseGame ();
+	}
+
+	public void setRateQuestionPanel(bool bActive)
+	{
+		if (bActive)
+			gameMgr.PauseGame ();
+		UI_RateQuestion.SetActive (bActive);
+	}
+
+	public void RemoveLocalSave()
+	{
+		GameFile.Save("save.data", new SaveObject(true));
+	}
+
 }

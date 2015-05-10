@@ -345,6 +345,11 @@ public class GameManager : MonoBehaviour {
 			eventHandler.onPlayerRespawn ();
 
 		Time.timeScale = 1f;
+
+		if (mysave.deathCount == 5 || mysave.deathCount == 20) {
+			eventHandler.setRateQuestionPanel(true);
+		}
+
 	}
 
 	public GameObject GetCurrentPlayer()
@@ -421,5 +426,11 @@ public class GameManager : MonoBehaviour {
 		} catch (System.Exception e) {
 			Utils.addLog ("SOOMLA/UNITY " + e.Message);
 		}
+	}
+
+	public void AddDeathCount(int d)
+	{
+		mysave.deathCount += d;
+		GameFile.Save ("save.data",mysave);
 	}
 }

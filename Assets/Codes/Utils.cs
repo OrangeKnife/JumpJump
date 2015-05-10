@@ -45,10 +45,10 @@ public class Utils {
 	public static void rateGame()
 	{
 		#if UNITY_ANDROID
-		appId = "";
+		appId = "com.JunshengYao.ColorJump";
 		Application.OpenURL("market://details?id="+appId);
 		#elif UNITY_IPHONE
-		appId = "";
+		appId = "com.JunshengYao.ColorJump";
 		Application.OpenURL("itms-apps://itunes.apple.com/app/"+appId);
 		#endif
 	}
