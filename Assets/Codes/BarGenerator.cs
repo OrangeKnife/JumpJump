@@ -25,6 +25,7 @@ public class BarGenerator : MonoBehaviour {
 	bool lastBarFlashing = false;
 	List<GameObject> PickupList;
 
+
 	void Start () 
 	{
 		if (gameMgr == null)
@@ -135,8 +136,11 @@ public class BarGenerator : MonoBehaviour {
 			bc.setBarNum(barCount);
 			lastBarController = newBar.GetComponent<BarController>();
 
-
-			if(barCount > pickupCount * barCountPerPickUp && Random.Range(0f,1f) < pickupChance)
+			if(barCount == gameMgr.hardCoreUnlockCount && !gameMgr.hardCoreUnlocked)
+			{
+				SpawnPickup( gameMgr.UnlockHardcoreModePickupTemplate , lastBarLocation);
+			}
+			else if(barCount > pickupCount * barCountPerPickUp && Random.Range(0f,1f) < pickupChance)
 			{
 				SpawnPickup( gameMgr.PickupTemplates[ Random.Range(0,gameMgr.PickupTemplates.Count)] , lastBarLocation);
 				pickupCount++;

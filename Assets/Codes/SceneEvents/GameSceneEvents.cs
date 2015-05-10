@@ -19,6 +19,10 @@ public class GameSceneEvents : MonoBehaviour {
 	//GameObject UI_SmallLeaderBoardsPanel = null;
 
 	[SerializeField]
+	UnityEngine.UI.Text AutoMessageText = null;
+	[SerializeField]
+	GameObject UI_AutoMessage  = null;
+	[SerializeField]
 	GameObject UI_RateQuestion = null;
 	[SerializeField]
 	GameObject UI_UnityAdsQuestion = null;
@@ -464,7 +468,12 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onHardcoreClicked()
 	{
 		playMenuClickedSound ();
-		DoTransition (DoHardCoreButton);
+
+
+		if(gameMgr.hardCoreUnlocked)
+			DoTransition (DoHardCoreButton);
+		else
+			ShowAutoMessage("HARDCORE  MODE  CAN  BE  UNLOCKED  BY  BEATING THE NORMAL MODE");
 	}
 
 	public void OnStartButtonClicked()
@@ -650,6 +659,13 @@ public class GameSceneEvents : MonoBehaviour {
 	public void RemoveLocalSave()
 	{
 		GameFile.Save("save.data", new SaveObject(true));
+	}
+
+	public void ShowAutoMessage(string message)
+	{
+		UI_AutoMessage.SetActive (message.Length > 0);
+		UI_AutoMessage.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+		AutoMessageText.text = message;
 	}
 
 }

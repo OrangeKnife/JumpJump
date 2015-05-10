@@ -58,10 +58,15 @@ public class BarController : MonoBehaviour
 
 	}
 
+	bool shallWeDisplayBarNum(int n)
+	{
+		return n % 10 == 0;
+	}
+
 	public void setBarNum(int n)
 	{
 		barNum = n;
-		if(n % 10 == 0)
+		if(shallWeDisplayBarNum(n))
 			barNumObj.GetComponent<TextMesh>().text = n.ToString();
 
 		score *= (n + 9) / 10;
@@ -314,8 +319,19 @@ public class BarController : MonoBehaviour
 			
 			if (score > 0) {
 				score = -1;
-				audioSource.clip = audioClips [0];
-				audioSource.volume = 0.8f;
+
+				if(shallWeDisplayBarNum(barNum))
+				{
+					audioSource.clip = audioClips [3];//speical sfx for 10,20,30....
+					audioSource.volume = 0.6f;
+				}
+				else
+				{
+					audioSource.clip = audioClips [0];
+					audioSource.volume = 0.8f;
+				}
+
+
 				audioSource.Play ();
 			} else {
 				score --;

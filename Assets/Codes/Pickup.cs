@@ -16,6 +16,7 @@ public class Pickup : MonoBehaviour
 	public int AddJumpNum;
 	public float lifespanAfterPickup;
 
+	public bool UnlockHardMode;
 
 	public List<AudioClip> audioClips = new List<AudioClip>();
 
@@ -26,10 +27,12 @@ public class Pickup : MonoBehaviour
 	public Vector3 popUpTextOffset;
 	public GUIStyle popupStyle;
 
+	public float sfxVolume = 0.2f;
+
 	void Start ()
 	{
 		audioSource = GetComponent<AudioSource> ();
-		audioSource.volume = 0.2f;
+		audioSource.volume = sfxVolume;
 
 	}
 	

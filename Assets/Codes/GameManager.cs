@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour {
 	private GameObject CurrentPlayer;
 
 	public List<GameObject> PickupTemplates;
+	public GameObject UnlockHardcoreModePickupTemplate;
 
 	public bool bGameStarted { get; private set; }
 	public Camera MainCam { get; private set;}
@@ -52,6 +53,14 @@ public class GameManager : MonoBehaviour {
 	public bool NoAds { get; private set; }
 
 	ColorJumpShopEventHandler shopHandler ;
+
+	public bool hardCoreUnlocked { get; private set; }
+	public int hardCoreUnlockCount;
+
+	public List<Sprite> backgroundSprites;
+	public List<Sprite> backgroundSprites_hardcore;
+
+	SpriteRenderer BGSpriteRenderer;
 
 	public void login()
 	{
@@ -112,7 +121,7 @@ public class GameManager : MonoBehaviour {
 
 		SetCurrentPlayerTemplateByIdx (0);
 		MainCam = GameObject.Find ("Main Camera").GetComponent<Camera>();
-
+		BGSpriteRenderer = MainCam.GetComponentInChildren<SpriteRenderer>();
 		barGen = GetComponent<BarGenerator> ();
 
 		//PlayerPrefs.DeleteAll ();
@@ -121,6 +130,7 @@ public class GameManager : MonoBehaviour {
 		if (GameFile.Load ("save.data", ref mysave)) {
 			bestScore = mysave.bestScore;
 			bestScore_hardcore = mysave.bestScore_hardcore;
+			hardCoreUnlocked = mysave.unlockedHardCore;
 		}
 
 		login ();
@@ -354,6 +364,16 @@ public class GameManager : MonoBehaviour {
 			eventHandler.setRateQuestionPanel(true);
 		}
 
+		BGSpriteRenderer.sprite = getRandomBG (gameMode);
+
+	}
+
+	Sprite getRandomBG(int mode)
+	{
+		if (mode == 0)
+			return backgroundSprites [Random.Range (0, backgroundSprites.Count)];
+		else
+			return backgroundSprites_hardcore [Random.Range (0, backgroundSprites_hardcore.Count)];
 	}
 
 	public GameObject GetCurrentPlayer()
@@ -435,6 +455,13 @@ public class GameManager : MonoBehaviour {
 	public void AddDeathCount(int d)
 	{
 		mysave.deathCount += d;
+		GameFile.Save ("save.data",mysave);
+	}
+
+	public void unlockHardcoreMode(bool wantToUnlock)
+	{
+		hardCoreUnlocked = wantToUnlock;
+		mysave.unlockedHardCore = hardCoreUnlocked;
 		GameFile.Save ("save.data",mysave);
 	}
 	

@@ -599,7 +599,7 @@ public class PlayerController : MonoBehaviour {
 		string jumpComboString = jumpCombo >= 2 ? " x " + jumpCombo.ToString () : "";
 
 		CleanUpPopupStartWith ('#');//hack for score :D
-		AddPopup ((realScore>0?"#" : "") + s.ToString ()+ jumpComboString, gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("S")), Time.time, popUpScoreGUIStyle);
+		AddPopup ((realScore>0?"#" : "") + s.ToString ()+ jumpComboString, gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + getPopUpOffSetByString("#")), Time.time, popUpScoreGUIStyle);
 				 
 		if (wantScoreToLife && tempPlayerScore >= scoreToLife) {
 			tempPlayerScore -= scoreToLife;
@@ -716,6 +716,9 @@ public class PlayerController : MonoBehaviour {
 
 	public bool Pickup(Pickup something)
 	{
+		if(something.UnlockHardMode)
+			gameMgr.unlockHardcoreMode(true);
+
 		if (something.gainLife)
 			gameMgr.AddLife (something.gainLifeNum);
 
