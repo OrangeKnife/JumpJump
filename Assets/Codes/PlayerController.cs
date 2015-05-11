@@ -101,6 +101,8 @@ public class PlayerController : MonoBehaviour {
 		ChangeColor ();
 
 		playerStartPlayTime = Time.time;
+
+
 	}
 
 	void AskUnityAdsQuestion()
@@ -185,6 +187,9 @@ public class PlayerController : MonoBehaviour {
 		allowInput_jump = true;
 		isDead = false;
 		deathSoundPlayed = false;
+
+		playSound (audioClips [4]);
+
 		yield return new WaitForSeconds(1f);
 		
 
@@ -711,7 +716,7 @@ public class PlayerController : MonoBehaviour {
 			audioSourceList.Add (gameObject.AddComponent<AudioSource> ());
 			slowtimeAudioSourceIdx = audioSourceList.Count - 1;
 		}
-		playSound (slowTimeLoopSound, slowtimeAudioSourceIdx, true);
+		playSound (slowTimeLoopSound, slowtimeAudioSourceIdx, true,1f);
 	}
 
 	public bool Pickup(Pickup something)
