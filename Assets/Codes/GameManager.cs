@@ -100,11 +100,14 @@ public class GameManager : MonoBehaviour {
 
 	public void SendRepeatingNotification() {
 #if UNITY_ANDROID && !UNITY_EDITOR
-		LocalNotification.SendRepeatingNotification(3, 3600*24, 3600*24, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
+		LocalNotification.SendRepeatingNotification(3, 3600*12, 3600*12, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
 #endif
 
 #if UNITY_IOS && !UNITY_EDITOR
-		//do ios
+		//ios is damn stupid, doesn't support custom interval like android :(, hack it here 2 notifications a day
+		LocalNotification.SendRepeatingNotification(3, 3600*12, 3600*12, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
+		LocalNotification.SendRepeatingNotification(3, 3600*24, 3600*24, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
+
 #endif
 
 	}
@@ -164,7 +167,7 @@ public class GameManager : MonoBehaviour {
 		shopHandler = new ColorJumpShopEventHandler ();
 		shopHandler.setUpGameMgr (this);
 
-
+		LocalNotification.CancelNotification (3);
 		SendRepeatingNotification ();//haha
 	}
 
