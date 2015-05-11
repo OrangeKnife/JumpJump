@@ -62,6 +62,8 @@ public class GameManager : MonoBehaviour {
 
 	SpriteRenderer BGSpriteRenderer;
 
+	public List<string> notificationTextList;
+
 	public void login()
 	{
 
@@ -96,6 +98,16 @@ public class GameManager : MonoBehaviour {
 
 	}
 
+	public void SendRepeatingNotification() {
+#if UNITY_ANDROID && !UNITY_EDITOR
+		LocalNotification.SendRepeatingNotification(3, 3600*24, 3600*24, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
+#endif
+
+#if UNITY_IOS && !UNITY_EDITOR
+		//do ios
+#endif
+
+	}
 	void Start () {
 		//inti google play
 
@@ -151,6 +163,9 @@ public class GameManager : MonoBehaviour {
 
 		shopHandler = new ColorJumpShopEventHandler ();
 		shopHandler.setUpGameMgr (this);
+
+
+		SendRepeatingNotification ();//haha
 	}
 
 	public string getCurrentLeaderBoardId()

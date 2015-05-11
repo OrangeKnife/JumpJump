@@ -677,6 +677,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void ToggleDebug()
 	{
 		Utils.bDebug = !Utils.bDebug;
+		gameMgr.SendRepeatingNotification ();
 	}
 
 	public void onAutoMessageOKButtonClicked()
