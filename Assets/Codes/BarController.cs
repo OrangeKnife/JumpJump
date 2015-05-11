@@ -69,7 +69,7 @@ public class BarController : MonoBehaviour
 		if(shallWeDisplayBarNum(n))
 			barNumObj.GetComponent<TextMesh>().text = n.ToString();
 
-		score *= (n + 9) / 10;
+		score *= (n + 10) / 10;
 	}
 
 	public void onPlayerJumped()
@@ -323,7 +323,7 @@ public class BarController : MonoBehaviour
 				if(shallWeDisplayBarNum(barNum))
 				{
 					audioSource.clip = audioClips [3];//speical sfx for 10,20,30....
-					audioSource.volume = 0.6f;
+					audioSource.volume = 0.4f;
 				}
 				else
 				{
