@@ -57,6 +57,9 @@ public class GameSceneEvents : MonoBehaviour {
 	UnityEngine.UI.Image color3 = null; 
 	[SerializeField]
 	UnityEngine.UI.Image color4 = null; 
+	[SerializeField]
+	GameObject DimImage = null; 
+
 
 	[SerializeField]
 	GameObject RemoveAdsButton = null; 
@@ -271,10 +274,11 @@ public class GameSceneEvents : MonoBehaviour {
 
 		HideAllBannerViews ();
 
+		SetDeathPanel (false);
 
 		gameMgr.StartGame (-1);
 
-		UI_DeathPanel.SetActive (false);
+
 
 
 	}
@@ -419,7 +423,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onPauseButtonClicked()
 	{
 		playMenuClickedSound ();
-		UI_PausePanel.SetActive (true);
+		SetPausePanel (true);
 		UI_PausePanel.GetComponent<Animator> ().Play ("PausePanelOpened");
 		UI_ScorePanel.SetActive (false);
 		ShowOneOfTheBannerViews();
@@ -437,7 +441,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onResumebuttonClicked()
 	{
 		playMenuClickedSound ();
-		UI_PausePanel.SetActive (false);
+		SetPausePanel (false);
 		UI_ScorePanel.SetActive (true);
 		HideAllBannerViews();
 		gameMgr.UnPauseGame ();
@@ -466,6 +470,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onRateButtonClicked()
 	{
 		playMenuClickedSound ();
+		gameMgr.ratedGame ();
 		Utils.rateGame ();
 	}
 
@@ -510,6 +515,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void SetPausePanel(bool bActive)
 	{
 		UI_PausePanel.SetActive (bActive);
+		SetDimImage (bActive);
 	}
 
 	public void SetScorePanel(bool bActive)
@@ -520,6 +526,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void SetDeathPanel(bool bActive)
 	{
 		UI_DeathPanel.SetActive (bActive);
+		SetDimImage (bActive);
 		if(bActive)
 			UI_DeathPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 	}
@@ -555,11 +562,17 @@ public class GameSceneEvents : MonoBehaviour {
 		return Advertisement.isReady ();
 	}
 
+	public void SetUnityAdsQuestion(bool bActive)
+	{
+		UI_UnityAdsQuestion.SetActive (bActive);
+		SetDimImage (bActive);
+	}
+
 	public void onAdsQuestionPopup()
 	{
 		if (Advertisement.isReady ()) {
-			UI_UnityAdsQuestion.SetActive (true);
-
+			SetUnityAdsQuestion (true);
+			SetDimImage (true);
 			UI_UnityAdsQuestion.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 
 			UnityAdsYesNum = 10;
@@ -575,7 +588,7 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 #if UNITY_EDITOR
 		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().AfterWatchAds();
-		UI_UnityAdsQuestion.SetActive (false);
+		SetUnityAdsQuestion (false);
 		return;
 #elif UNITY_ANDROID || UNITY_IOS
 
@@ -590,7 +603,7 @@ public class GameSceneEvents : MonoBehaviour {
 		}
 		else
 		{
-			UI_UnityAdsQuestion.SetActive (false);
+			SetUnityAdsQuestion (false);
 			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().DoDeath ();
 		 
 		}
@@ -610,7 +623,7 @@ public class GameSceneEvents : MonoBehaviour {
 			Utils.addLog("The ad was skipped before reaching the end.");
 			break;
 		case ShowResult.Failed:
-			UI_UnityAdsQuestion.SetActive (false);
+			SetUnityAdsQuestion (false);
 			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().DoDeath ();
 			Utils.addLog("The ad failed to be shown.");
 			break;
@@ -628,7 +641,7 @@ public class GameSceneEvents : MonoBehaviour {
 	void NoAdsContinueDie()
 	{
 		CancelInvoke ("TickingUnityAdsYesButton");
-		UI_UnityAdsQuestion.SetActive (false);
+		SetUnityAdsQuestion (false);
 		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().DoDeath ();
 	}
 
@@ -641,7 +654,7 @@ public class GameSceneEvents : MonoBehaviour {
 		if (UnityAdsYesNum >= 0)
 			Invoke ("TickingUnityAdsYesButton", 1f);
 		else {
-			UI_UnityAdsQuestion.SetActive (false);
+			SetUnityAdsQuestion (false);
 			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().DoDeath ();
 		}
 	}
@@ -649,25 +662,30 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onRateQuestionYesClicked()
 	{
 		onRateButtonClicked ();
-		UI_RateQuestion.SetActive (false);
+		setRateQuestionPanel (false);
 		gameMgr.UnPauseGame ();
 	}
 
 	public void onRateQuestionNoClicked()
 	{
 		playMenuClickedSound ();
-		UI_RateQuestion.SetActive (false);
+		setRateQuestionPanel (false);
+		gameMgr.rateLater ();
 		gameMgr.UnPauseGame ();
 	}
 
 	public void setRateQuestionPanel(bool bActive)
 	{
+		UI_RateQuestion.SetActive (bActive);
+		SetDimImage (bActive);
+
 		if (bActive) {
 			gameMgr.PauseGame ();
-
 			UI_RateQuestion.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 		}
-		UI_RateQuestion.SetActive (bActive);
+
+
+
 	}
 
 	public void RemoveLocalSave()
@@ -677,9 +695,14 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void ShowAutoMessage(string message)
 	{
-		UI_AutoMessage.SetActive (message.Length > 0);
-		UI_AutoMessage.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
-		AutoMessageText.text = message;
+		bool bActive = message.Length > 0;
+		UI_AutoMessage.SetActive (bActive);
+		SetDimImage (bActive);
+		if(bActive)
+		{
+			UI_AutoMessage.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+			AutoMessageText.text = message;
+		}
 	}
 
 	public void onCreditButtonClicked()
@@ -697,5 +720,11 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		playMenuClickedSound ();
 		UI_AutoMessage.SetActive (false);
+		SetDimImage (false);
+	}
+
+	public void SetDimImage(bool bActive)
+	{
+		DimImage.SetActive (bActive);
 	}
 }

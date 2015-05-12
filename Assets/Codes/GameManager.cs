@@ -385,8 +385,11 @@ public class GameManager : MonoBehaviour {
 
 		Time.timeScale = 1f;
 
-		if (mysave.deathCount == 5 || mysave.deathCount == 20) {
-			eventHandler.setRateQuestionPanel(true);
+		if (!mysave.rated)
+		{
+			if(mysave.deathCount == mysave.rateLaterDeathCount) {
+				eventHandler.setRateQuestionPanel(true);
+			}
 		}
 
 		BGSpriteRenderer.sprite = getRandomBG (gameMode);
@@ -487,6 +490,18 @@ public class GameManager : MonoBehaviour {
 	{
 		hardCoreUnlocked = wantToUnlock;
 		mysave.unlockedHardCore = hardCoreUnlocked;
+		GameFile.Save ("save.data",mysave);
+	}
+
+	public void ratedGame()
+	{
+		mysave.rated = true;
+		GameFile.Save ("save.data",mysave);
+	}
+
+	public void rateLater()
+	{
+		mysave.rateLaterDeathCount *= 5;
 		GameFile.Save ("save.data",mysave);
 	}
 	
