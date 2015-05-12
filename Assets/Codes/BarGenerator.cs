@@ -24,8 +24,8 @@ public class BarGenerator : MonoBehaviour {
 	public float scrollingBarCountFactor;
 	bool lastBarFlashing = false;
 	List<GameObject> PickupList;
-
-
+	
+	float difficultyMultiplier;
 	void Start () 
 	{
 		if (gameMgr == null)
@@ -37,6 +37,8 @@ public class BarGenerator : MonoBehaviour {
 
 		if (PickupList == null)
 			PickupList = new List<GameObject> ();
+
+		difficultyMultiplier = (float)(4 - gameMgr.gameMode)/3f;
 
 	}
 
@@ -108,22 +110,22 @@ public class BarGenerator : MonoBehaviour {
 
 			BarController bc = newBar.GetComponent<BarController>();
 
-			if(bc.getColor() == lastBarColor && barCount <= minimumBarCountHavingAdjacentSameColorBar)
+			if(bc.getColor() == lastBarColor && barCount <= minimumBarCountHavingAdjacentSameColorBar * difficultyMultiplier)
 				bc.ChangeColor();
 
 			lastBarColor = bc.getColor();
 
-			if(barCount > minimumBarCountForScrollingColor && Random.Range(0f,1f) < scrollingColorChance  
-			   && (barCount > minimumBarCountForHavingAdjacentScrollingBar || (lastBarController == null || (lastBarController != null && !lastBarController.ScrollingColor))))
+			if(barCount > minimumBarCountForScrollingColor * difficultyMultiplier  && Random.Range(0f,1f) < scrollingColorChance  
+			   && (barCount > minimumBarCountForHavingAdjacentScrollingBar * difficultyMultiplier || (lastBarController == null || (lastBarController != null && !lastBarController.ScrollingColor))))
 			{
 				newBar.GetComponent<MaterialScrollingController>().SetScrollingSpeedMultiplier( 1f + (float)barCount / scrollingBarCountFactor);
 				bc.enableScrollingColor(true);
 			}
-			else if(!lastBarFlashing && barCount > minimumBarCountForFlashingBar && Random.Range(0f,1f) < flashingBarChance)
+			else if(!lastBarFlashing && barCount > minimumBarCountForFlashingBar * difficultyMultiplier && Random.Range(0f,1f) < flashingBarChance  )
 				bc.enableFlashing(true);
-			else if(barCount > minimumBarCountForShaking)
+			else if(barCount > minimumBarCountForShaking * difficultyMultiplier)
 				bc.enableShaking(true);
-			else if(barCount > minimumBarCountForFadingBar)
+			else if(barCount > minimumBarCountForFadingBar * difficultyMultiplier)
 				bc.fadingAfterPlayerJumped = true;
 
 			lastBarFlashing = bc.Flashing;

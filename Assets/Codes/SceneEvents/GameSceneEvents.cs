@@ -424,8 +424,7 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		playMenuClickedSound ();
 		SetPausePanel (true);
-		UI_PausePanel.GetComponent<Animator> ().Play ("PausePanelOpened");
-		UI_ScorePanel.SetActive (false);
+
 		ShowOneOfTheBannerViews();
 		gameMgr.PauseGame ();
 
@@ -516,6 +515,9 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		UI_PausePanel.SetActive (bActive);
 		SetDimImage (bActive);
+
+		if(bActive)
+			UI_PausePanel.GetComponent<Animator> ().Play ("PausePanelOpened");
 	}
 
 	public void SetScorePanel(bool bActive)
@@ -629,7 +631,7 @@ public class GameSceneEvents : MonoBehaviour {
 			break;
 		}
 
-		UI_UnityAdsQuestion.SetActive (false);
+		SetUnityAdsQuestion (false);
 	}
 	
 	public void UnityAdsNoButtonClicked()
