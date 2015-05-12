@@ -38,8 +38,15 @@ public class BarGenerator : MonoBehaviour {
 		if (PickupList == null)
 			PickupList = new List<GameObject> ();
 
-		difficultyMultiplier = (float)(4 - gameMgr.gameMode)/3f;
 
+
+	}
+
+	public void resetDifficulty(int gameMode)
+	{
+		difficultyMultiplier = (float)(3 - gameMode)/3f;
+
+		Utils.addLog ("difficultyMultiplier=" + difficultyMultiplier.ToString ());
 	}
 
 	public void DestoryAllBarsAndPickups()
@@ -67,6 +74,8 @@ public class BarGenerator : MonoBehaviour {
 		barCount = 0;
 
 		pickupCount = 1;
+
+		resetDifficulty (gameMgr.gameMode);
 	}
 	
 	public void ActiveAllSpawnedBars()

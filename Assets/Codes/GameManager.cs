@@ -64,6 +64,11 @@ public class GameManager : MonoBehaviour {
 
 	public List<string> notificationTextList;
 
+	public bool readyForRecording { get; private set; }
+
+	public bool recorded = false;
+	float recordingStartTime;
+
 	public void login()
 	{
 
@@ -176,6 +181,44 @@ public class GameManager : MonoBehaviour {
 		LocalNotification.CancelNotification (0);
 #endif
 		SendPhoneNotification ();//haha
+
+		//EVERY PLAY
+		
+		Everyplay.SetMaxRecordingMinutesLength(1);
+		Everyplay.SetMetadata("level","Color Jump : Origin");
+
+		Everyplay.RecordingStarted += RecordingStartedDelegate;
+		Everyplay.RecordingStopped += RecordingStoppedDelegate;
+
+		if (Everyplay.IsSupported ()) {
+			Everyplay.ReadyForRecording += onReadyForRecording;
+		}
+	}
+
+	public void RecordingStartedDelegate() {
+		Utils.addLog("Recording was started");
+		/* The recording is now started, show the red "REC" in the upper hand corner */
+		//MyGameEngine.ShowRecordingIndicator();
+	}
+	
+	public void RecordingStoppedDelegate() {
+		Utils.addLog("Recording ended");
+		/* Remove visual indicator from the user */
+		//MyGameEngine.RemoveRecordingIndicator();
+	}
+	
+	public void ThumbnailReadyAtFilePathDelegate(string path) {
+		Utils.addLog("Thumbnail ready: "+path);
+		//this.thumbnailPath = path;
+	}
+
+	public void onReadyForRecording(bool enabled)
+	{
+		if (enabled) {
+			Utils.addLog("Ready for recording!");
+			readyForRecording = enabled;
+
+		}
 	}
 
 	public string getCurrentLeaderBoardId()
@@ -248,11 +291,14 @@ public class GameManager : MonoBehaviour {
 		}
 #endif
 */
+
+
+
 		bGameStarted = true;
 		currentScore = 0;
 		currentLife = getPlayerLifeByMode(gameMode);
 		eventHandler.UpdateUILife (currentLife);
-
+		
 		RespawnPlayer ();
 
 		barGen.onGameStarted ();
@@ -260,6 +306,13 @@ public class GameManager : MonoBehaviour {
 		eventHandler.onGameStarted ();
 
 		MainCam.backgroundColor = fromCameraColor;
+
+		if(readyForRecording) {
+			recordingStartTime = Time.time;
+			Everyplay.StartRecording();
+		}
+		
+
 	}
 
 	public void changeCameraBGColor(float playerHeight)
@@ -327,6 +380,12 @@ public class GameManager : MonoBehaviour {
 			GameFile.Save("save.data",mysave);
 
 		}
+
+
+		//for sharing
+		Everyplay.SetMetadata("floor",GetCurrentPlayer().GetComponent<PlayerController>().maxBarNum);
+		Everyplay.SetMetadata("score",currentScore);
+
 		eventHandler.onGameEnded ();
 	}
 
@@ -357,7 +416,9 @@ public class GameManager : MonoBehaviour {
 
 		if (!audiosource.isPlaying)
 			PlayBGM ();
+
 	}
+	
 
 	void Awake(){
 #if UNITY_ANDROID || UNITY_IOS
@@ -426,6 +487,10 @@ public class GameManager : MonoBehaviour {
 
 	public void PauseGame()
 	{
+		
+		if (readyForRecording && Everyplay.IsRecording())
+			Everyplay.PauseRecording ();
+
 		savedTimeScale = Time.timeScale;
 		Time.timeScale = 0;
 		bGamePaused = true;
@@ -433,6 +498,9 @@ public class GameManager : MonoBehaviour {
 
 	public void UnPauseGame()
 	{
+		if (readyForRecording && Everyplay.IsPaused())
+			Everyplay.ResumeRecording ();
+
 		Time.timeScale = savedTimeScale;
 		savedTimeScale = 1f;
 		bGamePaused = false;
@@ -503,6 +571,12 @@ public class GameManager : MonoBehaviour {
 	{
 		mysave.rateLaterDeathCount *= 5;
 		GameFile.Save ("save.data",mysave);
+	}
+
+	public void PlayLastMoment()
+	{
+		if(readyForRecording && recorded)
+			Everyplay.PlayLastRecording ();
 	}
 	
 }

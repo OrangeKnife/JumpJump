@@ -66,7 +66,7 @@ public class PlayerController : MonoBehaviour {
 	float lastStandTime = 0f;
 	public float jumpComboThreshold;
 
-	int maxBarNum = 0;
+	public int maxBarNum { get; private set; }
 	public int minimumBarCountForHidingColorIndicatoin;
 
 	public int maximumUnityAdsCanWatch = 1;
@@ -85,6 +85,8 @@ public class PlayerController : MonoBehaviour {
 	}
 	void Start () 
 	{
+		maxBarNum = 0;
+
 		eventHandler = GameObject.Find("eventHandler").GetComponent<GameSceneEvents>();
 
 		gameMgr = GameObject.Find("GameManager").GetComponent<GameManager>();
@@ -110,6 +112,7 @@ public class PlayerController : MonoBehaviour {
 
 	void AskUnityAdsQuestion()
 	{
+		StopRecording ();
 		CleanUpAllPopup ();
 
 		if (currentUnityAdsWatched < maximumUnityAdsCanWatch && eventHandler.IsUnityAdsReady()
@@ -118,6 +121,7 @@ public class PlayerController : MonoBehaviour {
 			MyRigidBody.velocity = Vector3.zero;
 			MyRigidBody.gravityScale = 0;
 			currentUnityAdsWatched++;
+
 			eventHandler.onAdsQuestionPopup ();
 		} else {
 			DoDeath();
@@ -135,6 +139,9 @@ public class PlayerController : MonoBehaviour {
 	
 	public void AfterWatchAds()
 	{
+		if (gameMgr.readyForRecording && !Everyplay.IsRecording())
+			Everyplay.StartRecording ();
+
 		gameMgr.AddLife (gameMgr.getPlayerLifeByMode(gameMgr.gameMode));
 		allowInput = true;
 		allowInput_jump = false;
@@ -151,7 +158,7 @@ public class PlayerController : MonoBehaviour {
 		spriteRenderer.enabled = false;
 
 		if (gameMgr.currentLife < 1) {
-			AskUnityAdsQuestion();
+			Invoke("AskUnityAdsQuestion",1f);
 
 		} else if (gameMgr.AddLife (-1) >= 1) {
 			allowInput = true;
@@ -167,6 +174,15 @@ public class PlayerController : MonoBehaviour {
 			Invoke("AskUnityAdsQuestion",1f);
 		}
 
+	}
+
+	void StopRecording()
+	{
+		if (gameMgr.readyForRecording) {
+
+			Everyplay.StopRecording ();
+			gameMgr.recorded = true;
+		}
 	}
 
 
@@ -362,7 +378,7 @@ public class PlayerController : MonoBehaviour {
 
 		GameObject bar = HeadKnocked ();
 		if (bar != null) {
-			Utils.addLog("knock into bar: " + bar.GetComponent<BarController>().getColor());
+			//Utils.addLog("knock into bar: " + bar.GetComponent<BarController>().getColor());
 			playSound(audioClips[1]);
 			fullScreenFlashImage.GetComponent<Animator>().Play("fading",0);
 			MyRigidBody.velocity = Vector3.zero;// -MyRigidBody.velocity * 0.1f;
@@ -584,7 +600,7 @@ public class PlayerController : MonoBehaviour {
 				lastStandTime = Time.time;
 				maxBarNum = Mathf.Max(maxBarNum, lastBarStandOn.barNum);
 
-				Utils.addLog("stand on bar:" + barController.getColor());
+				//Utils.addLog("stand on bar:" + barController.getColor());
 
 				Invoke("checkStandTime",jumpComboThreshold);
 
