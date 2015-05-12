@@ -68,6 +68,10 @@ public class GameSceneEvents : MonoBehaviour {
 
 	[SerializeField]
 	UnityEngine.UI.Text ExtraInfoText = null;
+	[SerializeField]
+	UnityEngine.UI.Text JumpCountText = null;
+	[SerializeField]
+	UnityEngine.UI.Text FloorText = null;
 
 	[SerializeField]
 	UnityEngine.UI.Text UnityAdsYesNumText = null;
@@ -536,6 +540,16 @@ public class GameSceneEvents : MonoBehaviour {
 		ExtraInfoText.text = ExtraInfoStr;
 	}
 
+	public void SetJumpCountText(string jcountStr)
+	{
+		JumpCountText.text = jcountStr;
+	}
+
+	public void SetFloorText(string floorTextStr)
+	{
+		FloorText.text = floorTextStr;
+	}
+	
 	public bool IsUnityAdsReady()
 	{
 		return Advertisement.isReady ();

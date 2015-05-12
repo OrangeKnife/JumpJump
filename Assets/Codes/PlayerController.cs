@@ -103,6 +103,8 @@ public class PlayerController : MonoBehaviour {
 
 		playerStartPlayTime = Time.time;
 
+		eventHandler.SetFloorText("FLOOR.0");
+		eventHandler.SetJumpCountText ("JUMP X "+currentJumpCount.ToString());
 
 	}
 
@@ -154,6 +156,7 @@ public class PlayerController : MonoBehaviour {
 		} else if (gameMgr.AddLife (-1) >= 1) {
 			allowInput = true;
 			allowInput_jump = false;
+			playSound(audioClips[5]);
 			Invoke ("revive", 1f);
 		} else {
 			if(!deathSoundPlayed)
@@ -498,6 +501,7 @@ public class PlayerController : MonoBehaviour {
 
 			jumped = true;
 			currentJumpCount += 1;
+			eventHandler.SetJumpCountText("JUMP X "+ (maxJumpCount - currentJumpCount).ToString());
 			MyRigidBody.velocity = Vector3.Min(Vector3.zero, Vector3.Max(new Vector3(0,-2f,0),MyRigidBody.velocity));
 			MyRigidBody.AddForce(new Vector3(0,jumpPower * 100f,0));
 			playSound(audioClips[0],0,false,0.1f); //jjump
@@ -571,6 +575,7 @@ public class PlayerController : MonoBehaviour {
 	{
 		if (!isDead) {
 			currentJumpCount = Mathf.Min (Mathf.Max (0, num), maxJumpCount);
+			eventHandler.SetJumpCountText("JUMP X "+ (maxJumpCount - currentJumpCount).ToString());
 			jumped = false;
 			combo = 0;
 			if(barController != null)
@@ -585,6 +590,8 @@ public class PlayerController : MonoBehaviour {
 
 				if(maxBarNum > minimumBarCountForHidingColorIndicatoin)
 					gameMgr.SetColorIndication(false);// I am good enough to do this
+
+				eventHandler.SetFloorText("FLOOR."+lastBarStandOn.barNum.ToString());
 			}
 			else
 			{
