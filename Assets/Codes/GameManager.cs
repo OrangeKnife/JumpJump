@@ -98,16 +98,22 @@ public class GameManager : MonoBehaviour {
 
 	}
 
-	public void SendRepeatingNotification() {
+	public void SendPhoneNotification() {
 #if UNITY_ANDROID && !UNITY_EDITOR
-		LocalNotification.SendRepeatingNotification(3, 3600*12, 3600*12, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
+		LocalNotification.SendNotification(1, 3600*24, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
+		LocalNotification.SendNotification(2, 3600*24*3, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
+		LocalNotification.SendNotification(3, 3600*24*7, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
+		LocalNotification.SendNotification(4, 3600*24*14, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
+		LocalNotification.SendNotification(5, 3600*24*30, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
 #endif
 
 #if UNITY_IOS && !UNITY_EDITOR
 		//ios is damn stupid, doesn't support custom interval like android :(, hack it here 2 notifications a day
-		LocalNotification.SendRepeatingNotification(3, 3600*12, 3600*12, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
-		LocalNotification.SendRepeatingNotification(3, 3600*24, 3600*24, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
-
+		LocalNotification.SendNotification(1, 3600*24, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
+		LocalNotification.SendNotification(2, 3600*24*3, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
+		LocalNotification.SendNotification(3, 3600*24*7, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
+		LocalNotification.SendNotification(4, 3600*24*14, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
+		LocalNotification.SendNotification(5, 3600*24*30, "Color Jump", "Ah! I am a Colorful Jumpy game! o(∩_∩)o", new Color32(0xff, 0x44, 0x44, 255));
 #endif
 
 	}
@@ -166,9 +172,10 @@ public class GameManager : MonoBehaviour {
 
 		shopHandler = new ColorJumpShopEventHandler ();
 		shopHandler.setUpGameMgr (this);
-
-		LocalNotification.CancelNotification (3);
-		SendRepeatingNotification ();//haha
+#if UNITY_IOS && !UNITY_EDITOR
+		LocalNotification.CancelNotification (0);
+#endif
+		SendPhoneNotification ();//haha
 	}
 
 	public string getCurrentLeaderBoardId()

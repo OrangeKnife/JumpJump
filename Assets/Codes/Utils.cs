@@ -53,7 +53,7 @@ public class Utils {
 		appId = "com.JunshengYao.ColorJump";
 		Application.OpenURL("market://details?id="+appId);
 		#elif UNITY_IPHONE
-		appId = "com.JunshengYao.ColorJump";
+		appId = "992004670";
 		Application.OpenURL("itms-apps://itunes.apple.com/app/"+appId);
 		#endif
 	}

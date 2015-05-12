@@ -80,6 +80,7 @@ public class PlayerController : MonoBehaviour {
 		audioSourceList = new List<AudioSource>();
 
 		audioSourceList.Add( gameObject.AddComponent<AudioSource>() );
+		audioSourceList.Add( gameObject.AddComponent<AudioSource>() );
 
 	}
 	void Start () 
@@ -273,7 +274,7 @@ public class PlayerController : MonoBehaviour {
 		{
 			if(Input.GetButtonDown("Fire1"))
 			{
-				playSound(audioClips[2]);
+				playSound(audioClips[2],1);
 				ChangeColor(-1,true);
 			}
 		}
@@ -326,7 +327,7 @@ public class PlayerController : MonoBehaviour {
 					{
 						if (allowInput_color && touch.phase == TouchPhase.Began)
 						{
-							playSound(audioClips[2]);
+							playSound(audioClips[2],1);
 							ChangeColor(-1,true);
 						}
 					}
