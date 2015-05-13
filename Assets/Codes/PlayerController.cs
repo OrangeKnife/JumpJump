@@ -139,9 +139,6 @@ public class PlayerController : MonoBehaviour {
 	
 	public void AfterWatchAds()
 	{
-		if (gameMgr.readyForRecording && !Everyplay.IsRecording())
-			Everyplay.StartRecording ();
-
 		gameMgr.AddLife (gameMgr.getPlayerLifeByMode(gameMgr.gameMode));
 		allowInput = true;
 		allowInput_jump = false;
@@ -180,7 +177,6 @@ public class PlayerController : MonoBehaviour {
 	{
 		if (gameMgr.readyForRecording) {
 
-			Everyplay.StopRecording ();
 			gameMgr.recorded = true;
 		}
 	}

@@ -182,17 +182,6 @@ public class GameManager : MonoBehaviour {
 #endif
 		SendPhoneNotification ();//haha
 
-		//EVERY PLAY
-		
-		Everyplay.SetMaxRecordingMinutesLength(1);
-		Everyplay.SetMetadata("level","Color Jump : Origin");
-
-		Everyplay.RecordingStarted += RecordingStartedDelegate;
-		Everyplay.RecordingStopped += RecordingStoppedDelegate;
-
-		if (Everyplay.IsSupported ()) {
-			Everyplay.ReadyForRecording += onReadyForRecording;
-		}
 	}
 
 	public void RecordingStartedDelegate() {
@@ -307,11 +296,7 @@ public class GameManager : MonoBehaviour {
 
 		MainCam.backgroundColor = fromCameraColor;
 
-		if(readyForRecording) {
-			recordingStartTime = Time.time;
-			Everyplay.StartRecording();
-		}
-		
+
 
 	}
 
@@ -381,10 +366,6 @@ public class GameManager : MonoBehaviour {
 
 		}
 
-
-		//for sharing
-		Everyplay.SetMetadata("floor",GetCurrentPlayer().GetComponent<PlayerController>().maxBarNum);
-		Everyplay.SetMetadata("score",currentScore);
 
 		eventHandler.onGameEnded ();
 	}
@@ -487,10 +468,6 @@ public class GameManager : MonoBehaviour {
 
 	public void PauseGame()
 	{
-		
-		if (readyForRecording && Everyplay.IsRecording())
-			Everyplay.PauseRecording ();
-
 		savedTimeScale = Time.timeScale;
 		Time.timeScale = 0;
 		bGamePaused = true;
@@ -498,8 +475,6 @@ public class GameManager : MonoBehaviour {
 
 	public void UnPauseGame()
 	{
-		if (readyForRecording && Everyplay.IsPaused())
-			Everyplay.ResumeRecording ();
 
 		Time.timeScale = savedTimeScale;
 		savedTimeScale = 1f;
@@ -575,8 +550,6 @@ public class GameManager : MonoBehaviour {
 
 	public void PlayLastMoment()
 	{
-		if(readyForRecording && recorded)
-			Everyplay.PlayLastRecording ();
 	}
 	
 }
