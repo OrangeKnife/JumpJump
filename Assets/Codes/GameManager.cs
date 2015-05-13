@@ -67,7 +67,7 @@ public class GameManager : MonoBehaviour {
 	public bool readyForRecording { get; private set; }
 
 	public bool recorded = false;
-	float recordingStartTime;
+	float gameStartTime;
 
 	public void login()
 	{
@@ -296,6 +296,7 @@ public class GameManager : MonoBehaviour {
 
 		MainCam.backgroundColor = fromCameraColor;
 
+		gameStartTime = Time.time;
 
 
 	}
@@ -550,6 +551,11 @@ public class GameManager : MonoBehaviour {
 
 	public void PlayLastMoment()
 	{
+	}
+
+	public float getPlayTime()
+	{
+		return Time.time - gameStartTime;
 	}
 	
 }

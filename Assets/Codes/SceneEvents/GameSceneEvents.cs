@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine.Advertisements;
+using System.IO;
 
 using GoogleMobileAds.Api;
 #if UNITY_ANDROID
@@ -79,6 +80,11 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	UnityEngine.UI.Text UnityAdsYesNumText = null;
 
+	[SerializeField]
+	GameObject EndOfGameObj = null;
+	[SerializeField]
+	UnityEngine.UI.Image ScreenShotImg = null;
+
 	int UnityAdsYesNum;
 
 
@@ -100,6 +106,8 @@ public class GameSceneEvents : MonoBehaviour {
 
 	
 	AudioSource audioSource;
+	Sprite screenShotSprite;
+	string ScreenShotPath;
 
 	public void DestoryAllAds()
 	{
@@ -248,7 +256,27 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onPlayerDead() 
 	{
-		Invoke ("ShowDeathPanel", 1f);
+	}
+
+	void SetEndOfGameMark(bool bActive)
+	{
+		EndOfGameObj.SetActive (bActive);
+
+		if (bActive) {
+			int maxBarNum = gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().maxBarNum;
+			 
+				string EOGText = "<color=#FF00FFFF>FLOOR.</color>  " + maxBarNum.ToString () + "\n<color=#FF00FFFF>SCORE.</color>  " + gameMgr.currentScore.ToString () + "\n<color=#FF00FFFF>TIME.</color>  " + ((int)gameMgr.getPlayTime ()).ToString ();
+			 
+				EndOfGameObj.GetComponentInChildren<TextMesh> ().text = EOGText;
+				EndOfGameObj.transform.position = new Vector3(0,gameMgr.MainCam.transform.position.y,-1);//lastBar.gameObject.transform.position;
+				EndOfGameObj.GetComponent<Animator>().Play("ScalePopInAnimation");
+				EndOfGameObj.GetComponent<AudioSource>().Play();
+
+			}
+ 
+
+
+
 	}
 
 	public void onPlayerRespawn()
@@ -256,6 +284,11 @@ public class GameSceneEvents : MonoBehaviour {
 		UpdateUISocre (0);
 		showTutorial (true);
 		SetColorIndicationPanel (true);//auto show
+	}
+
+	void TakeAScreenShotAndShowDeathPanel()
+	{
+		StartCoroutine(DoTakingScreenShot());
 	}
 
 	void ShowDeathPanel()
@@ -268,21 +301,25 @@ public class GameSceneEvents : MonoBehaviour {
 
 	}
 
+	 
+	
+
+	
 	public void OnTryAgainButtonClicked()
 	{
 		playMenuClickedSound ();
-
+		
 		HideAllBannerViews ();
-
+		
 		SetDeathPanel (false);
-
+		
 		gameMgr.StartGame (-1);
-
-
-
-
+		
+		
+		
+		
 	}
-
+	
 	public void UpdateUISocre(int newScore)
 	{
 		UI_ScoreText.GetComponent<UnityEngine.UI.Text>().text = newScore.ToString();
@@ -336,7 +373,8 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onGameEnded()
 	{
-		UI_ScorePanel.SetActive (false);
+		SetEndOfGameMark (true);
+		Invoke ("TakeAScreenShotAndShowDeathPanel", 2f);
 	}
 
 	public void addLog(string logstring)
@@ -729,4 +767,79 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		DimImage.SetActive (bActive);
 	}
+
+	public void OnShareButtonClicked()
+	{
+		ShareScreenshot ();
+	}
+
+	IEnumerator DoTakingScreenShot()
+	{
+		yield return new WaitForEndOfFrame();
+
+
+		// create the texture
+		Texture2D aTex = new Texture2D(Screen.width, Screen.height,TextureFormat.RGB24,true);
+		aTex.ReadPixels(new Rect(0f, 0f, Screen.width, Screen.height),0,0);
+		aTex.Apply();
+		/*
+		RenderTexture rt = new RenderTexture(Screen.width, Screen.height, 24);
+		gameMgr.MainCam.targetTexture = rt;
+		Texture2D aTex = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
+		gameMgr.MainCam.Render();
+		RenderTexture.active = rt;
+		aTex.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
+		aTex.Apply ();
+		gameMgr.MainCam.targetTexture = null;
+		RenderTexture.active = null;
+		Destroy(rt);
+		*/
+		byte[] dataToSave = aTex.EncodeToPNG();
+		ScreenShotPath = Path.Combine(Application.persistentDataPath,System.DateTime.Now.ToString("yyyy-MM-dd-HH") + ".png");
+		File.WriteAllBytes(ScreenShotPath, dataToSave);
+		
+		screenShotSprite = Sprite.Create(aTex,new Rect(0,0,Screen.width,Screen.height),new Vector2(0,0));
+		ScreenShotImg.sprite = screenShotSprite;
+		
+		SetEndOfGameMark (false);
+		UI_ScorePanel.SetActive (false);//gameended
+
+		yield return new WaitForSeconds(0.5f);
+		ShowDeathPanel ();
+	}
+
+	void ShareScreenshot()
+	{
+#if UNITY_ANDROID && !UNITY_EDITOR  
+
+		// block to open the file and share it ------------START
+		AndroidJavaClass intentClass = new AndroidJavaClass("android.content.Intent");
+		AndroidJavaObject intentObject = new AndroidJavaObject("android.content.Intent");
+		intentObject.Call<AndroidJavaObject>("setAction", intentClass.GetStatic<string>("ACTION_SEND"));
+		AndroidJavaClass uriClass = new AndroidJavaClass("android.net.Uri");
+		AndroidJavaObject uriObject = uriClass.CallStatic<AndroidJavaObject>("parse","file://" + ScreenShotPath);
+		intentObject.Call<AndroidJavaObject>("putExtra", intentClass.GetStatic<string>("EXTRA_STREAM"), uriObject);
+		intentObject.Call<AndroidJavaObject>("putExtra", intentClass.GetStatic<string>("EXTRA_TEXT"), "Check out this colorful jumpy game!");
+		intentObject.Call<AndroidJavaObject>("putExtra", intentClass.GetStatic<string>("EXTRA_SUBJECT"), "Color Jump");
+		intentObject.Call<AndroidJavaObject>("setType", "image/jpeg");
+		AndroidJavaClass unity = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+		AndroidJavaObject currentActivity = unity.GetStatic<AndroidJavaObject>("currentActivity");
+		
+		// option one WITHOUT chooser:
+		currentActivity.Call("startActivity", intentObject);
+		
+		// option two WITH chooser:
+		//AndroidJavaObject jChooser = intentClass.CallStatic<AndroidJavaObject>("createChooser", intentObject, "HEY! WANNA SHARE?");
+		//currentActivity.Call("startActivity", jChooser);
+		
+		// block to open the file and share it ------------END
+			
+		 
+#endif 	
+
+#if UINITY_IOS && !UNITY_EDITOR  
+
+#endif
+	}
+
 }
