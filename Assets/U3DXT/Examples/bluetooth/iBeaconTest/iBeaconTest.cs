@@ -119,7 +119,7 @@ public class iBeaconTest : MonoBehaviour {
 	void DidEnterRegion(object sender, CLLocationManager.DidEnterEventArgs e) {
 		var notif = new LocalNotification();
 		notif.alertBody = "Found beacon!";
-		UnityEngine.iOS.NotificationServices.PresentLocalNotificationNow(notif);
+		NotificationServices.PresentLocalNotificationNow(notif);
 
 		Log("Found beacon.");
 		locationManager.StartRangingBeaconsInRegion(beaconRegion);
@@ -128,7 +128,7 @@ public class iBeaconTest : MonoBehaviour {
 	void DidExitRegion(object sender, CLLocationManager.DidExitEventArgs e) {
 		var notif = new LocalNotification();
 		notif.alertBody = "Lost beacon!";
-		UnityEngine.iOS.NotificationServices.PresentLocalNotificationNow(notif);
+		NotificationServices.PresentLocalNotificationNow(notif);
 
 		Log("Left region.");
 		locationManager.StopRangingBeaconsInRegion(beaconRegion);

@@ -21,7 +21,7 @@ public class SocialTest : MonoBehaviour {
 	
 	void Start() {
 	
-		_logo = GameObject.Find("Logo").GetComponent<GUITexture>().texture as Texture2D;
+		_logo = GameObject.Find("Logo").guiTexture.texture as Texture2D;
 
 		if (CoreXT.IsDevice) {
 			// subscribe to events

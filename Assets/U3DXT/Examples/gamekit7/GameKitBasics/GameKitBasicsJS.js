@@ -56,7 +56,7 @@ function OnLocalPlayerAuthenticated(sender:Object, e:EventArgs) {
 	localPlayer.LoadPhoto(GKPhotoSize.Normal, function(photo:Texture2D) {
 		if (photo != null) {
 			Log("Loaded photo");
-			GameObject.Find("PlayerPhoto").GetComponent.<GUITexture>().texture = photo;
+			GameObject.Find("PlayerPhoto").guiTexture.texture = photo;
 		} else {
 			Log("Local player has no photo or error loading photo.");
 		}

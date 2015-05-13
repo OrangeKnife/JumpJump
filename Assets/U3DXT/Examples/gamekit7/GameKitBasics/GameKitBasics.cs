@@ -134,7 +134,7 @@ public class GameKitBasics : MonoBehaviour {
 				GameKitXT.localPlayer.LoadPhoto(GKPhotoSize.Normal, delegate(Texture2D photo) {
 					if (photo != null) {
 						Log("Loaded photo");
-						GameObject.Find("PlayerPhoto").GetComponent<GUITexture>().texture = photo;
+						GameObject.Find("PlayerPhoto").guiTexture.texture = photo;
 					} else {
 						Log("Local player has no photo or error loading photo.");
 					}
