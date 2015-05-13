@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-class LocalNotification
+class MyLocalNotification
 {
 #if UNITY_ANDROID && !UNITY_EDITOR
     private static string fullClassName = "net.agasper.unitynotification.UnityNotificationManager";
