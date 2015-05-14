@@ -836,10 +836,9 @@ public class GameSceneEvents : MonoBehaviour {
 			
 		 
 #endif 	
-
-#if UINITY_IOS && !UNITY_EDITOR  
-
-#endif
+		#if UNITY_IOS && !UNITY_EDITOR
+		 MyiOSSharing.iOSShareImgAndMessage(ScreenShotPath,"Check out this colorful jumpy game!");
+		#endif 
 	}
 
 }
