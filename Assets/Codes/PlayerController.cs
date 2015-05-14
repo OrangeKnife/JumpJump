@@ -74,6 +74,8 @@ public class PlayerController : MonoBehaviour {
 	bool deathSoundPlayed = false;
 
 	float playerStartPlayTime;//track how long player survive
+
+	int totalJumpCount = 0;
 	void Awake()
 	{
 		
@@ -104,6 +106,7 @@ public class PlayerController : MonoBehaviour {
 		ChangeColor ();
 
 		playerStartPlayTime = Time.time;
+		totalJumpCount = 0;
 
 		eventHandler.SetFloorText("FLOOR.0");
 		eventHandler.SetJumpCountText ("JUMP X "+currentJumpCount.ToString());
@@ -511,6 +514,7 @@ public class PlayerController : MonoBehaviour {
 	{
 		if (bButtonJumpDown && maxJumpCount > currentJumpCount) {
 
+			totalJumpCount += 1;
 			jumped = true;
 			currentJumpCount += 1;
 			eventHandler.SetJumpCountText("JUMP X "+ (maxJumpCount - currentJumpCount).ToString());
