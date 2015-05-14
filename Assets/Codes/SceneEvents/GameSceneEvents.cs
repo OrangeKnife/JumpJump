@@ -265,7 +265,9 @@ public class GameSceneEvents : MonoBehaviour {
 		if (bActive) {
 			int maxBarNum = gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().maxBarNum;
 			 
-				string EOGText = "<color=#FF00FFFF>FLOOR.</color>  " + maxBarNum.ToString () + "\n<color=#FF00FFFF>SCORE.</color>  " + gameMgr.currentScore.ToString () + "\n<color=#FF00FFFF>TIME.</color>  " + ((int)gameMgr.getPlayTime ()).ToString ();
+				string EOGText = "<color=#FF00FFFF>FLOOR.</color>  " + maxBarNum.ToString () + "\n<color=#FF00FFFF>SCORE.</color>  " + gameMgr.currentScore.ToString () + 
+				"\n<color=#FF00FFFF>JUMP.</color>  " + (gameMgr.GetCurrentPlayer().GetComponent<PlayerController>().totalJumpCount).ToString () +
+				"\n<color=#FF00FFFF>TIME.</color>  " + ((int)gameMgr.getPlayTime ()).ToString ();
 			 
 				EndOfGameObj.GetComponentInChildren<TextMesh> ().text = EOGText;
 				EndOfGameObj.transform.position = new Vector3(0,gameMgr.MainCam.transform.position.y,-1);//lastBar.gameObject.transform.position;

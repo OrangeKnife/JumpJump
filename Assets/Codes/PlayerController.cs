@@ -75,7 +75,7 @@ public class PlayerController : MonoBehaviour {
 
 	float playerStartPlayTime;//track how long player survive
 
-	int totalJumpCount = 0;
+	public int totalJumpCount {get; private set;}
 	void Awake()
 	{
 		
