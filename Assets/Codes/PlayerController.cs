@@ -379,10 +379,10 @@ public class PlayerController : MonoBehaviour {
 		if (bar != null) {
 			//Utils.addLog("knock into bar: " + bar.GetComponent<BarController>().getColor());
 			playSound(audioClips[1]);
-			fullScreenFlashImage.GetComponent<Animator>().Play("fading",0);
+			PlayScreenFlash();
 			MyRigidBody.velocity = Vector3.zero;// -MyRigidBody.velocity * 0.1f;
 			EObjectColor barC = bar.GetComponent<BarController> ().getColor ();
-			if(barC < EObjectColor.MAXCOLORNUM)
+			if(barC < EObjectColor.MAXCOLORNUM && gameMgr.currentLife > 1)
 				ChangeColor ((int)barC);
 
 			AddPopup("LIFE - 1", gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpLifeTextOffset.x , popUpLifeTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpLifeGUIStyle);
@@ -404,6 +404,11 @@ public class PlayerController : MonoBehaviour {
 				ResetJumpCount (0, null);
 			}
 		}
+	}
+
+	public void PlayScreenFlash(string animName = "fading")
+	{
+		fullScreenFlashImage.GetComponent<Animator>().Play(animName);
 	}
 
 	public void AddPopup(string message, Vector3 loc, float popupTime, GUIStyle popupStyle)

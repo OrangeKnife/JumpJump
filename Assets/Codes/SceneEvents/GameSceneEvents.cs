@@ -18,7 +18,15 @@ public class GameSceneEvents : MonoBehaviour {
 	//GameObject yellowboardsButton = null;
 	//[SerializeField]
 	//GameObject UI_SmallLeaderBoardsPanel = null;
-
+	
+	[SerializeField]
+	UnityEngine.UI.Text CountingText = null;
+	[SerializeField]
+	GameObject UI_CountingPanel = null;
+	[SerializeField]
+	UnityEngine.UI.Text SwitchJumpLeftRightText = null;
+	[SerializeField]
+	GameObject UI_OptionPanel = null;
 	[SerializeField]
 	UnityEngine.UI.Text AutoMessageText = null;
 	[SerializeField]
@@ -102,13 +110,15 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject transitionImg = null; 
 
-	public AudioClip menuClickedSound;
+	public AudioClip menuClickedSound,screenShotSound;
 
 	
 	AudioSource audioSource;
 	Sprite screenShotSprite;
 	string ScreenShotPath;
 
+
+	float countingTime;//counting Time
 	public void DestoryAllAds()
 	{
 		if (bannerView != null)
@@ -161,7 +171,17 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void playMenuClickedSound()
 	{
+		audioSource.volume = 0.1f;
 		audioSource.clip = menuClickedSound;
+		audioSource.Play ();
+	}
+
+	public void playScreenShotSound()
+	{
+		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().PlayScreenFlash ("ScreenShotFlash");
+
+		audioSource.volume = 0.7f;
+		audioSource.clip = screenShotSound;
 		audioSource.Play ();
 	}
 
@@ -299,7 +319,7 @@ public class GameSceneEvents : MonoBehaviour {
 		yourScore.text = gameMgr.currentScore.ToString ();
 		yourBest.text = gameMgr.getBestScore ().ToString();
 
-		ShowOneOfTheBannerViews ();
+
 
 	}
 
@@ -376,6 +396,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onGameEnded()
 	{
 		SetEndOfGameMark (true);
+		Invoke ("playScreenShotSound",0.65f);
 		Invoke ("TakeAScreenShotAndShowDeathPanel", 2f);
 	}
 
@@ -747,6 +768,25 @@ public class GameSceneEvents : MonoBehaviour {
 		}
 	}
 
+	public void SetOptionPanel(bool bActive)
+	{
+		UI_OptionPanel.SetActive (bActive);
+		SetDimImage (bActive);
+
+		if(bActive)
+		{
+			UI_OptionPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+
+			SwitchJumpLeftRightText.text = mysave.currentJumpType == 0 ? "SET RIGHT JUMP" : "SET LEFT JUMP";
+		}
+	}
+
+	public void onOptionButtonClicked()
+	{
+		playMenuClickedSound ();
+		SetOptionPanel (true);
+	}
+
 	public void onCreditButtonClicked()
 	{
 		playMenuClickedSound ();
@@ -777,9 +817,12 @@ public class GameSceneEvents : MonoBehaviour {
 
 	IEnumerator DoTakingScreenShot()
 	{
+
+
 		yield return new WaitForEndOfFrame();
 
 
+		
 		// create the texture
 		Texture2D aTex = new Texture2D(Screen.width, Screen.height,TextureFormat.RGB24,true);
 		aTex.ReadPixels(new Rect(0f, 0f, Screen.width, Screen.height),0,0);
@@ -803,9 +846,13 @@ public class GameSceneEvents : MonoBehaviour {
 		screenShotSprite = Sprite.Create(aTex,new Rect(0,0,Screen.width,Screen.height),new Vector2(0,0));
 		ScreenShotImg.sprite = screenShotSprite;
 		
+
+		ShowOneOfTheBannerViews ();
+		yield return new WaitForSeconds (1.5f);
+
 		SetEndOfGameMark (false);
 		UI_ScorePanel.SetActive (false);//gameended
-
+		
 		yield return new WaitForSeconds(0.5f);
 		ShowDeathPanel ();
 	}
@@ -843,4 +890,65 @@ public class GameSceneEvents : MonoBehaviour {
 		#endif 
 	}
 
+	public void onRecordVideoButtonClicked()
+	{
+		SetOptionPanel (false);
+		setCountingPanel (true);
+		countingTime = 3f;
+		StartCoroutine (TickingCounting ());
+	}
+
+	public void startRecording()
+	{
+
+		Utils.addLog("Start Recording");
+
+	}
+
+	public void endRecording()
+	{}
+
+	public void playLastRecording()
+	{}
+
+	public void SwitchLeftRightJump()
+	{
+		mysave.currentJumpType = mysave.currentJumpType == 0 ? 1 : 0;
+		GameFile.Save ("save.data", mysave);
+		SwitchJumpLeftRightText.text = mysave.currentJumpType == 0 ? "SET RIGHT JUMP" : "SET LEFT JUMP";
+	}
+
+	public void onOptionBackButtonClicked()
+	{
+		StopCoroutine (TickingCounting ());
+		SetOptionPanel (false);
+	}
+
+	public void setCountingPanel(bool bActive)
+	{
+		UI_CountingPanel.SetActive(bActive);
+		if(bActive)
+			UI_CountingPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+	}
+
+	public void onCountingCanceled()
+	{
+		playMenuClickedSound ();
+		setCountingPanel (false);
+	}
+
+ 
+
+	IEnumerator TickingCounting()
+	{
+		while (countingTime > 0) {
+			yield return new WaitForSeconds (1f);
+			countingTime -= 1f;
+			CountingText.text = ((int)countingTime).ToString();
+		}
+
+		setCountingPanel (false);
+		startRecording ();
+		yield return null;
+	}
 }
