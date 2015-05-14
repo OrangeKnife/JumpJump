@@ -941,6 +941,8 @@ public class GameSceneEvents : MonoBehaviour {
 
 	IEnumerator TickingCounting()
 	{
+		CountingText.text = ((int)countingTime).ToString();
+
 		while (countingTime > 0) {
 			yield return new WaitForSeconds (1f);
 			countingTime -= 1f;
