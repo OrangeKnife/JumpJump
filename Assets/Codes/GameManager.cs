@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SocialPlatforms;
 using UnityEngine.SocialPlatforms.GameCenter;
-
+using UnityEngine.Cloud.Analytics;
 using Soomla.Store;
 
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -429,6 +429,10 @@ public class GameManager : MonoBehaviour {
 			{
 				mysave = new SaveObject(true);
 				GameFile.Save("save.data",mysave);
+
+				UnityAnalytics.CustomEvent("GameSaveDataCreated",new Dictionary<string, object>{
+					{ "GameSaveData", 1 }
+				} );
 			}
 			
 		}

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine.Advertisements;
 using System.IO;
-
+using UnityEngine.Cloud.Analytics;
 using GoogleMobileAds.Api;
 #if UNITY_ANDROID
 using GooglePlayGames;
@@ -292,7 +292,14 @@ public class GameSceneEvents : MonoBehaviour {
 				EndOfGameObj.GetComponent<Animator>().Play("ScalePopInAnimation");
 				EndOfGameObj.GetComponent<AudioSource>().Play();
 
-			}
+
+			UnityAnalytics.CustomEvent("GameEnded",new Dictionary<string, object>{
+				{ "FLOOR", maxBarNum },
+				{ "SCORE", gameMgr.currentScore },
+				{ "TIME", (int)gameMgr.getPlayTime () }
+			} );
+		
+		}
  
 
 
@@ -533,8 +540,12 @@ public class GameSceneEvents : MonoBehaviour {
 		playMenuClickedSound ();
 		gameMgr.RemoveAds ();
 
+		UnityAnalytics.CustomEvent("GameEnded",new Dictionary<string, object>{
+			{ "NoAdsButtonClicked", 1 }
+		} );
+		
 	}
-
+	
 	public void onRateButtonClicked()
 	{
 		playMenuClickedSound ();
@@ -654,6 +665,11 @@ public class GameSceneEvents : MonoBehaviour {
 			UnityAdsYesNum = 10;
 			UnityAdsYesNumText.GetComponent<Animator> ().Play ("FlashingTextOneSecondAnimation");
 			TickingUnityAdsYesButton ();
+
+			UnityAnalytics.CustomEvent("UnityAdsPopup",new Dictionary<string, object>{
+				{ "UnityAdsNum", 1 }
+			} );
+			
 		} else {
 			Utils.addLog("ads not ready!");
 			NoAdsContinueDie();

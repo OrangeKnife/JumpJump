@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Soomla.Store;
+using UnityEngine.Cloud.Analytics;
 /// <summary>
 /// This class contains functions that receive events that they are subscribed to.
 ///
@@ -95,7 +96,11 @@ public class ColorJumpShopEventHandler {
 	/// <param name="pvi">Purchasable virtual item.</param>
 	public void onItemPurchased(PurchasableVirtualItem pvi, string payload) {
 		Utils.addLog ("onItemPurchased called: itemid=" + pvi.ItemId+",payload="+payload);
-
+		if((PurchaseWithMarket)pvi.PurchaseType != null)
+		{
+			MarketItem mi = ((PurchaseWithMarket)pvi.PurchaseType).MarketItem;
+			UnityAnalytics.Transaction(mi.ProductId, (decimal)mi.Price, mi.MarketCurrencyCode,null , null);
+		}
 	}
 	
 	/// <summary>
