@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour {
 	int jumpCombo = 0;
 	public bool wantJumpCombo = true;
 	bool isDead = false;
-	bool allowInput = true;
+	public bool allowInput = true;
 	bool allowInput_jump = true;
 	bool allowInput_color = true;
 
@@ -158,6 +158,7 @@ public class PlayerController : MonoBehaviour {
 		spriteRenderer.enabled = false;
 
 		if (gameMgr.currentLife < 1) {
+			eventHandler.SetPauseButton(false);
 			Invoke("AskUnityAdsQuestion",1f);
 
 		} else if (gameMgr.AddLife (-1) >= 1) {
@@ -171,6 +172,8 @@ public class PlayerController : MonoBehaviour {
 				playSound (audioClips [3]);//die cuz fall through
 				deathSoundPlayed = true;
 			}
+
+			eventHandler.SetPauseButton(false);
 			Invoke("AskUnityAdsQuestion",1f);
 		}
 
@@ -216,6 +219,11 @@ public class PlayerController : MonoBehaviour {
 
  
 		MyRigidBody.gravityScale = 1;
+
+	}
+
+	void performJump()
+	{
 
 	}
 
@@ -308,47 +316,95 @@ public class PlayerController : MonoBehaviour {
 				Touch touch = Input.GetTouch(i);
 				if(touch.position.y < Screen.height *0.8f)
 				{
-					if (touch.position.x <= Screen.width / 2 )
+					if (gameMgr.mysave.currentJumpType == 0)
 					{
-						// jump
-						if(allowInput_jump)
+						// left jump
+						if(touch.position.x <= Screen.width / 2 )
 						{
-							if (touch.phase == TouchPhase.Began)
+							if(allowInput_jump)
 							{
-								ButtonJumpDown = true;
+								if (touch.phase == TouchPhase.Began)
+								{
+									ButtonJumpDown = true;
+								}
+								else
+								{
+									ButtonJumpDown = false;
+								}
+								
+								if (touch.phase == TouchPhase.Ended)
+								{
+									ButtonJumpUp = true;
+								}
+								else
+								{
+									ButtonJumpUp = false;
+								}
+								
+								if (touch.phase == TouchPhase.Moved)
+								{
+									ButtonJumpHold = true;
+								}
+								else
+								{
+									ButtonJumpHold = false;
+								}
 							}
-							else
+						}
+						else
+						{
+							if (allowInput_color && touch.phase == TouchPhase.Began)
 							{
-								ButtonJumpDown = false;
-							}
-							
-							if (touch.phase == TouchPhase.Ended)
-							{
-								ButtonJumpUp = true;
-							}
-							else
-							{
-								ButtonJumpUp = false;
-							}
-							
-							if (touch.phase == TouchPhase.Moved)
-							{
-								ButtonJumpHold = true;
-							}
-							else
-							{
-								ButtonJumpHold = false;
+								playSound(audioClips[2],1);
+								ChangeColor(-1,true);
 							}
 						}
 					}
-					else
+					else//right jump
 					{
-						if (allowInput_color && touch.phase == TouchPhase.Began)
+						// left jump
+						if(touch.position.x <= Screen.width / 2 )
+						{	
+							if (allowInput_color && touch.phase == TouchPhase.Began)
+							{
+								playSound(audioClips[2],1);
+								ChangeColor(-1,true);
+							}
+						}
+						else
 						{
-							playSound(audioClips[2],1);
-							ChangeColor(-1,true);
+							if(allowInput_jump)
+							{
+								if (touch.phase == TouchPhase.Began)
+								{
+									ButtonJumpDown = true;
+								}
+								else
+								{
+									ButtonJumpDown = false;
+								}
+								
+								if (touch.phase == TouchPhase.Ended)
+								{
+									ButtonJumpUp = true;
+								}
+								else
+								{
+									ButtonJumpUp = false;
+								}
+								
+								if (touch.phase == TouchPhase.Moved)
+								{
+									ButtonJumpHold = true;
+								}
+								else
+								{
+									ButtonJumpHold = false;
+								}
+							}
 						}
 					}
+
 				}
 				 
 			}
@@ -518,13 +574,13 @@ public class PlayerController : MonoBehaviour {
 
 	void HandleInput(bool bButtonJumpDown, bool bButtonJumpHold, bool bButtonJumpUp)
 	{
-		if (bButtonJumpDown && maxJumpCount > currentJumpCount) {
+		if (bButtonJumpUp && maxJumpCount > currentJumpCount) {
 
 			totalJumpCount += 1;
 			jumped = true;
 			currentJumpCount += 1;
 			eventHandler.SetJumpCountText("JUMP X "+ (maxJumpCount - currentJumpCount).ToString());
-			//MyRigidBody.velocity = Vector3.Min(Vector3.zero, Vector3.Max(new Vector3(0,-2f,0),MyRigidBody.velocity));
+			MyRigidBody.velocity = Vector3.Min(Vector3.zero, Vector3.Max(new Vector3(0,-2f,0),MyRigidBody.velocity));//avoid crazy current vel !!!
 			MyRigidBody.AddForce(new Vector3(0,jumpPower * 100f,0));
 			playSound(audioClips[0],0,false,0.1f); //jjump
 			if(lastBarStandOn != null)
@@ -542,12 +598,12 @@ public class PlayerController : MonoBehaviour {
 		/*
 		if (bButtonJumpHold) {
 
-		}*/
+		}
 
 		if (bButtonJumpUp && maxJumpCount > currentJumpCount) {
 
 		}
-
+*/
 
 
 	}

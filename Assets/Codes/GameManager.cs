@@ -34,7 +34,8 @@ public class GameManager : MonoBehaviour {
 	int currentBGMindex = 0;
 	AudioSource audiosource;
 
-	SaveObject mysave;
+	[System.NonSerialized]
+	public SaveObject mysave;
 
 	public int gameMode { get; private set;}//0 normal, 1 hard core
 	float savedTimeScale = 1f;
@@ -281,7 +282,7 @@ public class GameManager : MonoBehaviour {
 #endif
 */
 
-
+		eventHandler.isTitle = false;
 
 		bGameStarted = true;
 		currentScore = 0;
@@ -318,9 +319,11 @@ public class GameManager : MonoBehaviour {
 	{
 		bGameStarted = false;
 
-
+		CurrentPlayer.GetComponent<PlayerController>().allowInput = false;
 
 		eventHandler.DoTransition(BackToMainMenuFromGame);
+
+
 	}
 
 
@@ -339,6 +342,8 @@ public class GameManager : MonoBehaviour {
 		eventHandler.SetDeathPanel (false);
 		eventHandler.SetStartPanel (true);
 		eventHandler.ShowOneOfTheBannerViews(true);
+
+		eventHandler.isTitle = true;
 
 	}
 
@@ -394,7 +399,14 @@ public class GameManager : MonoBehaviour {
 
 	void Update () {
 
-		if (Input.GetKeyDown(KeyCode.Escape)) { Application.Quit(); }
+		if (Input.GetKeyDown(KeyCode.Escape)) 
+		{
+			if(eventHandler.isTitle)
+				Application.Quit(); 
+			else if(!bGamePaused)
+				eventHandler.onPauseButtonClicked();
+
+		}
 
 		if (!audiosource.isPlaying)
 			PlayBGM ();
@@ -411,6 +423,19 @@ public class GameManager : MonoBehaviour {
 		DontDestroyOnLoad(gameObject);
 
 		audiosource = GetComponent<AudioSource> ();
+
+		try{
+			if(!GameFile.Load ("save.data", ref mysave))
+			{
+				mysave = new SaveObject(true);
+				GameFile.Save("save.data",mysave);
+			}
+			
+		}
+		catch(System.Exception)
+		{
+			Debug.Log ("save.data loading error");
+		}
 	}
 
 	public void RespawnPlayer()
@@ -469,7 +494,8 @@ public class GameManager : MonoBehaviour {
 
 	public void PauseGame()
 	{
-		savedTimeScale = Time.timeScale;
+		if(savedTimeScale != 0)
+			savedTimeScale = Time.timeScale;
 		Time.timeScale = 0;
 		bGamePaused = true;
 	}

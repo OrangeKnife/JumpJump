@@ -93,6 +93,9 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	UnityEngine.UI.Image ScreenShotImg = null;
 
+	[SerializeField]
+	GameObject RecordButton = null;
+
 	int UnityAdsYesNum;
 
 
@@ -100,8 +103,6 @@ public class GameSceneEvents : MonoBehaviour {
 
 
 	GameManager gameMgr;
-	SaveObject mysave;
-	
 
 
 	BannerView bannerView,bannerViewBottom;
@@ -117,8 +118,17 @@ public class GameSceneEvents : MonoBehaviour {
 	Sprite screenShotSprite;
 	string ScreenShotPath;
 
-
+	bool bPauseButtonDisabled = false;
 	float countingTime;//counting Time
+
+	public delegate void AutoMessageOKButtonDelegate();
+	AutoMessageOKButtonDelegate currentMessageOkButtonDelegate;
+
+	IEnumerator TickingCountCoroutine;
+	bool bDidRecordingVideo = false;
+
+	public bool isTitle = true;
+
 	public void DestoryAllAds()
 	{
 		if (bannerView != null)
@@ -167,6 +177,8 @@ public class GameSceneEvents : MonoBehaviour {
 			InitGameMgr ();
 
 		StartCoroutine(initUnityAds());
+
+		Everyplay.ReadyForRecording += OnReadyForRecording;
 	}
 
 	public void playMenuClickedSound()
@@ -180,7 +192,7 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().PlayScreenFlash ("ScreenShotFlash");
 
-		audioSource.volume = 0.7f;
+		audioSource.volume = 0.3f;
 		audioSource.clip = screenShotSound;
 		audioSource.Play ();
 	}
@@ -251,21 +263,6 @@ public class GameSceneEvents : MonoBehaviour {
 
 
 
-
-
-		try{
-
-			if(!GameFile.Load ("save.data", ref mysave))
-			{
-				mysave = new SaveObject(true);
-				GameFile.Save("save.data",mysave);
-			}
-
-		}
-		catch(System.Exception)
-		{
-			Debug.Log ("save.data loading error");
-		}
 	}
 
 	void InitGameMgr()
@@ -314,7 +311,7 @@ public class GameSceneEvents : MonoBehaviour {
 	}
 
 	void ShowDeathPanel()
-	{	
+	{
 		SetDeathPanel (true);
 		yourScore.text = gameMgr.currentScore.ToString ();
 		yourBest.text = gameMgr.getBestScore ().ToString();
@@ -324,7 +321,10 @@ public class GameSceneEvents : MonoBehaviour {
 	}
 
 	 
-	
+	public void SetPauseButton(bool bActive)
+	{
+		bPauseButtonDisabled = !bActive;
+	}
 
 	
 	public void OnTryAgainButtonClicked()
@@ -396,7 +396,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onGameEnded()
 	{
 		SetEndOfGameMark (true);
-		Invoke ("playScreenShotSound",0.65f);
+		Invoke ("playScreenShotSound",1.2f);
 		Invoke ("TakeAScreenShotAndShowDeathPanel", 2f);
 	}
 
@@ -407,6 +407,10 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void showTutorial(bool wantToShow)
 	{
+
+		tutorialLeft.GetComponent<TextMesh>().text = "TAP LEFT\n" +( gameMgr.mysave.currentJumpType == 0 ? "JUMP" : "COLOR");
+		tutorialRight.GetComponent<TextMesh>().text = "TAP RIGHT\n" +( gameMgr.mysave.currentJumpType == 0 ? "COLOR" : "JUMP");
+
 		tutorialLeft.SetActive(wantToShow);
 		tutorialRight.SetActive(wantToShow);
 	}
@@ -483,6 +487,9 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onPauseButtonClicked()
 	{
+		if (bPauseButtonDisabled)
+			return;
+		
 		playMenuClickedSound ();
 		SetPausePanel (true);
 
@@ -542,7 +549,7 @@ public class GameSceneEvents : MonoBehaviour {
 		if(gameMgr.hardCoreUnlocked)
 			DoTransition (DoHardCoreButton);
 		else
-			ShowAutoMessage("HARDCORE  MODE\n  CAN  BE  UNLOCKED\n  BY  BEATING THE\n NORMAL MODE");
+			ShowAutoMessage("HARDCORE  MODE  CAN  BE  UNLOCKED  BY  REACHING FLOOR.100  IN  NORMAL  MODE");
 	}
 
 	public void OnStartButtonClicked()
@@ -558,6 +565,7 @@ public class GameSceneEvents : MonoBehaviour {
 		gameMgr.StartGame (1);
 		
 		HideAllBannerViews ();
+
 	}
 	
 	void DoStartButton()
@@ -592,6 +600,9 @@ public class GameSceneEvents : MonoBehaviour {
 		SetDimImage (bActive);
 		if(bActive)
 			UI_DeathPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+
+		if (!bActive)
+			bPauseButtonDisabled = false; // enable pause button 
 	}
 
 	public void SetStartPanel(bool bActive)
@@ -634,6 +645,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onAdsQuestionPopup()
 	{
 		if (Advertisement.isReady ()) {
+
 			SetUnityAdsQuestion (true);
 			SetDimImage (true);
 			UI_UnityAdsQuestion.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
@@ -654,6 +666,9 @@ public class GameSceneEvents : MonoBehaviour {
 		SetUnityAdsQuestion (false);
 		return;
 #elif UNITY_ANDROID || UNITY_IOS
+		
+		if(Everyplay.IsRecording())
+			Everyplay.PauseRecording();
 
 		CancelInvoke ("TickingUnityAdsYesButton");
 		//UnityADS
@@ -693,6 +708,8 @@ public class GameSceneEvents : MonoBehaviour {
 		}
 
 		SetUnityAdsQuestion (false);
+		if(Everyplay.IsPaused())
+			Everyplay.ResumeRecording();
 	}
 	
 	public void UnityAdsNoButtonClicked()
@@ -756,8 +773,9 @@ public class GameSceneEvents : MonoBehaviour {
 		GameFile.Save("save.data", new SaveObject(true));
 	}
 
-	public void ShowAutoMessage(string message)
+	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null)
 	{
+		currentMessageOkButtonDelegate = messageOkDelegate;
 		bool bActive = message.Length > 0;
 		UI_AutoMessage.SetActive (bActive);
 		SetDimImage (bActive);
@@ -777,7 +795,7 @@ public class GameSceneEvents : MonoBehaviour {
 		{
 			UI_OptionPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 
-			SwitchJumpLeftRightText.text = mysave.currentJumpType == 0 ? "SET RIGHT JUMP" : "SET LEFT JUMP";
+			SwitchJumpLeftRightText.text = gameMgr.mysave.currentJumpType == 0 ? "SET RIGHT JUMP" : "SET LEFT JUMP";
 		}
 	}
 
@@ -803,6 +821,8 @@ public class GameSceneEvents : MonoBehaviour {
 		playMenuClickedSound ();
 		UI_AutoMessage.SetActive (false);
 		SetDimImage (false);
+		if(currentMessageOkButtonDelegate != null)
+			currentMessageOkButtonDelegate ();
 	}
 
 	public void SetDimImage(bool bActive)
@@ -819,14 +839,14 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 
 
-		yield return new WaitForEndOfFrame();
+		yield return new WaitForEndOfFrame ();
 
 
 		
 		// create the texture
-		Texture2D aTex = new Texture2D(Screen.width, Screen.height,TextureFormat.RGB24,true);
-		aTex.ReadPixels(new Rect(0f, 0f, Screen.width, Screen.height),0,0);
-		aTex.Apply();
+		Texture2D aTex = new Texture2D (Screen.width, Screen.height, TextureFormat.RGB24, true);
+		aTex.ReadPixels (new Rect (0f, 0f, Screen.width, Screen.height), 0, 0);
+		aTex.Apply ();
 		/*
 		RenderTexture rt = new RenderTexture(Screen.width, Screen.height, 24);
 		gameMgr.MainCam.targetTexture = rt;
@@ -839,21 +859,32 @@ public class GameSceneEvents : MonoBehaviour {
 		RenderTexture.active = null;
 		Destroy(rt);
 		*/
-		byte[] dataToSave = aTex.EncodeToPNG();
-		ScreenShotPath = Path.Combine(Application.persistentDataPath,System.DateTime.Now.ToString("yyyy-MM-dd-HH") + ".png");
-		File.WriteAllBytes(ScreenShotPath, dataToSave);
+		byte[] dataToSave = aTex.EncodeToPNG ();
+		ScreenShotPath = Path.Combine (Application.persistentDataPath, System.DateTime.Now.ToString ("yyyy-MM-dd-HH") + ".png");
+		File.WriteAllBytes (ScreenShotPath, dataToSave);
 		
-		screenShotSprite = Sprite.Create(aTex,new Rect(0,0,Screen.width,Screen.height),new Vector2(0,0));
+		screenShotSprite = Sprite.Create (aTex, new Rect (0, 0, Screen.width, Screen.height), new Vector2 (0, 0));
 		ScreenShotImg.sprite = screenShotSprite;
 		
 
 		ShowOneOfTheBannerViews ();
-		yield return new WaitForSeconds (1.5f);
+		yield return new WaitForSeconds (3f);
 
 		SetEndOfGameMark (false);
-		UI_ScorePanel.SetActive (false);//gameended
-		
-		yield return new WaitForSeconds(0.5f);
+		//UI_ScorePanel.SetActive (false);//gameended
+		if (Everyplay.IsRecording ()) {
+			Everyplay.StopRecording ();
+			Everyplay.SetMetadata ("FloorNum", gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().maxBarNum);
+			Everyplay.SetMetadata ("Score", gameMgr.currentScore);
+			bDidRecordingVideo = true;
+		}
+
+		if (bDidRecordingVideo)
+		{
+			ShowAutoMessage ("VIDEO RECORDING ENDED!", playLastRecording);
+			bDidRecordingVideo = false;
+		}
+
 		ShowDeathPanel ();
 	}
 
@@ -895,32 +926,46 @@ public class GameSceneEvents : MonoBehaviour {
 		SetOptionPanel (false);
 		setCountingPanel (true);
 		countingTime = 3f;
-		StartCoroutine (TickingCounting ());
+		TickingCountCoroutine = TickingCounting ();
+		StartCoroutine (TickingCountCoroutine);
+	}
+
+	void OnReadyForRecording(bool enabled)
+	{
+
+		RecordButton.GetComponent<UnityEngine.UI.Button>().interactable = enabled;
 	}
 
 	public void startRecording()
 	{
 
-		Utils.addLog("Start Recording");
+		if (Everyplay.IsSupported () && !Everyplay.IsRecording ())
+			Everyplay.StartRecording ();
 
 	}
 
 	public void endRecording()
-	{}
+	{
+		//playMenuClickedSound ();
+	}
 
 	public void playLastRecording()
-	{}
+	{
+		playMenuClickedSound ();
+		Everyplay.PlayLastRecording ();
+	}
 
 	public void SwitchLeftRightJump()
 	{
-		mysave.currentJumpType = mysave.currentJumpType == 0 ? 1 : 0;
-		GameFile.Save ("save.data", mysave);
-		SwitchJumpLeftRightText.text = mysave.currentJumpType == 0 ? "SET RIGHT JUMP" : "SET LEFT JUMP";
+		playMenuClickedSound ();
+		gameMgr.mysave.currentJumpType = gameMgr.mysave.currentJumpType == 0 ? 1 : 0;
+		GameFile.Save ("save.data", gameMgr.mysave);
+		SwitchJumpLeftRightText.text = gameMgr.mysave.currentJumpType == 0 ? "SET RIGHT JUMP" : "SET LEFT JUMP";
 	}
 
 	public void onOptionBackButtonClicked()
 	{
-		StopCoroutine (TickingCounting ());
+		playMenuClickedSound ();
 		SetOptionPanel (false);
 	}
 
@@ -935,6 +980,7 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		playMenuClickedSound ();
 		setCountingPanel (false);
+		StopCoroutine (TickingCountCoroutine);
 	}
 
  

@@ -320,24 +320,32 @@ public class BarController : MonoBehaviour
 			if (score > 0) {
 				score = -1;
 
-				if(shallWeDisplayBarNum(barNum))
+
+				if(!audioSource.isPlaying)
 				{
-					audioSource.clip = audioClips [3];//speical sfx for 10,20,30....
-					audioSource.volume = 0.4f;
-				}
-				else
-				{
-					audioSource.clip = audioClips [0];
-					audioSource.volume = 0.8f;
+					if(shallWeDisplayBarNum(barNum))
+					{
+						audioSource.clip = audioClips [3];//speical sfx for 10,20,30....
+						audioSource.volume = 0.4f;
+					}
+					else
+					{
+						audioSource.clip = audioClips [0];
+						audioSource.volume = 0.7f;
+					}
+					audioSource.Play ();
 				}
 
 
-				audioSource.Play ();
 			} else {
 				score --;
-				audioSource.clip = audioClips [1];
-				audioSource.volume = 0.1f;
-				audioSource.Play ();
+
+				if(!audioSource.isPlaying)
+				{
+					audioSource.clip = audioClips [1];
+					audioSource.volume = 0.05f;
+					audioSource.Play ();
+				}
 				
 			}
 			
