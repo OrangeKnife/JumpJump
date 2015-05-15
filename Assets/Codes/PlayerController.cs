@@ -393,6 +393,7 @@ public class PlayerController : MonoBehaviour {
 				allowInput = false;
 				gameObject.layer = LayerMask.NameToLayer("NoCollision");
 				GetComponent<Animator>().Play("Spin");
+
 				if(!deathSoundPlayed)
 				{
 					playSound (audioClips [3]);//die
@@ -523,7 +524,7 @@ public class PlayerController : MonoBehaviour {
 			jumped = true;
 			currentJumpCount += 1;
 			eventHandler.SetJumpCountText("JUMP X "+ (maxJumpCount - currentJumpCount).ToString());
-			MyRigidBody.velocity = Vector3.Min(Vector3.zero, Vector3.Max(new Vector3(0,-2f,0),MyRigidBody.velocity));
+			//MyRigidBody.velocity = Vector3.Min(Vector3.zero, Vector3.Max(new Vector3(0,-2f,0),MyRigidBody.velocity));
 			MyRigidBody.AddForce(new Vector3(0,jumpPower * 100f,0));
 			playSound(audioClips[0],0,false,0.1f); //jjump
 			if(lastBarStandOn != null)

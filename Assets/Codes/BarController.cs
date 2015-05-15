@@ -312,7 +312,7 @@ public class BarController : MonoBehaviour
 			if(other.gameObject.transform.position.y  < gameObject.transform.position.y )
 				return;
 			
-			other.gameObject.GetComponent<Rigidbody2D>().velocity = Vector3.zero;
+			//other.gameObject.GetComponent<Rigidbody2D>().velocity = Vector3.zero;
 			
 			if(minusScore && score < 0 || score > 0)
 				other.gameObject.GetComponent<PlayerController> ().AddScore (score);
