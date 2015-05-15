@@ -74,7 +74,7 @@ public class PlayerController : MonoBehaviour {
 	bool deathSoundPlayed = false;
 
 	float playerStartPlayTime;//track how long player survive
-
+	Animator myAnimator;
 	public int totalJumpCount {get; private set;}
 	void Awake()
 	{
@@ -97,6 +97,7 @@ public class PlayerController : MonoBehaviour {
 
 		spriteRenderer = GetComponent<SpriteRenderer>();
 
+		myAnimator = GetComponent<Animator> ();
 
 		fullScreenFlashImage = GameObject.Find ("FullScreenFlashImage");
 
@@ -439,7 +440,11 @@ public class PlayerController : MonoBehaviour {
 			MyRigidBody.velocity = Vector3.zero;// -MyRigidBody.velocity * 0.1f;
 			EObjectColor barC = bar.GetComponent<BarController> ().getColor ();
 			if(barC < EObjectColor.MAXCOLORNUM && gameMgr.currentLife > 1)
+			{
+				myAnimator.Play("FastFlashing");
 				ChangeColor ((int)barC);
+
+			}
 
 			AddPopup("LIFE - 1", gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpLifeTextOffset.x , popUpLifeTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpLifeGUIStyle);
 
@@ -448,7 +453,7 @@ public class PlayerController : MonoBehaviour {
 			{
 				allowInput = false;
 				gameObject.layer = LayerMask.NameToLayer("NoCollision");
-				GetComponent<Animator>().Play("Spin");
+				myAnimator.Play("Spin");
 
 				if(!deathSoundPlayed)
 				{
