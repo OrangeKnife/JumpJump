@@ -868,7 +868,7 @@ public class GameSceneEvents : MonoBehaviour {
 		
 
 		ShowOneOfTheBannerViews ();
-		yield return new WaitForSeconds (3f);
+		yield return new WaitForSeconds (2f);
 
 		SetEndOfGameMark (false);
 		//UI_ScorePanel.SetActive (false);//gameended
