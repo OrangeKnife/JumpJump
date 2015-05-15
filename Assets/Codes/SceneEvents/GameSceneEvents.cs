@@ -178,7 +178,8 @@ public class GameSceneEvents : MonoBehaviour {
 
 		StartCoroutine(initUnityAds());
 
-		Everyplay.ReadyForRecording += OnReadyForRecording;
+		if(Everyplay.IsSupported())
+			Everyplay.ReadyForRecording += OnReadyForRecording;
 	}
 
 	public void playMenuClickedSound()
@@ -930,9 +931,8 @@ public class GameSceneEvents : MonoBehaviour {
 		StartCoroutine (TickingCountCoroutine);
 	}
 
-	void OnReadyForRecording(bool enabled)
+	public void OnReadyForRecording(bool enabled)
 	{
-
 		RecordButton.GetComponent<UnityEngine.UI.Button>().interactable = enabled;
 	}
 
