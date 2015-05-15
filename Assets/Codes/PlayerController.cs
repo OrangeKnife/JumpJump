@@ -29,7 +29,9 @@ public class PlayerController : MonoBehaviour {
 	GameSceneEvents eventHandler = null;
 	GameManager gameMgr = null;
 	Rigidbody2D MyRigidBody;
-	SpriteRenderer spriteRenderer;
+	SpriteRenderer spriteRenderer,skinSpriteRenderer;
+	public GameObject skin;
+
 
 	public bool jumped {get; private set;}
 	public Vector3 popUpComboTextOffset;
@@ -96,6 +98,7 @@ public class PlayerController : MonoBehaviour {
 		MyRigidBody = GetComponent<Rigidbody2D> ();
 
 		spriteRenderer = GetComponent<SpriteRenderer>();
+		skinSpriteRenderer = skin.GetComponent<SpriteRenderer> ();
 
 		myAnimator = GetComponent<Animator> ();
 
@@ -157,6 +160,7 @@ public class PlayerController : MonoBehaviour {
 		MyRigidBody.gravityScale = 0;
 		MyRigidBody.velocity = Vector3.zero;
 		spriteRenderer.enabled = false;
+		skinSpriteRenderer.enabled = false;
 
 		if (gameMgr.currentLife < 1) {
 			eventHandler.SetPauseButton(false);
@@ -207,6 +211,7 @@ public class PlayerController : MonoBehaviour {
 		GetComponent<Animator>().Play("Regular");
 		gameObject.layer = 10 + (int)currentColor;
 		spriteRenderer.enabled = true;
+		skinSpriteRenderer.enabled = true;
 		allowInput_jump = true;
 		isDead = false;
 		deathSoundPlayed = false;

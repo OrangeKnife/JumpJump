@@ -18,7 +18,8 @@ public class GameSceneEvents : MonoBehaviour {
 	//GameObject yellowboardsButton = null;
 	//[SerializeField]
 	//GameObject UI_SmallLeaderBoardsPanel = null;
-	
+	[SerializeField]
+	GameObject UI_ShopPanel = null;
 	[SerializeField]
 	UnityEngine.UI.Text CountingText = null;
 	[SerializeField]
@@ -814,6 +815,41 @@ public class GameSceneEvents : MonoBehaviour {
 
 			SwitchJumpLeftRightText.text = gameMgr.mysave.currentJumpType == 0 ? "SET RIGHT JUMP" : "SET LEFT JUMP";
 		}
+	}
+
+	public void SetShopPanel(bool bActive)
+	{
+		UI_ShopPanel.SetActive (bActive);
+		SetDimImage (bActive);
+		if(bActive)
+		{
+			UI_ShopPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+		}
+	}
+
+	public void onShopPreviousButtonClicked()
+	{
+	}
+	public void onShopNextButtonClicked ()
+	{
+	}
+
+	public void PurchaseCurrentSelectedSkin()
+	{
+		Utils.addLog("PurchaseCurrentSelectedSkin");
+	}
+
+	public void onShopButtonClicked()
+	{
+		playMenuClickedSound ();
+		SetShopPanel (true);
+	}
+
+	public void onShopBackButtonClicked()
+	{
+		playMenuClickedSound ();
+		SetShopPanel (false);
+
 	}
 
 	public void onOptionButtonClicked()
