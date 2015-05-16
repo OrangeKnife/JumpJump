@@ -43,6 +43,8 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	UnityEngine.UI.Text AutoMessageText = null;
 	[SerializeField]
+	GameObject AutoMessageOKButton = null;
+	[SerializeField]
 	GameObject UI_AutoMessage  = null;
 	[SerializeField]
 	GameObject UI_RateQuestion = null;
@@ -811,7 +813,7 @@ public class GameSceneEvents : MonoBehaviour {
 		#endif
 	}
 
-	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null)
+	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null, bool wantOKButton = true)
 	{
 		currentMessageOkButtonDelegate = messageOkDelegate;
 		bool bActive = message.Length > 0;
@@ -822,6 +824,8 @@ public class GameSceneEvents : MonoBehaviour {
 			UI_AutoMessage.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 			AutoMessageText.text = message;
 		}
+
+		AutoMessageOKButton.SetActive(wantOKButton);
 	}
 
 	public void SetOptionPanel(bool bActive)
@@ -863,6 +867,8 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onMarketPurchase(string itemId)
 	{
+		CancelInvoke ("PurchaseItemTimeOut");
+		ShowAutoMessage ("");
 		DisplayShopItem (currentShopItemDisplayIndex);
 	}
 
@@ -892,10 +898,14 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void PurchaseCurrentSelectedSkin()
 	{
+		playMenuClickedSound ();
 		Utils.addLog("PurchaseCurrentSelectedSkin");
 		//if(Can buy and didn't buy)
-		if (currentShopItemId != "" && StoreInventory.GetItemBalance (currentShopItemId) == 0)
+		if (currentShopItemId != "" && StoreInventory.GetItemBalance (currentShopItemId) == 0) {
 			gameMgr.BuySkin (currentShopItemId);
+			ShowAutoMessage("PROCESSING...\nPLEASE  WAIT",null,false);
+			Invoke("PurchaseItemTimeOut",30f);
+		}
 		else {
 			 
 				gameMgr.UseSkin (currentShopItemDisplayIndex);
@@ -903,6 +913,11 @@ public class GameSceneEvents : MonoBehaviour {
 		}
 		//can buy and bought, use it
 		//
+	}
+
+	void PurchaseItemTimeOut()
+	{
+		ShowAutoMessage("TIMEOUT\nCANNOT  CONNECT\nTO  APP  STORE");
 	}
 
 	public void onShopButtonClicked()
