@@ -908,15 +908,17 @@ public class GameSceneEvents : MonoBehaviour {
 	}
 
 	public void onRestoreTransactionsStarted() {
+#if UNITY_IOS && !UNITY_EDITOR
 		ShowAutoMessage("PROCESSING...\nPLEASE  WAIT",null,false);
 		CancelInvoke ("ConnectToAppStoreTimeOut");
 		Invoke("ConnectToAppStoreTimeOut",90f);
+#endif
 	}
 	
 	public void onRestoreTransactionsFinished(bool success) {
-		CancelInvoke ("ConnectToAppStoreTimeOut");
 
 #if UNITY_IOS && !UNITY_EDITOR
+		CancelInvoke ("ConnectToAppStoreTimeOut");
 		if(success)
 			ShowAutoMessage ("FINISHED !");
 		else
