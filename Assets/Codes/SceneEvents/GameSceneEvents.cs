@@ -915,10 +915,13 @@ public class GameSceneEvents : MonoBehaviour {
 	
 	public void onRestoreTransactionsFinished(bool success) {
 		CancelInvoke ("ConnectToAppStoreTimeOut");
+
+#if UNITY_IOS && !UNITY_EDITOR
 		if(success)
 			ShowAutoMessage ("FINISHED !");
 		else
 			ShowAutoMessage ("FAILED !");
+#endif
 	}
 
 	public void PurchaseCurrentSelectedSkin()
