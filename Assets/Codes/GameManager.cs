@@ -542,10 +542,18 @@ public class GameManager : MonoBehaviour {
 
 	public void onMarketPurchase(string itemId)
 	{
-		NoAds = itemId == ColorJumpStoreAssets.NO_ADS_LTVG.ItemId;
-		Utils.addLog ("new NoAds = " + NoAds.ToString ());
-		if (NoAds)
-			eventHandler.DestoryAllAds ();
+		switch(itemId)
+		{
+		case "no_ads":
+				NoAds = true;
+				Utils.addLog ("new NoAds = " + NoAds.ToString ());
+				eventHandler.DestoryAllAds ();
+			break;
+		case "colorjumpId_smileface":
+		case "colorjumpId_sadface":
+				eventHandler.onMarketPurchase (itemId);
+				break;
+		}
 	}
 
 	public void CancelPurchase(string itemId)

@@ -805,6 +805,10 @@ public class GameSceneEvents : MonoBehaviour {
 	public void RemoveLocalSave()
 	{
 		GameFile.Save("save.data", new SaveObject(true));
+
+		#if UNITY_EDITOR
+		PlayerPrefs.DeleteAll ();
+		#endif
 	}
 
 	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null)
@@ -854,6 +858,11 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		if (currentShopItemDisplayIndex < gameMgr.SkinTemplates.Count - 1)
 			currentShopItemDisplayIndex++;
+		DisplayShopItem (currentShopItemDisplayIndex);
+	}
+
+	public void onMarketPurchase(string itemId)
+	{
 		DisplayShopItem (currentShopItemDisplayIndex);
 	}
 
