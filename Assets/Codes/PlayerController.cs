@@ -78,6 +78,8 @@ public class PlayerController : MonoBehaviour {
 	float playerStartPlayTime;//track how long player survive
 	Animator myAnimator;
 	public int totalJumpCount {get; private set;}
+	public float defaultGravity;
+
 	void Awake()
 	{
 		
@@ -96,6 +98,7 @@ public class PlayerController : MonoBehaviour {
 		gameMgr = GameObject.Find("GameManager").GetComponent<GameManager>();
 
 		MyRigidBody = GetComponent<Rigidbody2D> ();
+		MyRigidBody.gravityScale = defaultGravity;
 
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		skinSpriteRenderer = skin.GetComponent<SpriteRenderer> ();
@@ -224,7 +227,7 @@ public class PlayerController : MonoBehaviour {
 
 
  
-		MyRigidBody.gravityScale = 1;
+		MyRigidBody.gravityScale = defaultGravity;
 
 	}
 
@@ -447,7 +450,7 @@ public class PlayerController : MonoBehaviour {
 			if(barC < EObjectColor.MAXCOLORNUM && gameMgr.currentLife > 1)
 			{
 				myAnimator.Play("FastFlashing");
-				ChangeColor ((int)barC);
+				//ChangeColor ((int)barC);
 
 			}
 
@@ -584,7 +587,7 @@ public class PlayerController : MonoBehaviour {
 
 	void HandleInput(bool bButtonJumpDown, bool bButtonJumpHold, bool bButtonJumpUp)
 	{
-		if (bButtonJumpUp && maxJumpCount > currentJumpCount) {
+		if (bButtonJumpDown && maxJumpCount > currentJumpCount) {
 
 			totalJumpCount += 1;
 			jumped = true;
