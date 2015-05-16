@@ -910,7 +910,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onRestoreTransactionsStarted() {
 		ShowAutoMessage("PROCESSING...\nPLEASE  WAIT",null,false);
 		CancelInvoke ("ConnectToAppStoreTimeOut");
-		Invoke("ConnectToAppStoreTimeOut",30f);
+		Invoke("ConnectToAppStoreTimeOut",90f);
 	}
 	
 	public void onRestoreTransactionsFinished(bool success) {
@@ -930,7 +930,7 @@ public class GameSceneEvents : MonoBehaviour {
 			gameMgr.BuySkin (currentShopItemId);
 			ShowAutoMessage("PROCESSING...\nPLEASE  WAIT",null,false);
 			CancelInvoke ("ConnectToAppStoreTimeOut");
-			Invoke("ConnectToAppStoreTimeOut",30f);
+			Invoke("ConnectToAppStoreTimeOut",90f);
 		}
 		else {
 			 
