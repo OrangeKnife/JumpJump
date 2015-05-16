@@ -76,7 +76,7 @@ public class PlayerController : MonoBehaviour {
 	bool deathSoundPlayed = false;
 
 	float playerStartPlayTime;//track how long player survive
-	Animator myAnimator;
+	Animator myAnimator,mySkinAnimator;
 	public int totalJumpCount {get; private set;}
 	public float defaultGravity;
 
@@ -164,6 +164,7 @@ public class PlayerController : MonoBehaviour {
 		skinObject.transform.SetParent(gameObject.transform,false);
 		currentSkin = skinObject.GetComponent<PlayerSkin> ();
 		skinSpriteRenderer = skinObject.GetComponent<SpriteRenderer> ();
+		mySkinAnimator = skinObject.GetComponent<Animator> ();
 	 	 
 	}
 
@@ -224,7 +225,7 @@ public class PlayerController : MonoBehaviour {
 			gameObject.transform.position = Vector3.zero;
 			gameMgr.MainCam.gameObject.GetComponent<CameraController> ().ResetCamera (gameObject);
 		}
-		GetComponent<Animator>().Play("Regular");
+		myAnimator.Play("Regular");
 		gameObject.layer = 10 + (int)currentColor;
 		spriteRenderer.enabled = true;
 		if(skinSpriteRenderer != null)
@@ -464,6 +465,8 @@ public class PlayerController : MonoBehaviour {
 			if(barC < EObjectColor.MAXCOLORNUM && gameMgr.currentLife > 1)
 			{
 				myAnimator.Play("FastFlashing");
+				if(mySkinAnimator != null)
+					mySkinAnimator.Play ("PlayerSkinHurt");
 				//ChangeColor ((int)barC);
 
 			}
@@ -476,6 +479,9 @@ public class PlayerController : MonoBehaviour {
 				allowInput = false;
 				gameObject.layer = LayerMask.NameToLayer("NoCollision");
 				myAnimator.Play("Spin");
+				
+				if(mySkinAnimator != null)
+					mySkinAnimator.Play ("PlayerSkinDeath");
 
 				if(!deathSoundPlayed)
 				{
@@ -602,6 +608,10 @@ public class PlayerController : MonoBehaviour {
 	void HandleInput(bool bButtonJumpDown, bool bButtonJumpHold, bool bButtonJumpUp)
 	{
 		if (bButtonJumpDown && maxJumpCount > currentJumpCount) {
+
+			
+			if(mySkinAnimator != null)
+				mySkinAnimator.Play ("PlayerSkinJump");
 
 			totalJumpCount += 1;
 			jumped = true;
