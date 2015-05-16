@@ -227,7 +227,8 @@ public class PlayerController : MonoBehaviour {
 		GetComponent<Animator>().Play("Regular");
 		gameObject.layer = 10 + (int)currentColor;
 		spriteRenderer.enabled = true;
-		skinSpriteRenderer.enabled = true;
+		if(skinSpriteRenderer != null)
+			skinSpriteRenderer.enabled = true;
 		allowInput_jump = true;
 		isDead = false;
 		deathSoundPlayed = false;
