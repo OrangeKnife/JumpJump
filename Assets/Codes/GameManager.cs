@@ -556,6 +556,14 @@ public class GameManager : MonoBehaviour {
 		}
 	}
 
+	public void onRestoreTransactionsStarted() {
+		eventHandler.onRestoreTransactionsStarted ();
+	}
+
+	public void onRestoreTransactionsFinished(bool success) {
+		eventHandler.onRestoreTransactionsFinished (success);
+	}
+
 	public void CancelPurchase(string itemId)
 	{
 	}

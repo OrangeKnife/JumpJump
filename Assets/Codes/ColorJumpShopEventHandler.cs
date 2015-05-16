@@ -203,6 +203,8 @@ public class ColorJumpShopEventHandler {
 	/// </summary>
 	public void onRestoreTransactionsStarted() {
 		Utils.addLog ("onRestoreTransactionsStarted");
+		if (gameMgr != null)
+			gameMgr.onRestoreTransactionsStarted ();
 	}
 	
 	/// <summary>
@@ -211,6 +213,8 @@ public class ColorJumpShopEventHandler {
 	/// <param name="success">If set to <c>true</c> success.</param>
 	public void onRestoreTransactionsFinished(bool success) {
 		Utils.addLog ("onRestoreTransactionsFinished("+success.ToString()+")");
+		if (gameMgr != null)
+			gameMgr.onRestoreTransactionsFinished (success);
 	}
 	
 	/// <summary>

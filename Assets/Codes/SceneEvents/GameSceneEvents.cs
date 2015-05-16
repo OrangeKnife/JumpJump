@@ -867,9 +867,20 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onMarketPurchase(string itemId)
 	{
-		CancelInvoke ("PurchaseItemTimeOut");
+		CancelInvoke ("ConnectToAppStoreTimeOut");
 		ShowAutoMessage ("");
-		DisplayShopItem (currentShopItemDisplayIndex);
+		if(UI_ShopPanel.activeSelf)
+			DisplayShopItem (currentShopItemDisplayIndex);
+	}
+
+	public void onRestorePurchaseButtonClicked()
+	{
+#if UNITY_IOS && !UNITY_EDITOR
+		SoomlaStore.RestoreTransactions ();
+#endif
+#if UNITY_ANDROID
+		ShowAutoMessage("ANDROID  USES  DONT  HAVE  TO\nRESTORE!");
+#endif
 	}
 
 	void DisplayShopItem(int idxOfgoodies)
@@ -896,6 +907,20 @@ public class GameSceneEvents : MonoBehaviour {
 		}
 	}
 
+	public void onRestoreTransactionsStarted() {
+		ShowAutoMessage("PROCESSING...\nPLEASE  WAIT",null,false);
+		CancelInvoke ("ConnectToAppStoreTimeOut");
+		Invoke("ConnectToAppStoreTimeOut",30f);
+	}
+	
+	public void onRestoreTransactionsFinished(bool success) {
+		CancelInvoke ("ConnectToAppStoreTimeOut");
+		if(success)
+			ShowAutoMessage ("FINISHED !");
+		else
+			ShowAutoMessage ("FAILED !");
+	}
+
 	public void PurchaseCurrentSelectedSkin()
 	{
 		playMenuClickedSound ();
@@ -904,7 +929,8 @@ public class GameSceneEvents : MonoBehaviour {
 		if (currentShopItemId != "" && StoreInventory.GetItemBalance (currentShopItemId) == 0) {
 			gameMgr.BuySkin (currentShopItemId);
 			ShowAutoMessage("PROCESSING...\nPLEASE  WAIT",null,false);
-			Invoke("PurchaseItemTimeOut",30f);
+			CancelInvoke ("ConnectToAppStoreTimeOut");
+			Invoke("ConnectToAppStoreTimeOut",30f);
 		}
 		else {
 			 
@@ -915,7 +941,7 @@ public class GameSceneEvents : MonoBehaviour {
 		//
 	}
 
-	void PurchaseItemTimeOut()
+	void ConnectToAppStoreTimeOut()
 	{
 		ShowAutoMessage("TIMEOUT\nCANNOT  CONNECT\nTO  APP  STORE");
 	}
