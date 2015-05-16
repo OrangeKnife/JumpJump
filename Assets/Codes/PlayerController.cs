@@ -175,7 +175,8 @@ public class PlayerController : MonoBehaviour {
 		MyRigidBody.gravityScale = 0;
 		MyRigidBody.velocity = Vector3.zero;
 		spriteRenderer.enabled = false;
-		skinSpriteRenderer.enabled = false;
+		if(skinSpriteRenderer != null)
+			skinSpriteRenderer.enabled = false;
 
 		if (gameMgr.currentLife < 1) {
 			eventHandler.SetPauseButton(false);
