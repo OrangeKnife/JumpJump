@@ -7,6 +7,7 @@ public class PlayerSkin : MonoBehaviour
 	public float skinPrice;
 
 	public Sprite ShopIcon;
-	public bool canBuy;
+	public bool purchasable;
+	public bool freeToUse;
 }
 

@@ -71,8 +71,9 @@ public class GameManager : MonoBehaviour {
 	float gameStartTime;
 
 	public List<GameObject> SkinTemplates;
+	List<GameObject> ownedSkins;
 	GameObject currentSelectedSkinTemplate;
-
+	int currentSkinTemplateIdx = 0;//random skin
 	public void login()
 	{
 
@@ -186,6 +187,22 @@ public class GameManager : MonoBehaviour {
 #endif
 		SendPhoneNotification ();//haha
 
+		ownedSkins = new List<GameObject> ();
+		checkOwnedSkins ();
+
+	}
+
+	void checkOwnedSkins()
+	{
+		for(int i = 1; i < SkinTemplates.Count; ++i)
+		{
+			PlayerSkin ps = SkinTemplates[i].GetComponent<PlayerSkin>();
+			if(ps != null)
+			{
+				if(ps.freeToUse || ps.purchasable && ps.skinId != "" && StoreInventory.GetItemBalance (ps.skinId) > 0)
+					ownedSkins.Add (SkinTemplates[i]);
+			}
+		}
 	}
 
 	public void RecordingStartedDelegate() {
@@ -454,6 +471,9 @@ public class GameManager : MonoBehaviour {
 
 		CurrentPlayer = Instantiate(CurrentPlayerTemplate);
 
+		if (currentSkinTemplateIdx == 0)
+			UseSkin (currentSkinTemplateIdx); // do random every game
+
 		if (currentSelectedSkinTemplate != null)
 			CurrentPlayer.GetComponent<PlayerController> ().AttachSkin (currentSelectedSkinTemplate);
 
@@ -551,9 +571,25 @@ public class GameManager : MonoBehaviour {
 			break;
 		case "colorjumpId_smileface":
 		case "colorjumpId_sadface":
+				GameObject skinJustBought = getSkinBySkinId(itemId);
+				if(skinJustBought != null)
+					ownedSkins.Add(skinJustBought);
+				else
+					Utils.addLog("WTF, CANNOT FIND SKIN YOU JUST BOUGHT");
+
 				eventHandler.onMarketPurchase (itemId);
 				break;
 		}
+	}
+
+	GameObject getSkinBySkinId(string skId)
+	{
+		foreach (GameObject sktemp in SkinTemplates) {
+			if(sktemp.GetComponent<PlayerSkin>().skinId == skId)
+				return sktemp;
+		}
+
+		return null;
 	}
 
 	public void onRestoreTransactionsStarted() {
@@ -586,9 +622,27 @@ public class GameManager : MonoBehaviour {
 		}
 	}
 
+	GameObject getRandomUseableSkin()
+	{
+		GameObject rtObj = null;
+		int RandomNum = 0;
+		Random.seed = (int)Time.time;
+		while (rtObj == null)
+		{
+			RandomNum = Random.Range(0,ownedSkins.Count);//at least you will get no skin in owned skins
+			rtObj = ownedSkins[RandomNum];
+		}
+		return rtObj;
+	}
+
 	public void UseSkin(int skinTemplateIdx)
 	{
-		if (skinTemplateIdx == 0)//no skin
+		currentSkinTemplateIdx = skinTemplateIdx;
+		if (skinTemplateIdx == 0) //force random a skin
+		{
+			currentSelectedSkinTemplate = getRandomUseableSkin();
+		}
+		else if (skinTemplateIdx == 1)//force no skin
 			currentSelectedSkinTemplate = null;
 		else 
 			currentSelectedSkinTemplate = SkinTemplates [skinTemplateIdx];

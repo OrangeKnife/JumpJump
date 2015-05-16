@@ -894,7 +894,8 @@ public class GameSceneEvents : MonoBehaviour {
 			currentShopItemPriceText.text = ps.skinPrice.ToString("0.00");
 			currentShopItemId = ps.skinId;
 
-			if(ps.skinPrice == 0 || currentShopItemId != "" && StoreInventory.GetItemBalance (currentShopItemId) > 0 )
+
+			if(ps.freeToUse || ps.purchasable && currentShopItemId != "" && StoreInventory.GetItemBalance (currentShopItemId) > 0 )
 			{
 				//refresh UI , already owned
 				currentShopItemPriceBG.SetActive(false);
@@ -904,6 +905,7 @@ public class GameSceneEvents : MonoBehaviour {
 				currentShopItemPriceBG.SetActive(true);
 				purchaseButtonText.text = "I  WANT  IT !";
 			}
+
 		}
 	}
 
@@ -930,17 +932,20 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		playMenuClickedSound ();
 		Utils.addLog("PurchaseCurrentSelectedSkin");
-		//if(Can buy and didn't buy)
-		if (currentShopItemId != "" && StoreInventory.GetItemBalance (currentShopItemId) == 0) {
-			gameMgr.BuySkin (currentShopItemId);
-			ShowAutoMessage("PROCESSING...\nPLEASE  WAIT",null,false);
-			CancelInvoke ("ConnectToAppStoreTimeOut");
-			Invoke("ConnectToAppStoreTimeOut",90f);
-		}
-		else {
-			 
-				gameMgr.UseSkin (currentShopItemDisplayIndex);
-			 
+		PlayerSkin ps = gameMgr.SkinTemplates [currentShopItemDisplayIndex].GetComponent<PlayerSkin> ();
+		if(ps != null)
+		{
+			if (currentShopItemId != "" && StoreInventory.GetItemBalance (currentShopItemId) == 0) {
+				gameMgr.BuySkin (currentShopItemId);
+				ShowAutoMessage("PROCESSING...\nPLEASE  WAIT",null,false);
+				CancelInvoke ("ConnectToAppStoreTimeOut");
+				Invoke("ConnectToAppStoreTimeOut",90f);
+			}
+			else {
+				 
+					gameMgr.UseSkin (currentShopItemDisplayIndex);
+				 
+				}
 		}
 		//can buy and bought, use it
 		//
