@@ -6,6 +6,8 @@ using UnityEngine.Advertisements;
 using System.IO;
 using UnityEngine.Cloud.Analytics;
 using GoogleMobileAds.Api;
+using Soomla.Store;
+
 #if UNITY_ANDROID
 using GooglePlayGames;
 #endif
@@ -18,6 +20,16 @@ public class GameSceneEvents : MonoBehaviour {
 	//GameObject yellowboardsButton = null;
 	//[SerializeField]
 	//GameObject UI_SmallLeaderBoardsPanel = null;
+	[SerializeField]
+	UnityEngine.UI.Text purchaseButtonText = null;
+	[SerializeField]
+	GameObject currentShopItemPriceBG = null;
+	[SerializeField]
+	UnityEngine.UI.Text currentShopItemPriceText = null;
+	[SerializeField]
+	UnityEngine.UI.Text currentShopItemName = null;
+	[SerializeField]
+	UnityEngine.UI.Image currentShopItemImage = null;
 	[SerializeField]
 	GameObject UI_ShopPanel = null;
 	[SerializeField]
@@ -129,6 +141,10 @@ public class GameSceneEvents : MonoBehaviour {
 	bool bDidRecordingVideo = false;
 
 	public bool isTitle = true;
+
+	int currentShopItemDisplayIndex = 0;
+
+	string currentShopItemId;
 
 	public void DestoryAllAds()
 	{
@@ -824,19 +840,60 @@ public class GameSceneEvents : MonoBehaviour {
 		if(bActive)
 		{
 			UI_ShopPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+			DisplayShopItem(currentShopItemDisplayIndex);
 		}
 	}
 
 	public void onShopPreviousButtonClicked()
 	{
+		if(currentShopItemDisplayIndex > 0)
+			currentShopItemDisplayIndex--;
+		DisplayShopItem (currentShopItemDisplayIndex);
 	}
 	public void onShopNextButtonClicked ()
 	{
+		if (currentShopItemDisplayIndex < gameMgr.SkinTemplates.Count - 1)
+			currentShopItemDisplayIndex++;
+		DisplayShopItem (currentShopItemDisplayIndex);
+	}
+
+	void DisplayShopItem(int idxOfgoodies)
+	{
+		GameObject objTemp = gameMgr.SkinTemplates [idxOfgoodies];
+		PlayerSkin ps = objTemp.GetComponent<PlayerSkin> ();
+		if (ps != null) {
+			//show icon
+			currentShopItemImage.sprite = ps.ShopIcon;
+			currentShopItemName.text = ps.skinName;
+			currentShopItemPriceText.text = ps.skinPrice.ToString("0.00");
+			currentShopItemId = ps.skinId;
+
+			if(ps.skinPrice == 0 || currentShopItemId != "" && StoreInventory.GetItemBalance (currentShopItemId) > 0 )
+			{
+				//refresh UI , already owned
+				currentShopItemPriceBG.SetActive(false);
+				purchaseButtonText.text = "USE  THIS  SKIN";
+			}else
+			{
+				currentShopItemPriceBG.SetActive(true);
+				purchaseButtonText.text = "I  WANT  IT !";
+			}
+		}
 	}
 
 	public void PurchaseCurrentSelectedSkin()
 	{
 		Utils.addLog("PurchaseCurrentSelectedSkin");
+		//if(Can buy and didn't buy)
+		if (currentShopItemId != "" && StoreInventory.GetItemBalance (currentShopItemId) == 0)
+			gameMgr.BuySkin (currentShopItemId);
+		else {
+			 
+				gameMgr.UseSkin (currentShopItemDisplayIndex);
+			 
+		}
+		//can buy and bought, use it
+		//
 	}
 
 	public void onShopButtonClicked()

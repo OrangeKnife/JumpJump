@@ -30,7 +30,7 @@ public class PlayerController : MonoBehaviour {
 	GameManager gameMgr = null;
 	Rigidbody2D MyRigidBody;
 	SpriteRenderer spriteRenderer,skinSpriteRenderer;
-	public GameObject skin;
+
 
 
 	public bool jumped {get; private set;}
@@ -80,6 +80,10 @@ public class PlayerController : MonoBehaviour {
 	public int totalJumpCount {get; private set;}
 	public float defaultGravity;
 
+	GameObject skinObject;
+	PlayerSkin currentSkin = null;
+
+
 	void Awake()
 	{
 		
@@ -101,7 +105,6 @@ public class PlayerController : MonoBehaviour {
 		MyRigidBody.gravityScale = defaultGravity;
 
 		spriteRenderer = GetComponent<SpriteRenderer>();
-		skinSpriteRenderer = skin.GetComponent<SpriteRenderer> ();
 
 		myAnimator = GetComponent<Animator> ();
 
@@ -154,7 +157,16 @@ public class PlayerController : MonoBehaviour {
 		allowInput_jump = false;
 		Invoke ("revive", 1f);
 	}
-	
+
+	public void AttachSkin(GameObject skinTemp)
+	{
+		skinObject = GameObject.Instantiate (skinTemp);
+		skinObject.transform.SetParent(gameObject.transform,false);
+		currentSkin = skinObject.GetComponent<PlayerSkin> ();
+		skinSpriteRenderer = skinObject.GetComponent<SpriteRenderer> ();
+	 	 
+	}
+
 	void Die()
 	{
 		allowInput = false;

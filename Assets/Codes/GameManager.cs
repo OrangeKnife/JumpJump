@@ -70,6 +70,9 @@ public class GameManager : MonoBehaviour {
 	public bool recorded = false;
 	float gameStartTime;
 
+	public List<GameObject> SkinTemplates;
+	GameObject currentSelectedSkinTemplate;
+
 	public void login()
 	{
 
@@ -450,6 +453,10 @@ public class GameManager : MonoBehaviour {
 		}
 
 		CurrentPlayer = Instantiate(CurrentPlayerTemplate);
+
+		if (currentSelectedSkinTemplate != null)
+			CurrentPlayer.GetComponent<PlayerController> ().AttachSkin (currentSelectedSkinTemplate);
+
 		MainCam.gameObject.GetComponent<CameraController> ().ResetCamera (CurrentPlayer);
 
 		if(eventHandler)
@@ -554,6 +561,23 @@ public class GameManager : MonoBehaviour {
 		}
 	}
 
+	public void BuySkin(string soomlaId)
+	{
+		try{
+			StoreInventory.BuyItem(soomlaId);
+		} catch (System.Exception e) {
+			Utils.addLog ("SOOMLA/UNITY " + e.Message);
+		}
+	}
+
+	public void UseSkin(int skinTemplateIdx)
+	{
+		if (skinTemplateIdx == 0)//no skin
+			currentSelectedSkinTemplate = null;
+		else 
+			currentSelectedSkinTemplate = SkinTemplates [skinTemplateIdx];
+	}
+
 	public void AddDeathCount(int d)
 	{
 		mysave.deathCount += d;
@@ -588,4 +612,5 @@ public class GameManager : MonoBehaviour {
 		return Time.time - gameStartTime;
 	}
 	
+
 }

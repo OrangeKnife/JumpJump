@@ -42,7 +42,10 @@ using Soomla.Store;
 		/// see parent.
 		/// </summary>
 		public VirtualGood[] GetGoods() {
-			return new VirtualGood[] {/*MUFFINCAKE_GOOD, PAVLOVA_GOOD,CHOCLATECAKE_GOOD, CREAMCUP_GOOD, */NO_ADS_LTVG};
+			return new VirtualGood[] {/*MUFFINCAKE_GOOD, PAVLOVA_GOOD,CHOCLATECAKE_GOOD, CREAMCUP_GOOD, */
+			NO_ADS_LTVG,
+			SKIN_SMILEFACE_LTVG,
+			SKIN_SADFACE_LTVG};
 		}
 		
 		/// <summary>
@@ -81,7 +84,10 @@ using Soomla.Store;
 		
 		public const string NO_ADS_LIFETIME_PRODUCT_ID = "colorjump_remove_ads";
 		
-		
+		public const string COLORJUMP_SKIN_SMILEFACE_PRODUCT_ID = "colorjump_skin_smileface";
+		public const string COLORJUMP_SKIN_SADFACE_PRODUCT_ID = "colorjump_skin_sadface";
+		//public const string NO_ADS_LIFETIME_PRODUCT_ID = "colorjump_remove_ads";
+
 		/** Virtual Currencies **/
 		
 		public static VirtualCurrency MUFFIN_CURRENCY = new VirtualCurrency(
@@ -171,6 +177,20 @@ using Soomla.Store;
 			"No More Ads!",				 									// description
 			"no_ads",														// item id
 			new PurchaseWithMarket(NO_ADS_LIFETIME_PRODUCT_ID, 0.99));	// the way this virtual good is purchased
+
+		public static VirtualGood SKIN_SMILEFACE_LTVG = new LifetimeVG(
+			"Smile Face", 														// name
+			"I always smile!",				 									// description
+			"colorjumpId_smileface",														// item id
+			new PurchaseWithMarket(COLORJUMP_SKIN_SMILEFACE_PRODUCT_ID, 0.99));	// the way this virtual good is purchased
+
+		public static VirtualGood SKIN_SADFACE_LTVG = new LifetimeVG(
+			"Sad Face", 														// name
+			"I am sad :(",				 									// description
+			"colorjumpId_sadface",														// item id
+			new PurchaseWithMarket(COLORJUMP_SKIN_SADFACE_PRODUCT_ID, 0.99));	// the way this virtual good is purchased
+
+
 	}
 	
  
