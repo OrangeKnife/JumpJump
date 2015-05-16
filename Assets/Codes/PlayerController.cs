@@ -119,7 +119,7 @@ public class PlayerController : MonoBehaviour {
 		totalJumpCount = 0;
 
 		eventHandler.SetFloorText("FLOOR.0");
-		eventHandler.SetJumpCountText ("JUMP X "+currentJumpCount.ToString());
+		eventHandler.SetJumpCountText ("JUMP "+getJumpXstring());
 
 	}
 
@@ -604,7 +604,19 @@ public class PlayerController : MonoBehaviour {
 			setJumpCombo(0);
 
 	}
+	string getJumpXstring()
+	{
+		string Xstring = "";
+		if (maxJumpCount - currentJumpCount < 3) 
+		{
+			for (int i = 0; i < maxJumpCount - currentJumpCount; ++i) {
+				Xstring += "X";
+			}
+		} else
+			Xstring = "X " + (maxJumpCount - currentJumpCount).ToString ();
 
+		return Xstring;
+	}
 	void HandleInput(bool bButtonJumpDown, bool bButtonJumpHold, bool bButtonJumpUp)
 	{
 		if (bButtonJumpDown && maxJumpCount > currentJumpCount) {
@@ -616,7 +628,7 @@ public class PlayerController : MonoBehaviour {
 			totalJumpCount += 1;
 			jumped = true;
 			currentJumpCount += 1;
-			eventHandler.SetJumpCountText("JUMP X "+ (maxJumpCount - currentJumpCount).ToString());
+			eventHandler.SetJumpCountText("JUMP "+getJumpXstring() );
 			MyRigidBody.velocity = Vector3.Min(Vector3.zero, Vector3.Max(new Vector3(0,-2f,0),MyRigidBody.velocity));//avoid crazy current vel !!!
 			MyRigidBody.AddForce(new Vector3(0,jumpPower * 100f,0));
 			playSound(audioClips[0],0,false,0.1f); //jjump
@@ -690,7 +702,7 @@ public class PlayerController : MonoBehaviour {
 	{
 		if (!isDead) {
 			currentJumpCount = Mathf.Min (Mathf.Max (0, num), maxJumpCount);
-			eventHandler.SetJumpCountText("JUMP X "+ (maxJumpCount - currentJumpCount).ToString());
+			eventHandler.SetJumpCountText("JUMP "+getJumpXstring());
 			jumped = false;
 			combo = 0;
 			if(barController != null)
