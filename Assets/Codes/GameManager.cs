@@ -40,8 +40,8 @@ public class GameManager : MonoBehaviour {
 	public int gameMode { get; private set;}//0 normal, 1 hard core
 	float savedTimeScale = 1f;
 
-	public Color fromCameraColor;//218,237,226
-	public Color towardsCameraColor;
+	//public Color fromCameraColor;//218,237,226
+	//public Color towardsCameraColor;
 
 	public static string leaderboardId = "";
 	public static string leaderboardId_hardcore = "";
@@ -58,8 +58,10 @@ public class GameManager : MonoBehaviour {
 	public bool hardCoreUnlocked { get; private set; }
 	public int hardCoreUnlockCount;
 
-	public List<Sprite> backgroundSprites;
-	public List<Sprite> backgroundSprites_hardcore;
+	//public List<Sprite> backgroundSprites;
+	//public List<Sprite> backgroundSprites_hardcore;
+
+	public List<Color> backgroundColors,backgroundColors_hardcore;
 
 	SpriteRenderer BGSpriteRenderer;
 
@@ -315,18 +317,18 @@ public class GameManager : MonoBehaviour {
 	
 		eventHandler.onGameStarted ();
 
-		MainCam.backgroundColor = fromCameraColor;
+		//MainCam.backgroundColor = fromCameraColor;
 
 		gameStartTime = Time.time;
 
 
 	}
 
-	public void changeCameraBGColor(float playerHeight)
+	/*public void changeCameraBGColor(float playerHeight)
 	{
 		if(playerHeight <= 80f)
 			MainCam.backgroundColor = fromCameraColor + playerHeight / 300f * (towardsCameraColor - fromCameraColor);
-	}
+	}*/
 
 	public void ScoreReported(bool result) {
 		if(result)
@@ -491,16 +493,29 @@ public class GameManager : MonoBehaviour {
 			}
 		}
 
-		BGSpriteRenderer.sprite = getRandomBG (gameMode);
+		//BGSpriteRenderer.sprite = getRandomBG (gameMode);
+		MainCam.backgroundColor = getRandomBGColor (gameMode);
 
 	}
 
-	Sprite getRandomBG(int mode)
+	/*Sprite getRandomBG(int mode)
 	{
-		if (mode == 0)
+		if (mode == 0 && backgroundSprites.Count > 0)
 			return backgroundSprites [Random.Range (0, backgroundSprites.Count)];
-		else
+		else if(mode == 1 && backgroundSprites_hardcore.Count > 0)
 			return backgroundSprites_hardcore [Random.Range (0, backgroundSprites_hardcore.Count)];
+
+		return null;
+	}*/
+
+	Color getRandomBGColor(int mode)
+	{
+		if (mode == 0 && backgroundColors.Count > 0)
+			return backgroundColors [Random.Range (0, backgroundColors.Count)];
+		else if(mode == 1 && backgroundColors_hardcore.Count > 0)
+			return backgroundColors_hardcore [Random.Range (0, backgroundColors_hardcore.Count)];
+		
+		return Color.white;
 	}
 
 	public GameObject GetCurrentPlayer()
