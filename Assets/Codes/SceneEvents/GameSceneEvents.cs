@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
@@ -147,7 +147,7 @@ public class GameSceneEvents : MonoBehaviour {
 	int currentShopItemDisplayIndex = 0;
 
 	string currentShopItemId;
-
+	IEnumerator ButtonHoldLoopCoroutine;
 	public void DestoryAllAds()
 	{
 		if (bannerView != null)
@@ -849,6 +849,50 @@ public class GameSceneEvents : MonoBehaviour {
 		{
 			UI_ShopPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 			DisplayShopItem(currentShopItemDisplayIndex);
+		}
+	}
+
+	public void onShopPreviousButtonDown()
+	{
+		ButtonHoldLoopCoroutine = previousButtonLoop (0.3f);
+		StartCoroutine (ButtonHoldLoopCoroutine);
+	}
+
+	public void onShopPreviousButtonUp()
+	{
+		StopCoroutine (ButtonHoldLoopCoroutine);
+	}
+
+	IEnumerator previousButtonLoop(float loopinterval)
+	{
+		while(true)
+		{
+			onShopPreviousButtonClicked ();
+			yield return new WaitForSeconds(loopinterval);
+			loopinterval -= 0.01f;
+			loopinterval = Mathf.Max(0.2f,loopinterval);
+		}
+	}
+
+	public void onShopNextButtonDown ()
+	{
+		ButtonHoldLoopCoroutine = nextButtonLoop (0.3f);
+		StartCoroutine (ButtonHoldLoopCoroutine);
+	}
+
+	public void onShopNextButtonUp()
+	{
+		StopCoroutine (ButtonHoldLoopCoroutine);
+	}
+
+	IEnumerator nextButtonLoop(float loopinterval)
+	{
+		while(true)
+		{
+			onShopNextButtonClicked ();
+			yield return new WaitForSeconds(loopinterval);
+			loopinterval -= 0.01f;
+			loopinterval = Mathf.Max(0.2f,loopinterval);
 		}
 	}
 
