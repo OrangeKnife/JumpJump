@@ -35,7 +35,7 @@ using Soomla.Store;
 		/// see parent.
 		/// </summary>
 		public VirtualCurrency[] GetCurrencies() {
-			return new VirtualCurrency[]{MUFFIN_CURRENCY};
+		return new VirtualCurrency[]{FREEGIFT_TOKEN};
 		}
 		
 		/// <summary>
@@ -44,15 +44,15 @@ using Soomla.Store;
 		public VirtualGood[] GetGoods() {
 			return new VirtualGood[] {/*MUFFINCAKE_GOOD, PAVLOVA_GOOD,CHOCLATECAKE_GOOD, CREAMCUP_GOOD, */
 			NO_ADS_LTVG,
-			SKIN_SMILEFACE_LTVG,
-			SKIN_SADFACE_LTVG};
+			SKIN_01_LTVG,
+			SKIN_02_LTVG};
 		}
 		
 		/// <summary>
 		/// see parent.
 		/// </summary>
 		public VirtualCurrencyPack[] GetCurrencyPacks() {
-			return new VirtualCurrencyPack[] {/*TENMUFF_PACK, FIFTYMUFF_PACK, FOURHUNDMUFF_PACK, THOUSANDMUFF_PACK*/};
+			return new VirtualCurrencyPack[] {ONE_FREEGIFT_TOKEN/*TENMUFF_PACK, FIFTYMUFF_PACK, FOURHUNDMUFF_PACK, THOUSANDMUFF_PACK*/};
 		}
 		
 		/// <summary>
@@ -63,8 +63,13 @@ using Soomla.Store;
 		}
 		
 		/** Static Final Members **/
-		
+		public const string FREEGIFT_TOKEN_ITEM_ID      = "colorjump_freegifttoken";
+
 		public const string MUFFIN_CURRENCY_ITEM_ID      = "currency_muffin";
+
+
+
+	///////////////////////////////////////////////////////////////////////
 		
 		public const string TENMUFF_PACK_PRODUCT_ID      = "android.test.refunded";
 		
@@ -84,11 +89,18 @@ using Soomla.Store;
 		
 		public const string NO_ADS_LIFETIME_PRODUCT_ID = "colorjump_remove_ads";
 		
-		public const string COLORJUMP_SKIN_SMILEFACE_PRODUCT_ID = "colorjump_skin_smileface";
-		public const string COLORJUMP_SKIN_SADFACE_PRODUCT_ID = "colorjump_skin_sadface";
+		public const string COLORJUMP_SKIN_01_PRODUCT_ID = "colorjump_skin_smileface";
+		public const string COLORJUMP_SKIN_02_PRODUCT_ID = "colorjump_skin_sadface";
 		//public const string NO_ADS_LIFETIME_PRODUCT_ID = "colorjump_remove_ads";
 
 		/** Virtual Currencies **/
+
+		public static VirtualCurrency FREEGIFT_TOKEN = new VirtualCurrency(
+			"FreeGiftToken",										// name
+			"I am free gift token",												// description
+			FREEGIFT_TOKEN_ITEM_ID							// item id
+			);
+
 		
 		public static VirtualCurrency MUFFIN_CURRENCY = new VirtualCurrency(
 			"Muffins",										// name
@@ -98,6 +110,16 @@ using Soomla.Store;
 		
 		
 		/** Virtual Currency Packs **/
+
+		public static VirtualCurrencyPack ONE_FREEGIFT_TOKEN = new VirtualCurrencyPack(
+			"1 token",                                   // name
+			"give player one token",                       // description
+			"freegift_token_one",                                   // item id
+			1,												// number of currencies in the pack
+			FREEGIFT_TOKEN_ITEM_ID,                        // the currency associated with this pack
+			new PurchaseWithVirtualItem(FREEGIFT_TOKEN_ITEM_ID,0)
+			);
+
 		
 		public static VirtualCurrencyPack TENMUFF_PACK = new VirtualCurrencyPack(
 			"10 Muffins",                                   // name
@@ -178,19 +200,18 @@ using Soomla.Store;
 			"no_ads",														// item id
 			new PurchaseWithMarket(NO_ADS_LIFETIME_PRODUCT_ID, 0.99));	// the way this virtual good is purchased
 
-		public static VirtualGood SKIN_SMILEFACE_LTVG = new LifetimeVG(
+		public static VirtualGood SKIN_01_LTVG = new LifetimeVG(
 			"Smile Face", 														// name
 			"I always smile!",				 									// description
 			"colorjumpId_smileface",														// item id
-			new PurchaseWithMarket(COLORJUMP_SKIN_SMILEFACE_PRODUCT_ID, 0.99));	// the way this virtual good is purchased
+			new PurchaseWithMarket(COLORJUMP_SKIN_01_PRODUCT_ID, 0.99));	// the way this virtual good is purchased
 
-		public static VirtualGood SKIN_SADFACE_LTVG = new LifetimeVG(
+		public static VirtualGood SKIN_02_LTVG = new LifetimeVG(
 			"Sad Face", 														// name
 			"I am sad :(",				 									// description
 			"colorjumpId_sadface",														// item id
-			new PurchaseWithMarket(COLORJUMP_SKIN_SADFACE_PRODUCT_ID, 0.99));	// the way this virtual good is purchased
-
-
-	}
+			new PurchaseWithMarket(COLORJUMP_SKIN_02_PRODUCT_ID, 0.99));	// the way this virtual good is purchased
 	
+
+}
  

@@ -710,6 +710,13 @@ public class GameManager : MonoBehaviour {
 	{
 		return Time.time - gameStartTime;
 	}
+
+	public void AddFreeGiftToken(int i = 1)
+	{
+		StoreInventory.GiveItem ("freegift_token_one",1);
+		//Utils.addLog ("token = " + StoreInventory.GetItemBalance (ColorJumpStoreAssets.FREEGIFT_TOKEN_ITEM_ID));
+		//StoreInventory.TakeItem("freegift_token_one",1);
+	}
 	
 
 }
