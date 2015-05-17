@@ -500,6 +500,11 @@ public class GameManager : MonoBehaviour {
 
 	}
 
+	public void ChangeRandomBG()
+	{
+		MainCam.backgroundColor = getRandomBGColor (gameMode);
+	}
+
 	/*Sprite getRandomBG(int mode)
 	{
 		if (mode == 0 && backgroundSprites.Count > 0)

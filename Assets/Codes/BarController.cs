@@ -37,6 +37,7 @@ public class BarController : MonoBehaviour
 
 	Rigidbody2D shakingRigidBody;
 	Vector3 savedShakingPos;
+	GameManager gameMgr;
 	void Awake ()
 	{
 		barColor = (EObjectColor)Random.Range (0,(int)EObjectColor.MAXCOLORNUM);
@@ -50,7 +51,7 @@ public class BarController : MonoBehaviour
 		//audioSource.volume = 0.2f;
 		ChangeColor ();
 
-
+		gameMgr = GameObject.Find ("GameManager").GetComponent<GameManager>();
 	}
 
 	bool shallWeDisplayBarNum(int n)
@@ -308,9 +309,9 @@ public class BarController : MonoBehaviour
 				return;
 			
 			//other.gameObject.GetComponent<Rigidbody2D>().velocity = Vector3.zero;
-			
+			PlayerController pc = other.gameObject.GetComponent<PlayerController>();
 			if(minusScore && score < 0 || score > 0)
-				other.gameObject.GetComponent<PlayerController> ().AddScore (score);
+				pc.AddScore (score);
 			
 			if (score > 0) {
 				score = -1;
@@ -322,6 +323,9 @@ public class BarController : MonoBehaviour
 					{
 						audioSource.clip = audioClips [3];//speical sfx for 10,20,30....
 						audioSource.volume = 0.4f;
+
+						//lets change BG
+						gameMgr.ChangeRandomBG();
 					}
 					else
 					{
