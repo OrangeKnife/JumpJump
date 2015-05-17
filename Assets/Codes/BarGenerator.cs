@@ -24,6 +24,7 @@ public class BarGenerator : MonoBehaviour {
 	public float scrollingBarCountFactor;
 	bool lastBarFlashing = false;
 	List<GameObject> PickupList;
+	List<GameObject> FloatingObjectList;
 	
 	float difficultyMultiplier;
 	void Start () 
@@ -38,6 +39,8 @@ public class BarGenerator : MonoBehaviour {
 		if (PickupList == null)
 			PickupList = new List<GameObject> ();
 
+		if (FloatingObjectList == null)
+			FloatingObjectList = new List<GameObject> ();
 
 
 	}
@@ -60,6 +63,12 @@ public class BarGenerator : MonoBehaviour {
 			Destroy (obj);
 		}
 		PickupList.Clear ();
+
+		
+		foreach (GameObject obj in FloatingObjectList) {
+			Destroy (obj);
+		}
+		FloatingObjectList.Clear ();
 	}
 
 	public void onGameStarted()
@@ -157,9 +166,18 @@ public class BarGenerator : MonoBehaviour {
 				pickupCount++;
 			}
 
+			if(Random.Range(0f,1f) < 0.2f)
+				SpawnFloatingObject(gameMgr.ForegroundFloatingObjectList[Random.Range(0,gameMgr.ForegroundFloatingObjectList.Count)],lastBarLocation);
 
 
 		}
+	}
+
+	void SpawnFloatingObject(GameObject floatingObjTemp,Vector3 barloc)
+	{
+		GameObject go = GameObject.Instantiate (floatingObjTemp);
+		FloatingObjectList.Add (go);
+		go.transform.position = barloc + new Vector3(Random.Range(-3f,3f) + barloc.x, Random.Range(-barHeight.y*0.5f,barHeight.y * 1.5f),barloc.z);
 	}
 
 	void SpawnPickup(GameObject pickupTemplate, Vector3 barloc)

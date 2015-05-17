@@ -14,6 +14,8 @@ public class GameManager : MonoBehaviour {
 	public List<GameObject> PlayerTemplates;
 	private GameObject CurrentPlayer;
 
+	
+	public List<GameObject> ForegroundFloatingObjectList;
 	public List<GameObject> PickupTemplates;
 	public GameObject UnlockHardcoreModePickupTemplate;
 
