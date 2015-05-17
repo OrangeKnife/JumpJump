@@ -160,11 +160,16 @@ public class PlayerController : MonoBehaviour {
 
 	public void AttachSkin(GameObject skinTemp)
 	{
-		skinObject = GameObject.Instantiate (skinTemp);
-		skinObject.transform.SetParent(gameObject.transform,false);
-		currentSkin = skinObject.GetComponent<PlayerSkin> ();
-		skinSpriteRenderer = skinObject.GetComponent<SpriteRenderer> ();
-		mySkinAnimator = skinObject.GetComponent<Animator> ();
+		if (skinObject != null)
+			GameObject.Destroy (skinObject);
+
+		if (skinTemp != null) {
+			skinObject = GameObject.Instantiate (skinTemp);
+			skinObject.transform.SetParent (gameObject.transform, false);
+			currentSkin = skinObject.GetComponent<PlayerSkin> ();
+			skinSpriteRenderer = skinObject.GetComponent<SpriteRenderer> ();
+			mySkinAnimator = skinObject.GetComponent<Animator> ();
+		}
 	 	 
 	}
 
@@ -254,6 +259,7 @@ public class PlayerController : MonoBehaviour {
 	void Update () 
 	{
 		bool ButtonJumpDown, ButtonJumpHold, ButtonJumpUp;
+		bool ButtonChangeColorDown = false;
 
 
 
@@ -324,8 +330,7 @@ public class PlayerController : MonoBehaviour {
 		{
 			if(Input.GetButtonDown("Fire1"))
 			{
-				playSound(audioClips[2],1);
-				ChangeColor(-1,true);
+				ButtonChangeColorDown = true;
 			}
 		}
 	
@@ -379,8 +384,7 @@ public class PlayerController : MonoBehaviour {
 						{
 							if (allowInput_color && touch.phase == TouchPhase.Began)
 							{
-								playSound(audioClips[2],1);
-								ChangeColor(-1,true);
+								ButtonChangeColorDown = true;
 							}
 						}
 					}
@@ -391,8 +395,7 @@ public class PlayerController : MonoBehaviour {
 						{	
 							if (allowInput_color && touch.phase == TouchPhase.Began)
 							{
-								playSound(audioClips[2],1);
-								ChangeColor(-1,true);
+								ButtonChangeColorDown = true;
 							}
 						}
 						else
@@ -436,7 +439,14 @@ public class PlayerController : MonoBehaviour {
 		
 		#endif
 
-		HandleInput (ButtonJumpDown, ButtonJumpHold, ButtonJumpUp);
+		 
+			if (ButtonChangeColorDown) {
+				playSound (audioClips [2], 1);
+				ChangeColor (-1, true);
+			}
+
+			HandleInput (ButtonJumpDown, ButtonJumpHold, ButtonJumpUp);
+	 
 
 		GameObject obj_foot = FootTouched ();
 		if (obj_foot != null) {
@@ -461,7 +471,8 @@ public class PlayerController : MonoBehaviour {
 			playSound(audioClips[1]);
 			PlayScreenFlash();
 			MyRigidBody.velocity = Vector3.zero;// -MyRigidBody.velocity * 0.1f;
-			EObjectColor barC = bar.GetComponent<BarController> ().getColor ();
+			BarController bc = bar.GetComponent<BarController> ();
+			EObjectColor barC = bc.getColor ();
 			if(barC < EObjectColor.MAXCOLORNUM && gameMgr.currentLife > 1)
 			{
 				myAnimator.Play("FastFlashing");
@@ -471,10 +482,13 @@ public class PlayerController : MonoBehaviour {
 
 			}
 
-			AddPopup("LIFE - 1", gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpLifeTextOffset.x , popUpLifeTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpLifeGUIStyle);
+			if(bc.barNum > 1)
+			{
+				AddPopup("LIFE - 1", gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpLifeTextOffset.x , popUpLifeTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpLifeGUIStyle);
+				gameMgr.AddLife(-1);
+			}
 
-
-			if( gameMgr.AddLife(-1) < 1)
+			if( gameMgr.currentLife < 1)
 			{
 				allowInput = false;
 				gameObject.layer = LayerMask.NameToLayer("NoCollision");

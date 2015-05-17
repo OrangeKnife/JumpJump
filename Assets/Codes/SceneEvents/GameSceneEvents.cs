@@ -21,6 +21,10 @@ public class GameSceneEvents : MonoBehaviour {
 	//[SerializeField]
 	//GameObject UI_SmallLeaderBoardsPanel = null;
 	[SerializeField]
+	GameObject ExtraButton = null;
+	[SerializeField]
+	GameObject ScorePanelShopButton = null;
+	[SerializeField]
 	UnityEngine.UI.Text purchaseButtonText = null;
 	[SerializeField]
 	GameObject currentShopItemPriceBG = null;
@@ -372,6 +376,8 @@ public class GameSceneEvents : MonoBehaviour {
 	public void UpdateUISocre(int newScore)
 	{
 		UI_ScoreText.GetComponent<UnityEngine.UI.Text>().text = newScore.ToString();
+
+		ScorePanelShopButton.SetActive(newScore == 0); //only show you are at 0 floor
 	}
 
 	public void UpdateUILife(int newLife)
@@ -416,7 +422,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onGameStarted()
 	{
-		UI_ScorePanel.SetActive (true);
+		SetScorePanel (true);
 		UpdateUISocre (gameMgr.currentScore);
 	}
 
@@ -536,7 +542,7 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		playMenuClickedSound ();
 		SetPausePanel (false);
-		UI_ScorePanel.SetActive (true);
+		SetScorePanel (true);
 		HideAllBannerViews();
 		gameMgr.UnPauseGame ();
 	}
@@ -882,7 +888,8 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onShopNextButtonUp()
 	{
-		StopCoroutine (ButtonHoldLoopCoroutine);
+		if(ButtonHoldLoopCoroutine != null)
+			StopCoroutine (ButtonHoldLoopCoroutine);
 	}
 
 	IEnumerator nextButtonLoop(float loopinterval)
@@ -999,11 +1006,12 @@ public class GameSceneEvents : MonoBehaviour {
 			else {
 				 
 					gameMgr.UseSkin (currentShopItemDisplayIndex);
+					gameMgr.ApplySkinSetting();
 				 
 				}
 		}
-		//can buy and bought, use it
-		//
+
+
 	}
 
 	void ConnectToAppStoreTimeOut()
@@ -1021,6 +1029,9 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		playMenuClickedSound ();
 		SetShopPanel (false);
+
+		if (gameMgr.GetCurrentPlayer () != null)
+			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = true;
 
 	}
 
@@ -1223,4 +1234,25 @@ public class GameSceneEvents : MonoBehaviour {
 		startRecording ();
 		yield return null;
 	}
+
+	public void  onScorePanelShopButtonDown()
+	{
+		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = false;
+	}
+
+	
+	public void onExtraButtonClicked()
+	{
+		UnityEngine.AnimatorStateInfo animstateinfo = ExtraButton.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0);
+		if( animstateinfo.IsName("MovingUp"))
+			ExtraButton.GetComponent<Animator>().Play("MovingDown");
+		else
+			ExtraButton.GetComponent<Animator>().Play("MovingUp");
+	}
+
+	public void onGiftButtonClicked()
+	{
+
+	}
+	
 }

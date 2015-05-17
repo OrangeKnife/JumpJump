@@ -466,6 +466,13 @@ public class GameManager : MonoBehaviour {
 		}
 	}
 
+	public void ApplySkinSetting()
+	{
+	 
+		if (CurrentPlayer != null)
+			CurrentPlayer.GetComponent<PlayerController> ().AttachSkin (currentSelectedSkinTemplate);
+	}
+
 	public void RespawnPlayer()
 	{
 		if (CurrentPlayer != null)
@@ -476,10 +483,9 @@ public class GameManager : MonoBehaviour {
 		CurrentPlayer = Instantiate(CurrentPlayerTemplate);
 
 		if (currentSkinTemplateIdx == 0)
-			UseSkin (currentSkinTemplateIdx); // do random every game
+			UseSkin (currentSkinTemplateIdx); // do random every game if choose 0
 
-		if (currentSelectedSkinTemplate != null)
-			CurrentPlayer.GetComponent<PlayerController> ().AttachSkin (currentSelectedSkinTemplate);
+		ApplySkinSetting ();
 
 		MainCam.gameObject.GetComponent<CameraController> ().ResetCamera (CurrentPlayer);
 
