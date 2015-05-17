@@ -615,8 +615,15 @@ public class GameManager : MonoBehaviour {
 		eventHandler.onRestoreTransactionsFinished (success);
 	}
 
-	public void CancelPurchase(string itemId)
+	public void onPurchaseStarted(string itemId)
 	{
+		eventHandler.onPurchaseStarted (itemId);
+	}
+	
+
+	public void onPurchaseCancelled(string itemId)
+	{
+		eventHandler.onPurchaseCancelled(itemId);
 	}
 
 	public void RemoveAds()

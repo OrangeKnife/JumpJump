@@ -873,6 +873,19 @@ public class GameSceneEvents : MonoBehaviour {
 			DisplayShopItem (currentShopItemDisplayIndex);
 	}
 
+	public void onPurchaseStarted(string itemId)
+	{
+		ShowAutoMessage("PROCESSING...\nPLEASE  WAIT",null,false);
+		CancelInvoke ("ConnectToAppStoreTimeOut");
+		Invoke("ConnectToAppStoreTimeOut",90f);
+	}
+	
+	public void onPurchaseCancelled(string itemId)
+	{
+		CancelInvoke ("ConnectToAppStoreTimeOut");
+		ShowAutoMessage ("CANCELLED!");
+	}
+
 	public void onRestorePurchaseButtonClicked()
 	{
 #if UNITY_IOS && !UNITY_EDITOR
@@ -937,9 +950,7 @@ public class GameSceneEvents : MonoBehaviour {
 		{
 			if (currentShopItemId != "" && StoreInventory.GetItemBalance (currentShopItemId) == 0) {
 				gameMgr.BuySkin (currentShopItemId);
-				ShowAutoMessage("PROCESSING...\nPLEASE  WAIT",null,false);
-				CancelInvoke ("ConnectToAppStoreTimeOut");
-				Invoke("ConnectToAppStoreTimeOut",90f);
+
 			}
 			else {
 				 

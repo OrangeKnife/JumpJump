@@ -156,6 +156,9 @@ public class ColorJumpShopEventHandler {
 	/// </summary>
 	/// <param name="pvi">Purchasable virtual item.</param>
 	public void onItemPurchaseStarted(PurchasableVirtualItem pvi) {
+		if (gameMgr) {
+			gameMgr.onPurchaseStarted (pvi.ItemId);
+		}
 		Utils.addLog ("onItemPurchaseStarted called: itemid=" + pvi.ItemId);
 	}
 	
@@ -165,7 +168,7 @@ public class ColorJumpShopEventHandler {
 	/// <param name="pvi">Purchasable virtual item.</param>
 	public void onMarketPurchaseCancelled(PurchasableVirtualItem pvi) {
 		if (gameMgr) {
-			gameMgr.CancelPurchase (pvi.ItemId);
+			gameMgr.onPurchaseCancelled (pvi.ItemId);
 		}
 		Utils.addLog ("onMarketPurchaseCancelled called: itemid=" + pvi.ItemId);
 	}
