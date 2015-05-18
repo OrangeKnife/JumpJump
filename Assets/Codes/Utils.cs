@@ -10,7 +10,7 @@ public class Utils {
 
 	static string appId;
 
-	public static bool bDebug;
+	public static bool bDebug = true;
 	public static void addLog(string logstring)
 	{
 		if (!bDebug)

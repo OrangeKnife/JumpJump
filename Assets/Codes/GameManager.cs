@@ -435,7 +435,7 @@ public class GameManager : MonoBehaviour {
 
 	void OneSecondTick ()
 	{
-		 
+
 		gameActiveTime += 1;
 		float currentTimeSinceStartup = Time.realtimeSinceStartup;
 		if (currentTimeSinceStartup - lastTimeCheckGameActiveTime > 5)
@@ -454,8 +454,23 @@ public class GameManager : MonoBehaviour {
 		lastTimeDoOneSecondTick = Time.realtimeSinceStartup;
 	}
 
+	public void OnApplicationFocus(bool focused)
+	{
+		if (focused) {
+			Utils.addLog("OnApplicationFocus");
+			lastTimeCheckGameActiveTime = Time.realtimeSinceStartup;
+		}
+	}
+	
+	public void OnApplicationPause(bool paused)
+	{
+		if (paused) {
+			Utils.addLog("OnApplicationPause");
+		}
+	}
+	
 	void Update () {
-
+		
 		if (Input.GetKeyDown(KeyCode.Escape)) 
 		{
 			if(eventHandler.isTitle)
