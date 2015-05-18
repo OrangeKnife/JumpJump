@@ -724,5 +724,36 @@ public class GameManager : MonoBehaviour {
 		//StoreInventory.TakeItem("freegift_token_one",1);
 	}
 	
+	public int GetTokenNum()
+	{
+		return StoreInventory.GetItemBalance (ColorJumpStoreAssets.FREEGIFT_TOKEN_ITEM_ID);
+	}
+
+	public bool consumeToken(int i)
+	{
+		if (i > GetTokenNum ())
+			return false;
+
+		StoreInventory.TakeItem (ColorJumpStoreAssets.FREEGIFT_TOKEN_ITEM_ID, i);
+		return true;
+	}
+
+	public PlayerSkin GivePlayerRandomSkin()
+	{
+		GameObject rtObj = null;
+		int RandomNum = 1;
+		Random.seed = (int)Time.time;
+		 
+		RandomNum = Random.Range(1,SkinTemplates.Count);//no skin to the last skin
+		rtObj = SkinTemplates[RandomNum];
+		 
+ 		if (ownedSkins.IndexOf (rtObj) == -1) {
+			StoreInventory.GiveItem(rtObj.GetComponent<PlayerSkin>().skinId,1);
+			ownedSkins.Add(rtObj);
+			return rtObj.GetComponent<PlayerSkin> ();
+		}
+		else
+			return null;//nothing haha
+	}
 
 }

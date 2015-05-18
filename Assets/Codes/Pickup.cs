@@ -18,6 +18,9 @@ public class Pickup : MonoBehaviour
 
 	public bool UnlockHardMode;
 
+	public bool GiveToken;
+	public int GiveTokenNum;
+
 	public List<AudioClip> audioClips = new List<AudioClip>();
 
 	AudioSource audioSource;

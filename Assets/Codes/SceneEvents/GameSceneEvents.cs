@@ -21,6 +21,16 @@ public class GameSceneEvents : MonoBehaviour {
 	//[SerializeField]
 	//GameObject UI_SmallLeaderBoardsPanel = null;
 	[SerializeField]
+	UnityEngine.UI.Text MyTokenBalanceText = null;
+	[SerializeField]
+	UnityEngine.UI.Image autoMessageImg = null; 
+	[SerializeField]
+	GameObject GiftImage = null;
+	[SerializeField]
+	UnityEngine.UI.Text OpenGiftBoxButtonText = null;
+	[SerializeField]
+	GameObject UI_GiftPanel = null;
+	[SerializeField]
 	GameObject ExtraButton = null;
 	[SerializeField]
 	GameObject ScorePanelShopButton = null;
@@ -87,6 +97,8 @@ public class GameSceneEvents : MonoBehaviour {
 	UnityEngine.UI.Image color4 = null; 
 	[SerializeField]
 	GameObject DimImage = null; 
+	[SerializeField]
+	GameObject DimImageForAutoMessage = null; 
 
 
 	[SerializeField]
@@ -152,6 +164,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	string currentShopItemId;
 	IEnumerator ButtonHoldLoopCoroutine;
+	
 	public void DestoryAllAds()
 	{
 		if (bannerView != null)
@@ -582,7 +595,9 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		playMenuClickedSound ();
 
-
+		if(ExtraButton.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("MovingUp"))
+			ExtraButton.GetComponent<Animator>().Play("MovingDown");
+		
 		if(gameMgr.hardCoreUnlocked)
 			DoTransition (DoHardCoreButton);
 		else
@@ -592,24 +607,36 @@ public class GameSceneEvents : MonoBehaviour {
 	public void OnStartButtonClicked()
 	{
 		playMenuClickedSound ();
+
+		if(ExtraButton.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("MovingUp"))
+			ExtraButton.GetComponent<Animator>().Play("MovingDown");
+		
 		DoTransition (DoStartButton);
 	}
 
 	void DoHardCoreButton()
 	{
+
+
 		UI_StartPanel.SetActive (false);
 		
 		gameMgr.StartGame (1);
-		
+
+
+
 		HideAllBannerViews ();
 
 	}
 	
 	void DoStartButton()
 	{
+
+
 		UI_StartPanel.SetActive (false);
 		
 		gameMgr.StartGame (0);
+
+
 		
 		HideAllBannerViews ();
 		
@@ -819,17 +846,30 @@ public class GameSceneEvents : MonoBehaviour {
 		#endif
 	}
 
-	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null, bool wantOKButton = true)
+	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null, bool wantOKButton = true, Sprite img = null)
 	{
 		currentMessageOkButtonDelegate = messageOkDelegate;
 		bool bActive = message.Length > 0;
 		UI_AutoMessage.SetActive (bActive);
-		SetDimImage (bActive);
+		SetDimImage (bActive, true);
+
+		autoMessageImg.enabled = false;
 		if(bActive)
 		{
 			UI_AutoMessage.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 			AutoMessageText.text = message;
+
+			if(img != null)
+			{
+				autoMessageImg.sprite = img;
+				autoMessageImg.enabled = true;
+			}
+			else
+				autoMessageImg.enabled = false;
 		}
+
+
+
 
 		AutoMessageOKButton.SetActive(wantOKButton);
 	}
@@ -963,11 +1003,11 @@ public class GameSceneEvents : MonoBehaviour {
 			{
 				//refresh UI , already owned
 				currentShopItemPriceBG.SetActive(false);
-				purchaseButtonText.text = "USE  THIS  SKIN";
+				purchaseButtonText.text = "CHOOSE";
 			}else
 			{
-				currentShopItemPriceBG.SetActive(true);
-				purchaseButtonText.text = "I  WANT  IT !";
+				currentShopItemPriceBG.SetActive(false);//currentShopItemPriceBG.SetActive(true); //hide it now
+				purchaseButtonText.text = ps.skinPrice.ToString("0.00");
 			}
 
 		}
@@ -1007,6 +1047,7 @@ public class GameSceneEvents : MonoBehaviour {
 				 
 					gameMgr.UseSkin (currentShopItemDisplayIndex);
 					gameMgr.ApplySkinSetting();
+					SetShopPanel(false);
 				 
 				}
 		}
@@ -1056,14 +1097,17 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		playMenuClickedSound ();
 		UI_AutoMessage.SetActive (false);
-		SetDimImage (false);
+		SetDimImage (false, true);
 		if(currentMessageOkButtonDelegate != null)
 			currentMessageOkButtonDelegate ();
 	}
 
-	public void SetDimImage(bool bActive)
+	public void SetDimImage(bool bActive, bool forAutoMessage = false)
 	{
 		DimImage.SetActive (bActive);
+
+		if (forAutoMessage)
+			DimImageForAutoMessage.SetActive (bActive);
 	}
 
 	public void OnShareButtonClicked()
@@ -1252,7 +1296,62 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onGiftButtonClicked()
 	{
-
+		playMenuClickedSound ();
+		SetGiftPanel (true);
 	}
+
+	public void SetGiftPanel(bool bActive)
+	{
+		UI_GiftPanel.SetActive(bActive);
+		SetDimImage (bActive);
+		
+		if(bActive)
+		{
+			UI_GiftPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+			updateMyTokenBalance();
+		}
+	}
+
+	public void onGiftPanelBackButtonClicked()
+	{
+		SetGiftPanel (false);
+	}
+
+	public void onOpenGiftBoxButtonClicked()
+	{
+		CancelInvoke ("stopOpeningGift");
+		OpenGiftBoxButtonText.text = "OPENING...";
+		GiftImage.GetComponent<Animator>().Play("OpenGiftAnimation");
+		Invoke ("stopOpeningGift", 3f);
+	}
+
+	void updateMyTokenBalance()
+	{
+		int mytokenNum = gameMgr.GetTokenNum ();
+		OpenGiftBoxButtonText.text = mytokenNum < 10 ? (10 - mytokenNum).ToString () + "  TO  GO" : "TRY  MY  LUCK";
+		string tokencolorstr = mytokenNum < 10 ? "fa4a37" : "3afa37";//red and green
+		MyTokenBalanceText.text = "I  HAVE  <color=#"+tokencolorstr+">" +mytokenNum.ToString()+"</color> TOKENS !!";
+	}
+
+	void stopOpeningGift()
+	{
+		if (true/*gameMgr.consumeToken (10)*/) {
+
+			updateMyTokenBalance();
+
+			PlayerSkin ps = gameMgr.GivePlayerRandomSkin();
+			if(ps != null)
+			{
+				ShowAutoMessage("!! "+ps.skinName + " !!",null,true,ps.ShopIcon);
+			}
+			else
+			{
+				ShowAutoMessage("!! OH  NO !!");
+			}
+
+			GiftImage.GetComponent<Animator>().Play("Regular");
+		}
+	}
+
 	
 }

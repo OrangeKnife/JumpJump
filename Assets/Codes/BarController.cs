@@ -277,7 +277,7 @@ public class BarController : MonoBehaviour
 			if(other.gameObject.transform.position.y  < gameObject.transform.position.y )
 				return;
  
-			other.gameObject.GetComponent<Rigidbody2D>().velocity = Vector3.zero;
+			other.gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
 
 			if(minusScore && score < 0 || score > 0)
 				other.gameObject.GetComponent<PlayerController> ().AddScore (score);
@@ -302,13 +302,18 @@ public class BarController : MonoBehaviour
 	void OnCollisionEnter2D(Collision2D other)
 	{
 		if (other.gameObject.tag == "Player") {
-			if(other.gameObject.GetComponent<Rigidbody2D>().velocity.y > 0 && other.gameObject.transform.position.y < gameObject.GetComponent<BoxCollider2D>().transform.position.y)
+			if(other.gameObject.transform.position.y < gameObject.GetComponent<BoxCollider2D>().transform.position.y)
+				return;
+
+			other.gameObject.GetComponent<PlayerController> ().SetJumpCountZero ();//hack
+
+			if(other.gameObject.GetComponent<Rigidbody2D>().velocity.y > 0 )
 				return;
 				
 			if(other.gameObject.transform.position.y  < gameObject.transform.position.y )
 				return;
 			
-			//other.gameObject.GetComponent<Rigidbody2D>().velocity = Vector3.zero;
+			//other.gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
 			PlayerController pc = other.gameObject.GetComponent<PlayerController>();
 			if(minusScore && score < 0 || score > 0)
 				pc.AddScore (score);

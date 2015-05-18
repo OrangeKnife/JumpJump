@@ -131,7 +131,7 @@ public class PlayerController : MonoBehaviour {
 		if (currentUnityAdsWatched < maximumUnityAdsCanWatch && eventHandler.IsUnityAdsReady()
 		    && (Time.time - playerStartPlayTime > 20f && gameMgr.currentScore > 5 || gameMgr.currentScore > 25) )
 		{
-			MyRigidBody.velocity = Vector3.zero;
+			MyRigidBody.velocity = Vector2.zero;
 			MyRigidBody.gravityScale = 0;
 			currentUnityAdsWatched++;
 
@@ -179,7 +179,7 @@ public class PlayerController : MonoBehaviour {
 		gameObject.layer = LayerMask.NameToLayer("NoCollision");
 		isDead = true;
 		MyRigidBody.gravityScale = 0;
-		MyRigidBody.velocity = Vector3.zero;
+		MyRigidBody.velocity = Vector2.zero;
 		spriteRenderer.enabled = false;
 		if(skinSpriteRenderer != null)
 			skinSpriteRenderer.enabled = false;
@@ -261,6 +261,7 @@ public class PlayerController : MonoBehaviour {
 		bool ButtonJumpDown, ButtonJumpHold, ButtonJumpUp;
 		bool ButtonChangeColorDown = false;
 
+		//Utils.addLog ("velocity y=" + MyRigidBody.velocity.y);
 
 
 		if (gameMgr.bGamePaused)
@@ -470,7 +471,8 @@ public class PlayerController : MonoBehaviour {
 			//Utils.addLog("knock into bar: " + bar.GetComponent<BarController>().getColor());
 			playSound(audioClips[1]);
 			PlayScreenFlash();
-			MyRigidBody.velocity = Vector3.zero;// -MyRigidBody.velocity * 0.1f;
+
+			MyRigidBody.velocity = Vector2.zero;// -MyRigidBody.velocity * 0.1f;
 			BarController bc = bar.GetComponent<BarController> ();
 			EObjectColor barC = bc.getColor ();
 			if(barC < EObjectColor.MAXCOLORNUM && gameMgr.currentLife > 1)
@@ -643,7 +645,7 @@ public class PlayerController : MonoBehaviour {
 			jumped = true;
 			currentJumpCount += 1;
 			eventHandler.SetJumpCountText("JUMP "+getJumpXstring() );
-			MyRigidBody.velocity = Vector3.Min(Vector3.zero, Vector3.Max(new Vector3(0,-2f,0),MyRigidBody.velocity));//avoid crazy current vel !!!
+			MyRigidBody.velocity = Vector2.Min(Vector2.zero, Vector2.Max(new Vector2(0,-2f),MyRigidBody.velocity));//avoid crazy current vel !!!
 			MyRigidBody.AddForce(new Vector3(0,jumpPower * 100f,0));
 			playSound(audioClips[0],0,false,0.1f); //jjump
 			if(lastBarStandOn != null)
@@ -711,6 +713,12 @@ public class PlayerController : MonoBehaviour {
 		return null;
 	}
 
+	public void SetJumpCountZero()
+	{
+		currentJumpCount = 0;
+		eventHandler.SetJumpCountText("JUMP "+getJumpXstring());
+		jumped = false;
+	}
 
 	public void ResetJumpCount(int num, BarController barController)
 	{
@@ -881,6 +889,10 @@ public class PlayerController : MonoBehaviour {
 
 		if (something.slowTime) {
 			slowTimeStarted(something.timescale, something.slowTimeRecoverySpeed, something.slowTimeLoopSound);
+		}
+
+		if (something.GiveToken) {
+			gameMgr.AddFreeGiftToken(something.GiveTokenNum);
 		}
 
 		AddPopup(something.popupMessage,  gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + something.popUpTextOffset), Time.time, something.popupStyle);
