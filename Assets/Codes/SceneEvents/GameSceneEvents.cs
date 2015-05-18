@@ -565,7 +565,7 @@ public class GameSceneEvents : MonoBehaviour {
 		playMenuClickedSound ();
 		gameMgr.RemoveAds ();
 
-		UnityAnalytics.CustomEvent("GameEnded",new Dictionary<string, object>{
+		UnityAnalytics.CustomEvent("NoAdsButtonClicked",new Dictionary<string, object>{
 			{ "NoAdsButtonClicked", 1 }
 		} );
 		
