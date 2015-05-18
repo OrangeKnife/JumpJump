@@ -1341,8 +1341,8 @@ public class GameSceneEvents : MonoBehaviour {
 
 			}
 
-			ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",null,true,null,false);
-			updateMyTokenBalance();
+			ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,null,false);
+
 		}
 	}
 
