@@ -78,6 +78,15 @@ public class GameManager : MonoBehaviour {
 	List<GameObject> ownedSkins;
 	GameObject currentSelectedSkinTemplate;
 	int currentSkinTemplateIdx = 0;//random skin
+
+	public List<int> freeTokenGiveAwayTime;
+
+	int gameActiveTime = 0;
+	float lastTimeCheckGameActiveTime = 0f;
+	float lastTimeSaveGameActiveTime = 0f;
+	float lastTimeDoOneSecondTick = 0f;
+
+	int freeGiftCounterBalance;
 	public void login()
 	{
 
@@ -194,6 +203,9 @@ public class GameManager : MonoBehaviour {
 		ownedSkins = new List<GameObject> ();
 		checkOwnedSkins ();
 
+		gameActiveTime = StoreInventory.GetItemBalance (ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId);
+		freeGiftCounterBalance = StoreInventory.GetItemBalance (ColorJumpStoreAssets.FREEGIFT_COUNTER.ItemId);
+		lastTimeDoOneSecondTick = Time.realtimeSinceStartup;
 	}
 
 	void checkOwnedSkins()
@@ -421,6 +433,27 @@ public class GameManager : MonoBehaviour {
 			return false;
 	}
 
+	void OneSecondTick ()
+	{
+		 
+		gameActiveTime += 1;
+		float currentTimeSinceStartup = Time.realtimeSinceStartup;
+		if (currentTimeSinceStartup - lastTimeCheckGameActiveTime > 5)
+			gameActiveTime += (int)(currentTimeSinceStartup - lastTimeCheckGameActiveTime);
+
+		lastTimeCheckGameActiveTime = Time.realtimeSinceStartup;
+
+		if (lastTimeCheckGameActiveTime - lastTimeSaveGameActiveTime > 30) {
+			int savedGameActiveTime = StoreInventory.GetItemBalance (ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId);
+			StoreInventory.GiveItem (ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId, gameActiveTime - savedGameActiveTime);//now it's the save
+			lastTimeSaveGameActiveTime = lastTimeCheckGameActiveTime;
+		}
+
+		Utils.addLog ("GameManagerlog: (int)Time.deltaTime = " + (gameActiveTime).ToString ());
+		 
+		lastTimeDoOneSecondTick = Time.realtimeSinceStartup;
+	}
+
 	void Update () {
 
 		if (Input.GetKeyDown(KeyCode.Escape)) 
@@ -434,6 +467,9 @@ public class GameManager : MonoBehaviour {
 
 		if (!audiosource.isPlaying)
 			PlayBGM ();
+
+		if (Time.realtimeSinceStartup - lastTimeDoOneSecondTick > 1f)
+			OneSecondTick ();
 
 	}
 	
@@ -717,11 +753,17 @@ public class GameManager : MonoBehaviour {
 		return Time.time - gameStartTime;
 	}
 
-	public void AddFreeGiftToken(int i = 1)
+	public int AddFreeGiftToken(int num = 1)
 	{
-		StoreInventory.GiveItem ("freegift_token_one",1);
-		//Utils.addLog ("token = " + StoreInventory.GetItemBalance (ColorJumpStoreAssets.FREEGIFT_TOKEN_ITEM_ID));
-		//StoreInventory.TakeItem("freegift_token_one",1);
+		StoreInventory.GiveItem (ColorJumpStoreAssets.ONE_FREEGIFT_TOKEN.ItemId,num);
+		StoreInventory.GiveItem (ColorJumpStoreAssets.FREEGIFT_COUNTER.ItemId,1);
+		freeGiftCounterBalance += 1;
+		
+		int savedGameActiveTime = StoreInventory.GetItemBalance(ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId);
+		StoreInventory.TakeItem(ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId,savedGameActiveTime);//now it's the save
+		gameActiveTime = 0;
+
+		return num;
 	}
 	
 	public int GetTokenNum()
@@ -759,6 +801,23 @@ public class GameManager : MonoBehaviour {
 	public List<GameObject> getOwnedSkins()
 	{
 		return ownedSkins;
+	}
+
+	public int getNextTimeFreeTokenSeconds()
+	{
+		if (freeGiftCounterBalance < 5)
+			return freeTokenGiveAwayTime [freeGiftCounterBalance];
+		else
+			return freeTokenGiveAwayTime [4];
+	}
+
+	public int getFreeGiftGiveAwayTimeLeft()
+	{	
+		int nextTimeGiveAwayTokens = getNextTimeFreeTokenSeconds ();
+		if (nextTimeGiveAwayTokens == -1)
+			return nextTimeGiveAwayTokens;
+		else 
+			return Mathf.Max(0,nextTimeGiveAwayTokens - gameActiveTime);
 	}
 
 }

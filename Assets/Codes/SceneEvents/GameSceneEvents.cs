@@ -20,6 +20,9 @@ public class GameSceneEvents : MonoBehaviour {
 	//GameObject yellowboardsButton = null;
 	//[SerializeField]
 	//GameObject UI_SmallLeaderBoardsPanel = null;
+
+	[SerializeField]
+	UnityEngine.UI.Text FreeTokensInfoText = null;
 	[SerializeField]
 	UnityEngine.UI.Text MyTokenBalanceText = null;
 	[SerializeField]
@@ -1321,7 +1324,24 @@ public class GameSceneEvents : MonoBehaviour {
 		
 		if(bActive)
 		{
+			GiftImage.GetComponent<Animator>().Play("Regular");
 			UI_GiftPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+			updateMyTokenBalance();
+		}
+
+		if (gameMgr.getFreeGiftGiveAwayTimeLeft () == 0) {
+			int howManyToken = 0;
+			if(UnityEngine.Random.Range(0,10)<=1)// 20% get 10 tokens
+			{
+				howManyToken = gameMgr.AddFreeGiftToken (10);
+			}
+			else
+			{
+				howManyToken = gameMgr.AddFreeGiftToken (UnityEngine.Random.Range(1,6));
+
+			}
+
+			ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",null,true,null,false);
 			updateMyTokenBalance();
 		}
 	}
@@ -1333,10 +1353,15 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onOpenGiftBoxButtonClicked()
 	{
-		CancelInvoke ("stopOpeningGift");
-		OpenGiftBoxButtonText.text = "OPENING...";
-		GiftImage.GetComponent<Animator>().Play("OpenGiftAnimation");
-		Invoke ("stopOpeningGift", 3f);
+		int mytokenNum = gameMgr.GetTokenNum ();
+
+		if(mytokenNum >= 10)
+		{
+			CancelInvoke ("stopOpeningGift");
+			OpenGiftBoxButtonText.text = "OPENING...";
+			GiftImage.GetComponent<Animator>().Play("OpenGiftAnimation");
+			Invoke ("stopOpeningGift", 3f);
+		}
 	}
 
 	void updateMyTokenBalance()
@@ -1349,7 +1374,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	void stopOpeningGift()
 	{
-		if (true/*gameMgr.consumeToken (10)*/) {
+		if ( gameMgr.consumeToken (10)) {
 
 			updateMyTokenBalance();
 

@@ -6,7 +6,7 @@ public class Utils {
 
 	static int logLineCount = 0;
 	static List<string> stringLog = new List<string>();
-	static int LogMaxLine = 30;
+	static int LogMaxLine = 20;
 
 	static string appId;
 

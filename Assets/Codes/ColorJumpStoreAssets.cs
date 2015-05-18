@@ -43,6 +43,8 @@ using Soomla.Store;
 		/// </summary>
 		public VirtualGood[] GetGoods() {
 			return new VirtualGood[] {/*MUFFINCAKE_GOOD, PAVLOVA_GOOD,CHOCLATECAKE_GOOD, CREAMCUP_GOOD, */
+			FREEGIFT_COUNTER,
+			ACCUMULATED_ACTIVETIME,
 			NO_ADS_LTVG,
 			SKIN_01_LTVG,
 			SKIN_02_LTVG};
@@ -52,7 +54,7 @@ using Soomla.Store;
 		/// see parent.
 		/// </summary>
 		public VirtualCurrencyPack[] GetCurrencyPacks() {
-			return new VirtualCurrencyPack[] {ONE_FREEGIFT_TOKEN/*TENMUFF_PACK, FIFTYMUFF_PACK, FOURHUNDMUFF_PACK, THOUSANDMUFF_PACK*/};
+			return new VirtualCurrencyPack[] {ONE_FREEGIFT_TOKEN,TEN_FREEGIFT_TOKEN/*TENMUFF_PACK, FIFTYMUFF_PACK, FOURHUNDMUFF_PACK, THOUSANDMUFF_PACK*/};
 		}
 		
 		/// <summary>
@@ -120,7 +122,15 @@ using Soomla.Store;
 			new PurchaseWithVirtualItem(FREEGIFT_TOKEN_ITEM_ID,0)
 			);
 
-		
+		public static VirtualCurrencyPack TEN_FREEGIFT_TOKEN = new VirtualCurrencyPack(
+			"10 tokens",                                   // name
+			"give player 10 tokens",                       // description
+			"freegift_token_ten",                                   // item id
+			10,												// number of currencies in the pack
+			FREEGIFT_TOKEN_ITEM_ID,                        // the currency associated with this pack
+			new PurchaseWithVirtualItem(FREEGIFT_TOKEN_ITEM_ID,0)
+			);
+	
 		public static VirtualCurrencyPack TENMUFF_PACK = new VirtualCurrencyPack(
 			"10 Muffins",                                   // name
 			"Test refund of an item",                       // description
@@ -158,7 +168,19 @@ using Soomla.Store;
 			);
 		
 		/** Virtual Goods **/
-		
+
+		public static VirtualGood FREEGIFT_COUNTER = new SingleUseVG(
+			"Free GIFT Counter",                                        		// name
+			"Increase this counter when give away tokens",   	// description
+			"freetoken_counter",                                        		// item id
+			new PurchaseWithVirtualItem(FREEGIFT_TOKEN_ITEM_ID, 0));  // the way this virtual good is purchased
+
+		public static VirtualGood ACCUMULATED_ACTIVETIME = new SingleUseVG(
+			"Accumulated Game Active Time",                                        		// name
+			"track how long player are activly play the game",   	// description
+			"accumulated_activetime",                                        		// item id
+			new PurchaseWithVirtualItem(FREEGIFT_TOKEN_ITEM_ID, 0));  // the way this virtual good is purchased
+	
 		public static VirtualGood MUFFINCAKE_GOOD = new SingleUseVG(
 			"Fruit Cake",                                       		// name
 			"Customers buy a double portion on each purchase of this cake", // description

@@ -15,6 +15,8 @@ public class SaveObject
 		rateLaterDeathCount = 5;
 
 		currentJumpType = 0;
+
+		accumulatedPlayTime = 0;
 	}
 	public bool firstRun;
 	public int bestScore,bestScore_hardcore;
@@ -25,6 +27,7 @@ public class SaveObject
 	public int version = 0;
 
 	public int currentJumpType;
+	public int accumulatedPlayTime;
 	//
 	public bool[] additionalInfoBool = new bool[10];
 	public int[] additionalInfoInt = new int[10];
