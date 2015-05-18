@@ -35,6 +35,8 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject ScorePanelShopButton = null;
 	[SerializeField]
+	GameObject ScorePanelGiftButton = null;
+	[SerializeField]
 	UnityEngine.UI.Text purchaseButtonText = null;
 	[SerializeField]
 	GameObject currentShopItemPriceBG = null;
@@ -390,7 +392,6 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		UI_ScoreText.GetComponent<UnityEngine.UI.Text>().text = newScore.ToString();
 
-		ScorePanelShopButton.SetActive(newScore == 0); //only show you are at 0 floor
 	}
 
 	public void UpdateUILife(int newLife)
@@ -437,6 +438,9 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		SetScorePanel (true);
 		UpdateUISocre (gameMgr.currentScore);
+
+		if(gameMgr.getOwnedSkins().Count > 1 || gameMgr.GetTokenNum() > 0)
+			UI_ScorePanel.GetComponent<Animator> ().Play ("ScorePanelShopAndGiftSlideIn");
 	}
 
 	public void onGameEnded()
@@ -846,7 +850,7 @@ public class GameSceneEvents : MonoBehaviour {
 		#endif
 	}
 
-	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null, bool wantOKButton = true, Sprite img = null)
+	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null, bool wantOKButton = true, Sprite img = null, bool wantCenter = true)
 	{
 		currentMessageOkButtonDelegate = messageOkDelegate;
 		bool bActive = message.Length > 0;
@@ -858,6 +862,10 @@ public class GameSceneEvents : MonoBehaviour {
 		{
 			UI_AutoMessage.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 			AutoMessageText.text = message;
+			if(wantCenter)
+				AutoMessageText.alignment = TextAnchor.MiddleCenter;
+			else
+				AutoMessageText.alignment = TextAnchor.UpperCenter;
 
 			if(img != null)
 			{
@@ -1048,7 +1056,8 @@ public class GameSceneEvents : MonoBehaviour {
 					gameMgr.UseSkin (currentShopItemDisplayIndex);
 					gameMgr.ApplySkinSetting();
 					SetShopPanel(false);
-				 
+					if (gameMgr.GetCurrentPlayer () != null)
+						gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = true;
 				}
 		}
 
@@ -1284,6 +1293,11 @@ public class GameSceneEvents : MonoBehaviour {
 		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = false;
 	}
 
+	public void hideScorePanelShopAndGiftButton ()
+	{
+		if(UI_ScorePanel.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("ScorePanelShopAndGiftSlideIn"))
+			UI_ScorePanel.GetComponent<Animator> ().Play ("ScorePanelShopAndGiftSlideOut");
+	}
 	
 	public void onExtraButtonClicked()
 	{
@@ -1342,11 +1356,11 @@ public class GameSceneEvents : MonoBehaviour {
 			PlayerSkin ps = gameMgr.GivePlayerRandomSkin();
 			if(ps != null)
 			{
-				ShowAutoMessage("!! "+ps.skinName + " !!",null,true,ps.ShopIcon);
+				ShowAutoMessage("!! "+ps.skinName + " !!",null,true,ps.ShopIcon, false);
 			}
 			else
 			{
-				ShowAutoMessage("!! OH  NO !!");
+				ShowAutoMessage("!! OH  NO !!",null,true,null,false);
 			}
 
 			GiftImage.GetComponent<Animator>().Play("Regular");

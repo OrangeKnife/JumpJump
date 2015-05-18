@@ -756,4 +756,9 @@ public class GameManager : MonoBehaviour {
 			return null;//nothing haha
 	}
 
+	public List<GameObject> getOwnedSkins()
+	{
+		return ownedSkins;
+	}
+
 }
