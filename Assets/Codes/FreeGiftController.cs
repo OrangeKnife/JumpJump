@@ -22,6 +22,7 @@ public class FreeGiftController : MonoBehaviour
 			OneSecondTick ();
 	}
 
+
 	void OneSecondTick ()
 	{ 
 		if (!gameMgr.bGameStarted) {

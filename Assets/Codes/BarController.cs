@@ -305,8 +305,15 @@ public class BarController : MonoBehaviour
 			if(other.gameObject.transform.position.y < gameObject.GetComponent<BoxCollider2D>().transform.position.y)
 				return;
 
-			other.gameObject.GetComponent<PlayerController> ().SetJumpCountZero ();//hack
+			/*other.gameObject.GetComponent<PlayerController> ().SetJumpCountZero ();//hack
 
+			if(!audioSource.isPlaying)//hack
+			{
+				audioSource.clip = audioClips [1];
+				audioSource.volume = 0.03f;
+				audioSource.Play ();
+			}*/
+			
 			if(other.gameObject.GetComponent<Rigidbody2D>().velocity.y > 0 )
 				return;
 				
@@ -316,13 +323,15 @@ public class BarController : MonoBehaviour
 			//other.gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
 			PlayerController pc = other.gameObject.GetComponent<PlayerController>();
 			if(minusScore && score < 0 || score > 0)
+			{
 				pc.AddScore (score);
+			}
 			
 			if (score > 0) {
 				score = -1;
 
 
-				if(!audioSource.isPlaying)
+				if(true)//!audioSource.isPlaying)
 				{
 					if(shallWeDisplayBarNum(barNum))
 					{

@@ -125,7 +125,6 @@ public class PlayerController : MonoBehaviour {
 
 	void AskUnityAdsQuestion()
 	{
-		StopRecording ();
 		CleanUpAllPopup ();
 
 		if (currentUnityAdsWatched < maximumUnityAdsCanWatch && eventHandler.IsUnityAdsReady()
@@ -205,14 +204,7 @@ public class PlayerController : MonoBehaviour {
 		}
 
 	}
-
-	void StopRecording()
-	{
-		if (gameMgr.readyForRecording) {
-
-			gameMgr.recorded = true;
-		}
-	}
+	
 
 
 	void revive()
@@ -472,7 +464,11 @@ public class PlayerController : MonoBehaviour {
 			playSound(audioClips[1]);
 			PlayScreenFlash();
 
+
 			MyRigidBody.velocity = Vector2.zero;// -MyRigidBody.velocity * 0.1f;
+			//force player snap
+			//gameObject.transform.position = new Vector3(gameObject.transform.position.x, bar.gameObject.transform.position.y - getHalfPlayerSizeY(),gameObject.transform.position.z);
+
 			BarController bc = bar.GetComponent<BarController> ();
 			EObjectColor barC = bc.getColor ();
 			if(barC < EObjectColor.MAXCOLORNUM && gameMgr.currentLife > 1)
@@ -678,6 +674,7 @@ public class PlayerController : MonoBehaviour {
 
 	bool isAlive()
 	{
+		//Time.timeScale = 0.1f;
 		return gameMgr.MainCam.gameObject.transform.position.y - gameObject.transform.position.y < gameMgr.MainCam.orthographicSize;
 	}
 
@@ -686,12 +683,17 @@ public class PlayerController : MonoBehaviour {
 		return gameObject.GetComponent<BoxCollider2D> ().size.y/2 * gameObject.transform.localScale.y;
 	}
 
+	public float getHalfBarSizeY(GameObject barObj)
+	{
+		return barObj.GetComponent<BoxCollider2D> ().size.y/2 * barObj.transform.localScale.y;
+	}
+
 
 	GameObject HeadKnocked()
 	{
 		float halfPlayerSizeY = getHalfPlayerSizeY ();
 		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y + halfPlayerSizeY);
-		//Debug.DrawLine (myPos, myPos + Vector2.up * 0.15f,new Color(1,0,0,1));
+		Debug.DrawLine (myPos, myPos + Vector2.up * 0.1f,new Color(1,0,0,1));
 
 		LayerMask lmask = (~(1 << (gameObject.layer))) - (1 <<  LayerMask.NameToLayer("NoCollision")) - (1 <<LayerMask.NameToLayer("Pickup"));
 

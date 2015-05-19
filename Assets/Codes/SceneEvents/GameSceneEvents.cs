@@ -20,9 +20,18 @@ public class GameSceneEvents : MonoBehaviour {
 	//GameObject yellowboardsButton = null;
 	//[SerializeField]
 	//GameObject UI_SmallLeaderBoardsPanel = null;
-
 	[SerializeField]
-	UnityEngine.UI.Text FreeTokensInfoText = null;
+	GameObject RecordVideoButton = null;
+	[SerializeField]
+	GameObject RecordVideoButtonOnPausePanel = null;
+	[SerializeField]
+	Sprite giftTokenImg = null;
+	[SerializeField]
+	GameObject shopPreviousButton = null;
+	[SerializeField]
+	GameObject shopNextButton = null;
+	[SerializeField]
+	UnityEngine.UI.Text FreeTokensIndicationText = null;
 	[SerializeField]
 	UnityEngine.UI.Text MyTokenBalanceText = null;
 	[SerializeField]
@@ -366,6 +375,8 @@ public class GameSceneEvents : MonoBehaviour {
 		yourBest.text = gameMgr.getBestScore ().ToString();
 
 
+		FreeTokensIndicationText.enabled = gameMgr.getFreeGiftGiveAwayTimeLeft () == 0;
+
 
 	}
 
@@ -656,8 +667,11 @@ public class GameSceneEvents : MonoBehaviour {
 		UI_PausePanel.SetActive (bActive);
 		SetDimImage (bActive);
 
-		if(bActive)
+		if (bActive) {
 			UI_PausePanel.GetComponent<Animator> ().Play ("PausePanelOpened");
+
+			RecordVideoButtonOnPausePanel.GetComponent<UnityEngine.UI.Button>().interactable = !Everyplay.IsRecording();
+		}
 	}
 
 	public void SetScorePanel(bool bActive)
@@ -895,6 +909,8 @@ public class GameSceneEvents : MonoBehaviour {
 			UI_OptionPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 
 			SwitchJumpLeftRightText.text = gameMgr.mysave.currentJumpType == 0 ? "SET RIGHT JUMP" : "SET LEFT JUMP";
+
+			RecordVideoButton.GetComponent<UnityEngine.UI.Button>().interactable = !Everyplay.IsRecording();
 		}
 	}
 
@@ -958,6 +974,7 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		if(currentShopItemDisplayIndex > 0)
 			currentShopItemDisplayIndex--;
+
 		DisplayShopItem (currentShopItemDisplayIndex);
 	}
 	public void onShopNextButtonClicked ()
@@ -994,7 +1011,7 @@ public class GameSceneEvents : MonoBehaviour {
 		SoomlaStore.RestoreTransactions ();
 #endif
 #if UNITY_ANDROID
-		ShowAutoMessage("ANDROID  USES  DONT  HAVE  TO\nRESTORE!");
+		ShowAutoMessage("ANDROID  USES  DONT  HAVE  TO  RESTORE!");
 #endif
 	}
 
@@ -1017,11 +1034,16 @@ public class GameSceneEvents : MonoBehaviour {
 				purchaseButtonText.text = "CHOOSE";
 			}else
 			{
-				currentShopItemPriceBG.SetActive(false);//currentShopItemPriceBG.SetActive(true); //hide it now
-				purchaseButtonText.text = ps.skinPrice.ToString("0.00");
+				currentShopItemPriceBG.SetActive(true); 
+				purchaseButtonText.text = "I  WANT  IT !";
+				//currentShopItemPriceBG.SetActive(false);//
+				//purchaseButtonText.text = ps.skinPrice.ToString("0.00");
 			}
 
 		}
+
+		shopPreviousButton.GetComponent<UnityEngine.UI.Button>().interactable = currentShopItemDisplayIndex > 0;
+		shopNextButton.GetComponent<UnityEngine.UI.Button>().interactable = currentShopItemDisplayIndex < gameMgr.SkinTemplates.Count - 1;
 	}
 
 	public void onRestoreTransactionsStarted() {
@@ -1097,7 +1119,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onCreditButtonClicked()
 	{
 		playMenuClickedSound ();
-		ShowAutoMessage("DEVELOPED  BY\n JUNSHENG YAO\n MUSIC  BY\n SHADY DAVE");
+		ShowAutoMessage("COLOR  JUMP\nDEVELOPED  BY\n JUNSHENG YAO\n MUSIC  BY\n SHADY DAVE");
 	}
 
 	public void ToggleDebug()
@@ -1164,6 +1186,14 @@ public class GameSceneEvents : MonoBehaviour {
 
 		SetEndOfGameMark (false);
 		//UI_ScorePanel.SetActive (false);//gameended
+
+		StopRecording ();
+
+		ShowDeathPanel ();
+	}
+
+	public void StopRecording ()
+	{
 		if (Everyplay.IsRecording ()) {
 			Everyplay.StopRecording ();
 			Everyplay.SetMetadata ("FloorNum", gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().maxBarNum);
@@ -1176,8 +1206,6 @@ public class GameSceneEvents : MonoBehaviour {
 			ShowAutoMessage ("VIDEO RECORDING ENDED!", playLastRecording);
 			bDidRecordingVideo = false;
 		}
-
-		ShowDeathPanel ();
 	}
 
 	void ShareScreenshot()
@@ -1213,12 +1241,22 @@ public class GameSceneEvents : MonoBehaviour {
 		#endif 
 	}
 
+	public void onPausePanelRecordVideoButtonClicked()
+	{
+		playMenuClickedSound ();
+		setCountingPanel (true);
+		countingTime = 3f;
+		TickingCountCoroutine = TickingCountingForRecordingOnPausePanel ();
+		StartCoroutine (TickingCountCoroutine);
+
+	}
+
 	public void onRecordVideoButtonClicked()
 	{
 		SetOptionPanel (false);
 		setCountingPanel (true);
 		countingTime = 3f;
-		TickingCountCoroutine = TickingCounting ();
+		TickingCountCoroutine = TickingCountingForRecording ();
 		StartCoroutine (TickingCountCoroutine);
 	}
 
@@ -1274,9 +1312,43 @@ public class GameSceneEvents : MonoBehaviour {
 		StopCoroutine (TickingCountCoroutine);
 	}
 
- 
 
-	IEnumerator TickingCounting()
+	IEnumerator TickingCountingForRecordingOnPausePanel()
+	{
+		CountingText.text = ((int)countingTime).ToString();
+
+		while (countingTime > 0) {
+
+			yield return StartCoroutine (CoroutineUtil.WaitForRealSeconds (1f));
+
+			countingTime -= 1f;
+			CountingText.text = ((int)countingTime).ToString();
+		}
+
+
+		setCountingPanel (false);
+		onResumebuttonClicked ();//resume game
+		startRecording ();
+		yield return null;
+	}
+	
+	/*IEnumerator TickingCountingForRecordingOnPausePanel()
+	{
+		CountingText.text = ((int)countingTime).ToString();
+		
+		while (countingTime > 0) {
+			yield return new WaitForSeconds (1f);
+			countingTime -= 1f;
+			CountingText.text = ((int)countingTime).ToString();
+		}
+		
+		setCountingPanel (false);
+		onResumebuttonClicked ();//resume game
+		startRecording ();
+		yield return null;
+	}*/
+
+	IEnumerator TickingCountingForRecording()
 	{
 		CountingText.text = ((int)countingTime).ToString();
 
@@ -1327,8 +1399,16 @@ public class GameSceneEvents : MonoBehaviour {
 			GiftImage.GetComponent<Animator>().Play("Regular");
 			UI_GiftPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 			updateMyTokenBalance();
-		}
+		
+			Invoke("GiveFreeGift",1f);
 
+
+ 
+		}
+	}
+
+	void GiveFreeGift()
+	{
 		if (gameMgr.getFreeGiftGiveAwayTimeLeft () == 0) {
 			int howManyToken = 0;
 			if(UnityEngine.Random.Range(0,10)<=1)// 20% get 10 tokens
@@ -1337,17 +1417,17 @@ public class GameSceneEvents : MonoBehaviour {
 			}
 			else
 			{
-				howManyToken = gameMgr.AddFreeGiftToken (UnityEngine.Random.Range(1,6));
-
+				howManyToken = gameMgr.AddFreeGiftToken (UnityEngine.Random.Range(2,6));
+				
 			}
-
-			ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,null,false);
-
+			
+			ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,giftTokenImg,false);
 		}
 	}
-
+	
 	public void onGiftPanelBackButtonClicked()
 	{
+		playMenuClickedSound ();
 		SetGiftPanel (false);
 	}
 
@@ -1376,16 +1456,15 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		if ( gameMgr.consumeToken (10)) {
 
-			updateMyTokenBalance();
 
 			PlayerSkin ps = gameMgr.GivePlayerRandomSkin();
 			if(ps != null)
 			{
-				ShowAutoMessage("!! "+ps.skinName + " !!",null,true,ps.ShopIcon, false);
+				ShowAutoMessage("!! "+ps.skinName + " !!",updateMyTokenBalance,true,ps.ShopIcon, false);
 			}
 			else
 			{
-				ShowAutoMessage("!! OH  NO !!",null,true,null,false);
+				ShowAutoMessage("!! OH  NO !!",updateMyTokenBalance,true,null,false);
 			}
 
 			GiftImage.GetComponent<Animator>().Play("Regular");

@@ -365,6 +365,8 @@ public class GameManager : MonoBehaviour {
 
 	void BackToMainMenuFromGame()
 	{
+		eventHandler.StopRecording ();
+
 		if (CurrentPlayer != null)
 			GameObject.Destroy(CurrentPlayer);
 		
@@ -648,8 +650,8 @@ public class GameManager : MonoBehaviour {
 				Utils.addLog ("new NoAds = " + NoAds.ToString ());
 				eventHandler.DestoryAllAds ();
 			break;
-		case "colorjumpId_smileface":
-		case "colorjumpId_sadface":
+		case "colorjumpId_skin_01":
+		case "colorjumpId_skin_02":
 				GameObject skinJustBought = getSkinBySkinId(itemId);
 				if(skinJustBought != null)
 					ownedSkins.Add(skinJustBought);
@@ -820,10 +822,10 @@ public class GameManager : MonoBehaviour {
 
 	public int getNextTimeFreeTokenSeconds()
 	{
-		if (freeGiftCounterBalance < 5)
+		if (freeGiftCounterBalance < freeTokenGiveAwayTime.Count )
 			return freeTokenGiveAwayTime [freeGiftCounterBalance];
 		else
-			return freeTokenGiveAwayTime [4];
+			return freeTokenGiveAwayTime [freeTokenGiveAwayTime.Count - 1];
 	}
 
 	public int getFreeGiftGiveAwayTimeLeft()
