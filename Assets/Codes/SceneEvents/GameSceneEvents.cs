@@ -1363,7 +1363,7 @@ public class GameSceneEvents : MonoBehaviour {
 		yield return null;
 	}
 
-	public void  onScorePanelShopButtonDown()
+	public void  onScorePanelShopORGiftButtonDown()
 	{
 		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = false;
 	}
@@ -1429,6 +1429,9 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		playMenuClickedSound ();
 		SetGiftPanel (false);
+		
+		if (gameMgr.GetCurrentPlayer () != null)
+			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = true;
 	}
 
 	public void onOpenGiftBoxButtonClicked()
