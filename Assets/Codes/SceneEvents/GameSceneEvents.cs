@@ -867,7 +867,9 @@ public class GameSceneEvents : MonoBehaviour {
 		#endif
 	}
 
-	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null, bool wantOKButton = true, Sprite img = null, bool wantCenter = true)
+
+
+	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null, bool wantOKButton = true, Sprite img = null, bool wantCenter = true, bool wantAnim = true)
 	{
 		currentMessageOkButtonDelegate = messageOkDelegate;
 		bool bActive = message.Length > 0;
@@ -877,7 +879,9 @@ public class GameSceneEvents : MonoBehaviour {
 		autoMessageImg.enabled = false;
 		if(bActive)
 		{
-			UI_AutoMessage.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+			if(wantAnim)
+				UI_AutoMessage.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+
 			AutoMessageText.text = message;
 			if(wantCenter)
 				AutoMessageText.alignment = TextAnchor.MiddleCenter;
@@ -984,17 +988,22 @@ public class GameSceneEvents : MonoBehaviour {
 		DisplayShopItem (currentShopItemDisplayIndex);
 	}
 
-	public void onMarketPurchase(string itemId)
+	void refreshCurrentShopItem()
 	{
-		CancelInvoke ("ConnectToAppStoreTimeOut");
-		ShowAutoMessage ("");
 		if(UI_ShopPanel.activeSelf)
 			DisplayShopItem (currentShopItemDisplayIndex);
 	}
 
+	public void onMarketPurchase(string itemId)
+	{
+		CancelInvoke ("ConnectToAppStoreTimeOut");
+		ShowAutoMessage ("");
+		Invoke ("refreshCurrentShopItem", 0.5f);
+	}
+
 	public void onPurchaseStarted(string itemId)
 	{
-		ShowAutoMessage("PROCESSING...\nPLEASE  WAIT",null,false);
+		ShowAutoMessage("PROCESSING...\nPLEASE  WAIT",null,false,null,true,false);
 		CancelInvoke ("ConnectToAppStoreTimeOut");
 		Invoke("ConnectToAppStoreTimeOut",90f);
 	}
