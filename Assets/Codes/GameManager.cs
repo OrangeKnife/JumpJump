@@ -1,11 +1,12 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SocialPlatforms;
 using UnityEngine.SocialPlatforms.GameCenter;
 using UnityEngine.Cloud.Analytics;
 using Soomla.Store;
-
+using System.Net.Sockets;
+using System.Threading;
 #if UNITY_ANDROID && !UNITY_EDITOR
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
@@ -81,12 +82,20 @@ public class GameManager : MonoBehaviour {
 
 	public List<int> freeTokenGiveAwayTime;
 
-	int gameActiveTime = 0;
-	float lastTimeCheckGameActiveTime = 0f;
-	float lastTimeSaveGameActiveTime = 0f;
-	float lastTimeDoOneSecondTick = 0f;
+	
+
 
 	int freeGiftCounterBalance;
+
+	System.DateTime synchronizedTime;//UTC
+	TcpClient client;
+	Thread syncTimeThread;
+	public bool syncTimeSuccess{ get; private set;}
+	bool syncFlag;//to save sync time elpse
+	static System.DateTime myBD = new System.DateTime(2015, 05, 01, 00, 00, 00);
+	int savedMinutes = 0;
+	public int synchronizedMinutes {get; private set;}
+	float realtimeSinceStartupSec_syncTimeSuccess = 0f;
 	public void login()
 	{
 
@@ -203,9 +212,78 @@ public class GameManager : MonoBehaviour {
 		ownedSkins = new List<GameObject> ();
 		checkOwnedSkins ();
 
-		gameActiveTime = StoreInventory.GetItemBalance (ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId);
+
+		savedMinutes = StoreInventory.GetItemBalance (ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId);
 		freeGiftCounterBalance = StoreInventory.GetItemBalance (ColorJumpStoreAssets.FREEGIFT_COUNTER.ItemId);
-		lastTimeDoOneSecondTick = Time.realtimeSinceStartup;
+
+
+		syncTimeThread = new Thread(syncTime) {Name = "TcpClient Thread"};
+		syncTimeThread.IsBackground = true;
+		syncTimeThread.Start ();
+	}
+
+	void OnConnect()
+	{
+		//Utils.addLog ("OnConnect!");
+		Debug.Log("OnConnect!");
+		System.IO.StreamReader streamReader = new System.IO.StreamReader (client.GetStream ());
+		string response = streamReader.ReadToEnd ();
+		if(response != "")
+		{
+			string utcDateTimeString = response.Substring (7, 17);
+			synchronizedTime = System.DateTime.ParseExact (utcDateTimeString, "yy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture , System.Globalization.DateTimeStyles.AssumeUniversal);
+			//Utils.addLog("synchronizedTime="+synchronizedTime.ToString());
+			Debug.Log("synchronizedTime="+synchronizedTime.ToString());
+
+			synchronizedMinutes = (int)synchronizedTime.Subtract(myBD).TotalMinutes;
+
+
+			syncTimeSuccess = true;
+			//eventHandler.showFreeTokenInfo(syncTimeSuccess);
+		}
+		 
+	}
+
+
+
+	public float GetTimeElaspeSinceSyncTimeSuccessMins()//only call when you sync success
+	{
+		return (Time.realtimeSinceStartup - realtimeSinceStartupSec_syncTimeSuccess)/60f;
+	}
+
+	public System.DateTime getSynchronizedTime()
+	{
+		return synchronizedTime;
+	}
+
+	void syncTime()
+	{
+		client = new TcpClient ();
+		 
+		while (true) {
+			try {
+				System.IAsyncResult result = client.BeginConnect ("time.nist.gov", 13, null, null);
+				bool success = result.AsyncWaitHandle.WaitOne (System.TimeSpan.FromSeconds (5));
+			
+				if (!success) {
+					Debug.Log ("Failed to connect.");
+				
+				} else {
+					OnConnect ();
+					break;
+				}
+			
+				client.EndConnect (result);
+				break;
+			} catch (System.Exception e) {
+				Debug.Log (e.ToString ());
+			}
+
+			Thread.Sleep(5000);
+
+		}
+	 
+	 
 	}
 
 	void checkOwnedSkins()
@@ -435,32 +513,12 @@ public class GameManager : MonoBehaviour {
 			return false;
 	}
 
-	void OneSecondTick ()
-	{
-
-		gameActiveTime += 1;
-		float currentTimeSinceStartup = Time.realtimeSinceStartup;
-		if (currentTimeSinceStartup - lastTimeCheckGameActiveTime > 5)
-			gameActiveTime += (int)(currentTimeSinceStartup - lastTimeCheckGameActiveTime);
-
-		lastTimeCheckGameActiveTime = Time.realtimeSinceStartup;
-
-		if (lastTimeCheckGameActiveTime - lastTimeSaveGameActiveTime > 30) {
-			int savedGameActiveTime = StoreInventory.GetItemBalance (ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId);
-			StoreInventory.GiveItem (ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId, gameActiveTime - savedGameActiveTime);//now it's the save
-			lastTimeSaveGameActiveTime = lastTimeCheckGameActiveTime;
-		}
-
-		Utils.addLog ("GameManagerlog: (int)Time.deltaTime = " + (gameActiveTime).ToString ());
-		 
-		lastTimeDoOneSecondTick = Time.realtimeSinceStartup;
-	}
 
 	public void OnApplicationFocus(bool focused)
 	{
 		if (focused) {
 			Utils.addLog("OnApplicationFocus");
-			lastTimeCheckGameActiveTime = Time.realtimeSinceStartup;
+
 		}
 	}
 	
@@ -472,7 +530,21 @@ public class GameManager : MonoBehaviour {
 	}
 	
 	void Update () {
-		
+
+		if (syncTimeSuccess && !syncFlag) {
+			syncFlag = true;
+			realtimeSinceStartupSec_syncTimeSuccess = Time.realtimeSinceStartup;
+
+			if(savedMinutes == 0)//first time run and first time sync
+			{
+				//save the install time
+				StoreInventory.GiveItem (ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId, synchronizedMinutes);//now it's the save
+				savedMinutes = synchronizedMinutes;
+			}
+
+
+		}
+
 		if (Input.GetKeyDown(KeyCode.Escape)) 
 		{
 			if(eventHandler.isTitle)
@@ -485,8 +557,6 @@ public class GameManager : MonoBehaviour {
 		if (!audiosource.isPlaying)
 			PlayBGM ();
 
-		if (Time.realtimeSinceStartup - lastTimeDoOneSecondTick > 1f)
-			OneSecondTick ();
 
 	}
 	
@@ -776,9 +846,11 @@ public class GameManager : MonoBehaviour {
 		StoreInventory.GiveItem (ColorJumpStoreAssets.FREEGIFT_COUNTER.ItemId,1);
 		freeGiftCounterBalance += 1;
 		
-		int savedGameActiveTime = StoreInventory.GetItemBalance(ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId);
-		StoreInventory.TakeItem(ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId,savedGameActiveTime);//now it's the save
-		gameActiveTime = 0;
+		int savedGameTime = StoreInventory.GetItemBalance(ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId);
+		savedMinutes = synchronizedMinutes + (int)GetTimeElaspeSinceSyncTimeSuccessMins ();
+		StoreInventory.GiveItem(ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId,  savedMinutes - savedGameTime ); //set to current time Mins
+
+		//gameActiveTime = 0;
 
 		return num;
 	}
@@ -820,7 +892,7 @@ public class GameManager : MonoBehaviour {
 		return ownedSkins;
 	}
 
-	public int getNextTimeFreeTokenSeconds()
+	public int getNextTimeFreeTokenMinutes()
 	{
 		if (freeGiftCounterBalance < freeTokenGiveAwayTime.Count )
 			return freeTokenGiveAwayTime [freeGiftCounterBalance];
@@ -828,13 +900,21 @@ public class GameManager : MonoBehaviour {
 			return freeTokenGiveAwayTime [freeTokenGiveAwayTime.Count - 1];
 	}
 
-	public int getFreeGiftGiveAwayTimeLeft()
+	public int getFreeTokenGiveAwayTime()
 	{	
-		int nextTimeGiveAwayTokens = getNextTimeFreeTokenSeconds ();
+		int nextTimeGiveAwayTokens = getNextTimeFreeTokenMinutes ();
 		if (nextTimeGiveAwayTokens == -1)
 			return nextTimeGiveAwayTokens;
 		else 
-			return Mathf.Max(0,nextTimeGiveAwayTokens - gameActiveTime);
+			return Mathf.Max(0,nextTimeGiveAwayTokens + savedMinutes);
+	}
+
+	public bool IsFreeTokenReady()
+	{
+		int freeTokenTime = getFreeTokenGiveAwayTime ();
+		int myCurrentSyncTimeMins = synchronizedMinutes + (int)GetTimeElaspeSinceSyncTimeSuccessMins();
+
+		return myCurrentSyncTimeMins >= freeTokenTime;
 	}
 
 }

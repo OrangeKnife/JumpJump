@@ -375,7 +375,7 @@ public class GameSceneEvents : MonoBehaviour {
 		yourBest.text = gameMgr.getBestScore ().ToString();
 
 
-		FreeTokensIndicationText.enabled = gameMgr.getFreeGiftGiveAwayTimeLeft () == 0;
+		FreeTokensIndicationText.enabled = gameMgr.getFreeTokenGiveAwayTime () == 0;
 
 
 	}
@@ -1400,7 +1400,8 @@ public class GameSceneEvents : MonoBehaviour {
 			UI_GiftPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 			updateMyTokenBalance();
 		
-			Invoke("GiveFreeGift",1f);
+			if(gameMgr.IsFreeTokenReady())
+				Invoke("GiveFreeGift",1f);
 
 
  
@@ -1409,7 +1410,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	void GiveFreeGift()
 	{
-		if (gameMgr.getFreeGiftGiveAwayTimeLeft () == 0) {
+		if (true) {
 			int howManyToken = 0;
 			if(UnityEngine.Random.Range(0,10)<=1)// 20% get 10 tokens
 			{
@@ -1474,5 +1475,10 @@ public class GameSceneEvents : MonoBehaviour {
 		}
 	}
 
+	public void showFreeTokenInfo(bool synchronized)
+	{
+		//FreeTokenInfoText.GetComponent<FreeTokenController> ().SetInfo (synchronized);//showup
+		
+	}
 	
 }
