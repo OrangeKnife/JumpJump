@@ -81,6 +81,7 @@ public class GameManager : MonoBehaviour {
 	int currentSkinTemplateIdx = 0;//random skin
 
 	public List<int> freeTokenGiveAwayTime;
+	public int TokenNumToOpenAGiftBox;
 
 	
 
@@ -90,6 +91,7 @@ public class GameManager : MonoBehaviour {
 	System.DateTime synchronizedTime;//UTC
 	TcpClient client;
 	Thread syncTimeThread;
+	bool keepConnecting = true;
 	public bool syncTimeSuccess{ get; private set;}
 	bool syncFlag;//to save sync time elpse
 	static System.DateTime myBD = new System.DateTime(2015, 05, 01, 00, 00, 00);
@@ -227,9 +229,11 @@ public class GameManager : MonoBehaviour {
 		//Utils.addLog ("OnConnect!");
 		Debug.Log("OnConnect!");
 		System.IO.StreamReader streamReader = new System.IO.StreamReader (client.GetStream ());
+		Debug.Log("GetStream!");
 		string response = streamReader.ReadToEnd ();
 		if(response != "")
 		{
+			keepConnecting = false;
 			string utcDateTimeString = response.Substring (7, 17);
 			synchronizedTime = System.DateTime.ParseExact (utcDateTimeString, "yy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture , System.Globalization.DateTimeStyles.AssumeUniversal);
 			//Utils.addLog("synchronizedTime="+synchronizedTime.ToString());
@@ -258,23 +262,23 @@ public class GameManager : MonoBehaviour {
 
 	void syncTime()
 	{
-		client = new TcpClient ();
-		 
-		while (true) {
+		while (keepConnecting) {
 			try {
+				client = new TcpClient ();
 				System.IAsyncResult result = client.BeginConnect ("time.nist.gov", 13, null, null);
-				bool success = result.AsyncWaitHandle.WaitOne (System.TimeSpan.FromSeconds (5));
+				bool success = result.AsyncWaitHandle.WaitOne (System.TimeSpan.FromSeconds (1));
 			
 				if (!success) {
 					Debug.Log ("Failed to connect.");
 				
 				} else {
 					OnConnect ();
-					break;
 				}
 			
 				client.EndConnect (result);
-				break;
+				client.Close();
+
+				 
 			} catch (System.Exception e) {
 				Debug.Log (e.ToString ());
 			}
@@ -720,8 +724,18 @@ public class GameManager : MonoBehaviour {
 				Utils.addLog ("new NoAds = " + NoAds.ToString ());
 				eventHandler.DestoryAllAds ();
 			break;
-		case "colorjumpId_skin_01":
-		case "colorjumpId_skin_02":
+		case "skin01":
+		case "skin02":
+		case "skin03":
+		case "skin04":
+		case "skin05":
+		case "skin06":
+		case "skin07":
+		case "skin08":
+		case "skin09":
+		case "skin10":
+		case "skin11":
+		case "skin12":
 				GameObject skinJustBought = getSkinBySkinId(itemId);
 				if(skinJustBought != null)
 					ownedSkins.Add(skinJustBought);

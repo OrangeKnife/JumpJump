@@ -1439,12 +1439,13 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		int mytokenNum = gameMgr.GetTokenNum ();
 
-		if(mytokenNum >= 10)
-		{
+		if (mytokenNum >= gameMgr.TokenNumToOpenAGiftBox) {
 			CancelInvoke ("stopOpeningGift");
 			OpenGiftBoxButtonText.text = "OPENING...";
-			GiftImage.GetComponent<Animator>().Play("OpenGiftAnimation");
+			GiftImage.GetComponent<Animator> ().Play ("OpenGiftAnimation");
 			Invoke ("stopOpeningGift", 3f);
+		} else {
+			ShowAutoMessage("YOU CAN COLLECT TOKENS BY PLAYING THE GAME OR CHECK BACK TO GAME EVERY FEW MINUTUES !");
 		}
 	}
 
