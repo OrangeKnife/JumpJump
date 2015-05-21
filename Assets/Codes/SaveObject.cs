@@ -14,7 +14,7 @@ public class SaveObject
 		rated = false;
 		rateLaterDeathCount = 5;
 
-		currentJumpType = 0;
+		currentJumpType = 1;
 
 		accumulatedPlayTime = 0;
 	}
