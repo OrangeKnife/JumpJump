@@ -1174,8 +1174,11 @@ public class GameSceneEvents : MonoBehaviour {
 
 		yield return new WaitForEndOfFrame ();
 
+		//resize frame
 
-		
+		float newWidth = ScreenShotFrame.GetComponent<RectTransform>().rect.height *  ((float)Screen.width)   / Screen.height;
+		 
+		ScreenShotFrame.GetComponent<RectTransform> ().SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, newWidth);
 		// create the texture
 		Texture2D aTex = new Texture2D (Screen.width, Screen.height, TextureFormat.RGB24, true);
 		aTex.ReadPixels (new Rect (0f, 0f, Screen.width, Screen.height), 0, 0);
