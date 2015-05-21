@@ -94,7 +94,7 @@ public class GameManager : MonoBehaviour {
 	bool keepConnecting = true;
 	public bool syncTimeSuccess{ get; private set;}
 	bool syncFlag;//to save sync time elpse
-	static System.DateTime myBD = new System.DateTime(2015, 05, 21, 00, 00, 00);
+	static System.DateTime myBD = new System.DateTime(2015, 05, 21, 06, 00, 00);
 	int savedMinutes = 0;
 	public int synchronizedMinutes {get; private set;}
 	float realtimeSinceStartupSec_syncTimeSuccess = 0f;
