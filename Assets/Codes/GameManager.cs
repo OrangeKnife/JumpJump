@@ -531,6 +531,7 @@ public class GameManager : MonoBehaviour {
 			keepConnecting = true;
 			syncFlag = false;
 
+			if(eventHandler != null)
 			eventHandler.resetFreeTokenInfoText();
 
 		}

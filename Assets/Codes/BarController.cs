@@ -45,7 +45,7 @@ public class BarController : MonoBehaviour
 		gameObject.layer = 10 + (int)barColor;
 
 
-		spriteRenderer = GetComponent<SpriteRenderer> ();
+		spriteRenderer = gameObject.GetComponent<SpriteRenderer> ();
 
 		audioSource = GetComponent<AudioSource> ();
 		//audioSource.volume = 0.2f;
