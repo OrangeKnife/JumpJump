@@ -31,6 +31,8 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject shopNextButton = null;
 	[SerializeField]
+	UnityEngine.UI.Text FreeTokenInfoText = null;
+	[SerializeField]
 	UnityEngine.UI.Text FreeTokensIndicationText = null;
 	[SerializeField]
 	UnityEngine.UI.Text MyTokenBalanceText = null;
@@ -1485,9 +1487,9 @@ public class GameSceneEvents : MonoBehaviour {
 		}
 	}
 
-	public void showFreeTokenInfo(bool synchronized)
+	public void resetFreeTokenInfoText()
 	{
-		//FreeTokenInfoText.GetComponent<FreeTokenController> ().SetInfo (synchronized);//showup
+		FreeTokenInfoText.GetComponent<FreeTokenController> ().ForceDisplayNonSynchronizedInfo ();//showup
 		
 	}
 	

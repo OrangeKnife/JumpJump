@@ -262,21 +262,25 @@ public class GameManager : MonoBehaviour {
 
 	void syncTime()
 	{
-		while (keepConnecting) {
+		while (true) {
 			try {
-				client = new TcpClient ();
-				System.IAsyncResult result = client.BeginConnect ("time.nist.gov", 13, null, null);
-				bool success = result.AsyncWaitHandle.WaitOne (System.TimeSpan.FromSeconds (1));
-			
-				if (!success) {
-					Debug.Log ("Failed to connect.");
+
+				if(keepConnecting)
+				{
+					client = new TcpClient ();
+					System.IAsyncResult result = client.BeginConnect ("time.nist.gov", 13, null, null);
+					bool success = result.AsyncWaitHandle.WaitOne (System.TimeSpan.FromSeconds (1));
 				
-				} else {
-					OnConnect ();
+					if (!success) {
+						Debug.Log ("Failed to connect.");
+					
+					} else {
+						OnConnect ();
+					}
+				
+					client.EndConnect (result);
+					client.Close();
 				}
-			
-				client.EndConnect (result);
-				client.Close();
 
 				 
 			} catch (System.Exception e) {
@@ -522,6 +526,12 @@ public class GameManager : MonoBehaviour {
 	{
 		if (focused) {
 			Utils.addLog("OnApplicationFocus");
+
+			syncTimeSuccess = false;
+			keepConnecting = true;
+			syncFlag = false;
+
+			eventHandler.resetFreeTokenInfoText();
 
 		}
 	}

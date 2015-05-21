@@ -4,13 +4,13 @@ using Soomla.Store;
 public class FreeTokenController : MonoBehaviour
 {
 	GameManager gameMgr;
-	UnityEngine.UI.Text FreeTokenInfoText;
+	UnityEngine.UI.Text InfoText;
 	Animator textAnimator;
 	float lastTimeTick;
 	int currentTextAnim = -1;
 	void Start ()
 	{
-		FreeTokenInfoText = gameObject.GetComponent<UnityEngine.UI.Text> ();
+		InfoText = gameObject.GetComponent<UnityEngine.UI.Text> ();
 		gameMgr = GameObject.Find ("GameManager").GetComponent<GameManager> ();
 		textAnimator = gameObject.GetComponent<Animator> ();
 		lastTimeTick = Time.realtimeSinceStartup;
@@ -22,6 +22,11 @@ public class FreeTokenController : MonoBehaviour
 			CheckFreeTokenReady ();
 	}
 
+	public void ForceDisplayNonSynchronizedInfo()
+	{
+		InfoText.text = "CONNECT  TO  INTERNET  AND  GET  FREE  TOKENS !";
+	}
+
 
 	void CheckFreeTokenReady ()
 	{ 
@@ -31,7 +36,7 @@ public class FreeTokenController : MonoBehaviour
 
 			if(myCurrentSyncTimeMins < freeTokenTime)
 			{
-				FreeTokenInfoText.text = "FREE  TOKENS  IN  " +  (freeTokenTime - myCurrentSyncTimeMins).ToString() + " MIN";
+				InfoText.text = "FREE  TOKENS  IN  " +  (freeTokenTime - myCurrentSyncTimeMins).ToString() + " MIN";
 				if (currentTextAnim != 0)
 				{
 					textAnimator.Play ("FlashText"); 
@@ -40,7 +45,7 @@ public class FreeTokenController : MonoBehaviour
 			}
 			else
 			{
-				FreeTokenInfoText.text = "FREE  TOKENS  READY!  CHECK  OUT  YOUR  GIFT!";
+				InfoText.text = "FREE  TOKENS  READY!  CHECK  OUT  YOUR  GIFT!";
 				if (currentTextAnim != 1)
 				{
 					textAnimator.Play ("FlashingTextOneSecondAnimation"); 
