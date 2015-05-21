@@ -17,6 +17,7 @@ public class SaveObject
 		currentJumpType = 1;
 
 		accumulatedPlayTime = 0;
+		lastSelectedSkin = 0;
 	}
 	public bool firstRun;
 	public int bestScore,bestScore_hardcore;
@@ -28,6 +29,7 @@ public class SaveObject
 
 	public int currentJumpType;
 	public int accumulatedPlayTime;
+	public int lastSelectedSkin;
 	//
 	public bool[] additionalInfoBool = new bool[10];
 	public int[] additionalInfoInt = new int[10];

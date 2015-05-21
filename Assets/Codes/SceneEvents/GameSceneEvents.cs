@@ -139,6 +139,9 @@ public class GameSceneEvents : MonoBehaviour {
 	GameObject EndOfGameObj = null;
 	[SerializeField]
 	UnityEngine.UI.Image ScreenShotImg = null;
+	[SerializeField]
+	GameObject ScreenShotFrame = null;
+
 
 	[SerializeField]
 	GameObject RecordButton = null;
@@ -926,6 +929,7 @@ public class GameSceneEvents : MonoBehaviour {
 		SetDimImage (bActive);
 		if(bActive)
 		{
+			currentShopItemDisplayIndex = gameMgr.currentSkinTemplateIdx;
 			UI_ShopPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 			DisplayShopItem(currentShopItemDisplayIndex);
 		}
@@ -1157,7 +1161,11 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void OnShareButtonClicked()
 	{
-		ShareScreenshot ();
+		Animator animator = ScreenShotFrame.GetComponent<Animator> ();
+		if (!animator.GetCurrentAnimatorStateInfo (0).IsName ("ScaleUp"))
+			animator.Play ("ScaleUp");
+
+		Invoke ("ShareScreenshot", 1f);
 	}
 
 	IEnumerator DoTakingScreenShot()
@@ -1491,6 +1499,15 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		FreeTokenInfoText.GetComponent<FreeTokenController> ().ForceDisplayNonSynchronizedInfo ();//showup
 		
+	}
+
+	public void onScreenShotImgFrameClicked()
+	{
+		Animator animator = ScreenShotFrame.GetComponent<Animator> ();
+		if(animator.GetCurrentAnimatorStateInfo(0).IsName("ScreenShotImgAnimation"))
+			animator.Play ("ScaleUp");
+		else
+			animator.Play ("ScaleDown");
 	}
 	
 }

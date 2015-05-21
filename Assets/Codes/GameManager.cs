@@ -78,7 +78,7 @@ public class GameManager : MonoBehaviour {
 	public List<GameObject> SkinTemplates;
 	List<GameObject> ownedSkins;
 	GameObject currentSelectedSkinTemplate;
-	int currentSkinTemplateIdx = 0;//random skin
+	public int currentSkinTemplateIdx { get; private set;}
 
 	public List<int> freeTokenGiveAwayTime;
 	public int TokenNumToOpenAGiftBox;
@@ -94,7 +94,7 @@ public class GameManager : MonoBehaviour {
 	bool keepConnecting = true;
 	public bool syncTimeSuccess{ get; private set;}
 	bool syncFlag;//to save sync time elpse
-	static System.DateTime myBD = new System.DateTime(2015, 05, 01, 00, 00, 00);
+	static System.DateTime myBD = new System.DateTime(2015, 05, 21, 00, 00, 00);
 	int savedMinutes = 0;
 	public int synchronizedMinutes {get; private set;}
 	float realtimeSinceStartupSec_syncTimeSuccess = 0f;
@@ -186,6 +186,7 @@ public class GameManager : MonoBehaviour {
 			bestScore = mysave.bestScore;
 			bestScore_hardcore = mysave.bestScore_hardcore;
 			hardCoreUnlocked = mysave.unlockedHardCore;
+			currentSkinTemplateIdx = mysave.lastSelectedSkin;
 		}
 
 		login ();
@@ -829,6 +830,9 @@ public class GameManager : MonoBehaviour {
 			currentSelectedSkinTemplate = null;
 		else 
 			currentSelectedSkinTemplate = SkinTemplates [skinTemplateIdx];
+
+		mysave.lastSelectedSkin = currentSkinTemplateIdx;
+		GameFile.Save ("save.data", mysave);
 	}
 
 	public void AddDeathCount(int d)

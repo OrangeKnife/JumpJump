@@ -12,7 +12,7 @@ public class BarGenerator : MonoBehaviour {
 	private LinkedList<GameObject> SpawnedBarsList;
 
 	public Vector3 firstBarLocation,barHeight;
-	public float flashingBarChance,scrollingColorChance,shackingBarChance;
+	public float flashingBarChance,scrollingColorChance,skakingBarChance;
 	public int minimumBarCountForFlashingBar,minimumBarCountForScrollingColor,minimumBarCountForFadingBar,minimumBarCountForShaking;
 	public int minimumBarCountHavingAdjacentSameColorBar,minimumBarCountForHavingAdjacentScrollingBar;
 	Vector3 lastBarLocation = Vector3.zero;
@@ -136,12 +136,13 @@ public class BarGenerator : MonoBehaviour {
 			if(barCount > minimumBarCountForScrollingColor * difficultyMultiplier  && Random.Range(0f,1f) < scrollingColorChance  
 			   && (barCount > minimumBarCountForHavingAdjacentScrollingBar * difficultyMultiplier || (lastBarController == null || (lastBarController != null && !lastBarController.ScrollingColor))))
 			{
-				newBar.GetComponent<MaterialScrollingController>().SetScrollingSpeedMultiplier( 1f + (float)barCount / scrollingBarCountFactor);
+				float scrollingMultiplier = Mathf.Min (2f, 1f + (float)barCount / scrollingBarCountFactor);
+				newBar.GetComponent<MaterialScrollingController>().SetScrollingSpeedMultiplier(scrollingMultiplier);
 				bc.enableScrollingColor(true);
 			}
 			else if(!lastBarFlashing && barCount > minimumBarCountForFlashingBar * difficultyMultiplier && Random.Range(0f,1f) < flashingBarChance  )
 				bc.enableFlashing(true);
-			else if(barCount > minimumBarCountForShaking * difficultyMultiplier)
+			else if(barCount > minimumBarCountForShaking * difficultyMultiplier && Random.Range(0f,1f) < skakingBarChance )
 				bc.enableShaking(true);
 			else if(barCount > minimumBarCountForFadingBar * difficultyMultiplier)
 				bc.fadingAfterPlayerJumped = true;
