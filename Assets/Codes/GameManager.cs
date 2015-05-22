@@ -110,13 +110,7 @@ public class GameManager : MonoBehaviour {
 
 	void DoLoginAuthenticate()
 	{
-		#if UNITY_IOS && !UNITY_EDITOR
-		leaderboardId = "ColorJumpScore";
-		leaderboardId_hardcore = "ColorJumpScore_HardCore";
-		#elif UNITY_ANDROID && !UNITY_EDITOR
-		leaderboardId = "CgkI_ab0x7wJEAIQAA";
-		leaderboardId_hardcore = "CgkI_ab0x7wJEAIQBw";
-		#endif
+
 		
 		Social.localUser.Authenticate (success => {
 			if (success) {
@@ -189,7 +183,17 @@ public class GameManager : MonoBehaviour {
 			currentSkinTemplateIdx = mysave.lastSelectedSkin;
 		}
 
+		#if UNITY_IOS && !UNITY_EDITOR
+		leaderboardId = "ColorJumpScore";
+		leaderboardId_hardcore = "ColorJumpScore_HardCore";
+		#elif UNITY_ANDROID && !UNITY_EDITOR
+		leaderboardId = "CgkI_ab0x7wJEAIQAA";
+		leaderboardId_hardcore = "CgkI_ab0x7wJEAIQBw";
+		#endif
+
+
 		login ();
+
  
 
 
