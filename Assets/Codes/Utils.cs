@@ -57,5 +57,35 @@ public class Utils {
 		Application.OpenURL("itms-apps://itunes.apple.com/app/"+appId);
 		#endif
 	}
+
+	public static Texture2D LoadPNG(int w, int h,string filePath) {
+		
+		Texture2D tex = null;
+		byte[] fileData;
+		
+		if (System.IO.File.Exists(filePath))     {
+			fileData = System.IO.File.ReadAllBytes(filePath);
+			tex = new Texture2D(w, h);
+			tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
+		}
+		return tex;
+	}
+
+	public static Texture2D ScaleTexture(Texture2D source,int targetWidth,int targetHeight) {
+		Texture2D result=new Texture2D(targetWidth,targetHeight,source.format,false);
+		
+		float incX=(1.0f / (float)targetWidth);
+		float incY=(1.0f / (float)targetHeight);
+		
+		for (int i = 0; i < result.height; ++i) {
+			for (int j = 0; j < result.width; ++j) {
+				Color newColor = source.GetPixelBilinear((float)j / (float)result.width, (float)i / (float)result.height);
+				result.SetPixel(j, i, newColor);
+			}
+		}
+		
+		result.Apply();
+		return result;
+	}
 	
 }

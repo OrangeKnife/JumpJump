@@ -563,7 +563,7 @@ public class GameManager : MonoBehaviour {
 
 		if (Input.GetKeyDown(KeyCode.Escape)) 
 		{
-			if(eventHandler.isTitle)
+			if(eventHandler.isTitle || bGamePaused)
 				Application.Quit(); 
 			else if(!bGamePaused)
 				eventHandler.onPauseButtonClicked();
