@@ -583,10 +583,15 @@ public class GameSceneEvents : MonoBehaviour {
 		gameMgr.UnPauseGame ();
 	}
 
-	public void onBackButtonClicked()
+	public void onBackButtonClicked()//pause panel
 	{
 		//back to main menu
 		playMenuClickedSound ();
+
+		Animator animator = ScreenShotFrame.GetComponent<Animator> ();
+		if(!animator.GetCurrentAnimatorStateInfo(0).IsName("ScreenShotImgAnimation"))
+			animator.Play ("ScaleDown");
+
 		gameMgr.BackToMainMenu ();
 
 
@@ -1519,6 +1524,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onScreenShotImgFrameClicked()
 	{
+		playMenuClickedSound ();
 		Animator animator = ScreenShotFrame.GetComponent<Animator> ();
 		if(animator.GetCurrentAnimatorStateInfo(0).IsName("ScreenShotImgAnimation"))
 			animator.Play ("ScaleUp");
