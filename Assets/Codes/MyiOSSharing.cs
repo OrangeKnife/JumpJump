@@ -18,6 +18,8 @@ using System.Runtime.InteropServices;
 		public static extern void iOSShareImgAndMessage (string iosPath, string message);
 		[DllImport("__Internal")]
 		public static extern void iOSShareMessage (string message);
+		[DllImport("__Internal")]
+		public static extern void iOSRegisterWechat (string message);
 		#endif
 	}
 

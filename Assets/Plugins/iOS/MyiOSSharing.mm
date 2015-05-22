@@ -1,11 +1,18 @@
 
 #import <UIKit/UIKit.h>
 
+#import "WeixinActivity/WeixinActivity.h"
+
 @interface  ViewController : UIViewController
+{
+    NSArray *activity;
+}
+
 
 @end
 // Method for image sharing
 @implementation ViewController
+
 
 -(void) shareMethod: (const char *) path : (const char *) shareMessage
 {
@@ -16,7 +23,16 @@
     NSString *message   = [NSString stringWithUTF8String:shareMessage];
     NSArray *postItems  = @[message,image];
  
-    UIActivityViewController *activityVc = [[UIActivityViewController alloc]initWithActivityItems:postItems applicationActivities:nil];
+    if([WXApi isWXAppInstalled])
+        activity = @[[[WeixinSessionActivity alloc] init], [[WeixinTimelineActivity alloc] init]];
+    else
+        activity = nil;
+    
+    UIActivityViewController *activityVc = [[UIActivityViewController alloc]initWithActivityItems:postItems applicationActivities:activity];
+    
+    
+    
+    activityVc.excludedActivityTypes = @[UIActivityTypeMessage,UIActivityTypeMail,UIActivityTypePrint,UIActivityTypeAssignToContact,UIActivityTypeCopyToPasteboard,UIActivityTypeAirDrop];
     
         [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:activityVc animated:YES completion:nil];
     //[activityVc release];
@@ -29,15 +45,29 @@
     NSString *message   = [NSString stringWithUTF8String:shareMessage];
     NSArray *postItems  = @[message];
     
-    UIActivityViewController *activityVc = [[UIActivityViewController alloc] initWithActivityItems:postItems applicationActivities:nil];
+    if([WXApi isWXAppInstalled])
+        activity = @[[[WeixinSessionActivity alloc] init], [[WeixinTimelineActivity alloc] init]];
+    else
+        activity = nil;
     
-    // Check if IOS device is IOS8
+    UIActivityViewController *activityVc = [[UIActivityViewController alloc] initWithActivityItems:postItems applicationActivities:activity];
+    
+    activityVc.excludedActivityTypes = @[UIActivityTypeMessage,UIActivityTypeMail,UIActivityTypePrint,UIActivityTypeAssignToContact,UIActivityTypeCopyToPasteboard,UIActivityTypeAirDrop];
     
     [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:activityVc animated:YES completion:nil];
     //[activityVc release];
 }
 
 @end
+
+extern "C"{
+    
+    void iOSRegisterWechat(const char* wechatId){
+        NSString *wxid   = [NSString stringWithUTF8String:wechatId];
+
+        [WXApi registerApp: wxid] ;
+    }
+}
  
 // globally declare image sharing method
 extern "C"{
