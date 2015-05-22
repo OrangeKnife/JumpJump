@@ -66,7 +66,7 @@ public class GameManager : MonoBehaviour {
 
 	public List<Color> backgroundColors,backgroundColors_hardcore;
 
-	SpriteRenderer BGSpriteRenderer;
+	//SpriteRenderer BGSpriteRenderer;
 
 	public List<string> notificationTextList;
 
@@ -176,7 +176,7 @@ public class GameManager : MonoBehaviour {
 
 		SetCurrentPlayerTemplateByIdx (0);
 		MainCam = GameObject.Find ("Main Camera").GetComponent<Camera>();
-		BGSpriteRenderer = MainCam.GetComponentInChildren<SpriteRenderer>();
+		//BGSpriteRenderer = MainCam.GetComponentInChildren<SpriteRenderer>();
 		barGen = GetComponent<BarGenerator> ();
 
 		//PlayerPrefs.DeleteAll ();
@@ -223,6 +223,10 @@ public class GameManager : MonoBehaviour {
 		syncTimeThread = new Thread(syncTime) {Name = "TcpClient Thread"};
 		syncTimeThread.IsBackground = true;
 		syncTimeThread.Start ();
+
+#if UNITY_IOS && !UNITY_EDITOR
+		MyiOSSharing.iOSRegisterWechat("wxf6b5d497940a676e");
+#endif
 	}
 
 	void OnConnect()
