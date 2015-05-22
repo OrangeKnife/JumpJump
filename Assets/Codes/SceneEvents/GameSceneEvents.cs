@@ -1176,11 +1176,11 @@ public class GameSceneEvents : MonoBehaviour {
 
 		//resize frame
 
-		float newWidth = ScreenShotFrame.GetComponent<RectTransform>().rect.height *  ((float)Screen.width)   / Screen.height;
+		float newFrameWidth = ScreenShotFrame.GetComponent<RectTransform>().rect.height *  ((float)Screen.width)   / Screen.height;
 		 
-		ScreenShotFrame.GetComponent<RectTransform> ().SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, newWidth);
+		ScreenShotFrame.GetComponent<RectTransform> ().SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, newFrameWidth);
 		// create the texture
-		Texture2D aTex = new Texture2D (Screen.width, Screen.height, TextureFormat.RGB24, true);
+		Texture2D aTex = new Texture2D (Screen.width, Screen.height, TextureFormat.RGB24, false);
 		aTex.ReadPixels (new Rect (0f, 0f, Screen.width, Screen.height), 0, 0);
 		aTex.Apply ();
 		/*
@@ -1197,11 +1197,24 @@ public class GameSceneEvents : MonoBehaviour {
 		*/
 		byte[] dataToSave = aTex.EncodeToPNG ();
 		ScreenShotPath = Path.Combine (Application.persistentDataPath, System.DateTime.Now.ToString ("yyyy-MM-dd-HH") + ".png");
-		File.WriteAllBytes (ScreenShotPath, dataToSave);
+		//File.WriteAllBytes (ScreenShotPath, dataToSave);//don't save it now
 		
 		screenShotSprite = Sprite.Create (aTex, new Rect (0, 0, Screen.width, Screen.height), new Vector2 (0, 0));
 		ScreenShotImg.sprite = screenShotSprite;
-		
+
+		int shotWidth = Screen.width;
+		int shotHeight = Screen.height;
+		if (shotWidth > 640) {
+			shotWidth = 640;
+			shotHeight = (int)(((float)Screen.height) / Screen.width * 640);
+			Texture2D ScaledTex = Utils.ScaleTexture (aTex, shotWidth, shotHeight);
+			File.WriteAllBytes (ScreenShotPath, ScaledTex.EncodeToPNG ());
+			Destroy (ScaledTex);
+		} else {
+			File.WriteAllBytes (ScreenShotPath, dataToSave);
+		}
+
+
 
 		ShowOneOfTheBannerViews ();
 		yield return new WaitForSeconds (2f);
