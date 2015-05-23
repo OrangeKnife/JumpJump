@@ -53,7 +53,7 @@ public class FreeTokenController : MonoBehaviour
 				}
 			} 
 
-			Utils.addLog ("time left [min]:" + (freeTokenTime - myCurrentSyncTimeMins).ToString());
+			//Utils.addLog ("time left [min]:" + (freeTokenTime - myCurrentSyncTimeMins).ToString());
 		} 
 
 		lastTimeTick = Time.realtimeSinceStartup;

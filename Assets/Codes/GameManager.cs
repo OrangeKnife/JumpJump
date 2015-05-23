@@ -767,9 +767,10 @@ public class GameManager : MonoBehaviour {
 				else
 					Utils.addLog("WTF, CANNOT FIND SKIN YOU JUST BOUGHT");
 
-				eventHandler.onMarketPurchase (itemId);
+				
 				break;
 		}
+		eventHandler.onMarketPurchase (itemId);
 	}
 
 	GameObject getSkinBySkinId(string skId)
