@@ -232,7 +232,7 @@ public class GameManager : MonoBehaviour {
 		MyiOSSharing.iOSRegisterWechat("wxf6b5d497940a676e");
 #endif
 
-		Screen.sleepTimeout = 300;
+		Screen.sleepTimeout = SleepTimeout.NeverSleep;
 	}
 
 	void OnConnect()
@@ -432,6 +432,8 @@ public class GameManager : MonoBehaviour {
 
 		gameStartTime = Time.time;
 
+		Screen.sleepTimeout = SleepTimeout.SystemSetting;
+
 	}
 
 	/*public void changeCameraBGColor(float playerHeight)
@@ -455,6 +457,7 @@ public class GameManager : MonoBehaviour {
 
 		eventHandler.DoTransition(BackToMainMenuFromGame);
 
+		Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
 	}
 
@@ -704,6 +707,7 @@ public class GameManager : MonoBehaviour {
 			savedTimeScale = Time.timeScale;
 		Time.timeScale = 0;
 		bGamePaused = true;
+		Screen.sleepTimeout = SleepTimeout.NeverSleep;
 	}
 
 	public void UnPauseGame()
@@ -712,6 +716,7 @@ public class GameManager : MonoBehaviour {
 		Time.timeScale = savedTimeScale;
 		savedTimeScale = 1f;
 		bGamePaused = false;
+		Screen.sleepTimeout = SleepTimeout.SystemSetting;
 	}
 
 	public void SetColorIndication(bool visiable)

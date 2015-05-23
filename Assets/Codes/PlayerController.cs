@@ -81,7 +81,7 @@ public class PlayerController : MonoBehaviour {
 	public float defaultGravity;
 
 	GameObject skinObject;
-	PlayerSkin currentSkin = null;
+	//PlayerSkin currentSkin = null;
 
 
 	void Awake()
@@ -165,7 +165,7 @@ public class PlayerController : MonoBehaviour {
 		if (skinTemp != null) {
 			skinObject = GameObject.Instantiate (skinTemp);
 			skinObject.transform.SetParent (gameObject.transform, false);
-			currentSkin = skinObject.GetComponent<PlayerSkin> ();
+			//currentSkin = skinObject.GetComponent<PlayerSkin> ();
 			skinSpriteRenderer = skinObject.GetComponent<SpriteRenderer> ();
 			mySkinAnimator = skinObject.GetComponent<Animator> ();
 		}

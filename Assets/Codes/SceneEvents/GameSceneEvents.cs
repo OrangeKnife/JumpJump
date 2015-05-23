@@ -622,10 +622,9 @@ public class GameSceneEvents : MonoBehaviour {
 		if(!animator.GetCurrentAnimatorStateInfo(0).IsName("ScreenShotImgAnimation"))
 			animator.Play ("ScaleDown");
 
-		gameMgr.BackToMainMenu ();
-
-
 		gameMgr.UnPauseGame ();
+
+		gameMgr.BackToMainMenu ();
 	}
 
 	public void onNoAdsButtonClicked()
