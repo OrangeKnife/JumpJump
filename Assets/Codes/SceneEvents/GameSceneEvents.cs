@@ -991,7 +991,10 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onShopPreviousButtonUp()
 	{
-		StopCoroutine (ButtonHoldLoopCoroutine);
+		if (ButtonHoldLoopCoroutine != null) {
+			StopCoroutine (ButtonHoldLoopCoroutine);
+			ButtonHoldLoopCoroutine = null;
+		}
 	}
 
 	IEnumerator previousButtonLoop(float loopinterval)
