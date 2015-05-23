@@ -49,10 +49,10 @@ public class GameSceneEvents : MonoBehaviour {
 	GameObject UI_GiftPanel = null;
 	[SerializeField]
 	GameObject ExtraButton = null;
-	[SerializeField]
+	/*[SerializeField]
 	GameObject ScorePanelShopButton = null;
 	[SerializeField]
-	GameObject ScorePanelGiftButton = null;
+	GameObject ScorePanelGiftButton = null;*/
 	[SerializeField]
 	UnityEngine.UI.Text purchaseButtonText = null;
 	[SerializeField]
