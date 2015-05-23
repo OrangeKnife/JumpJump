@@ -188,7 +188,8 @@ public class GameSceneEvents : MonoBehaviour {
 
 	string currentShopItemId;
 	IEnumerator ButtonHoldLoopCoroutine;
-	
+
+	float lastTimePlayTitleJumpAnim;
 	public void DestoryAllAds()
 	{
 		if (bannerView != null)
@@ -240,6 +241,15 @@ public class GameSceneEvents : MonoBehaviour {
 
 		if(Everyplay.IsSupported())
 			Everyplay.ReadyForRecording += OnReadyForRecording;
+
+		UI_StartPanel.GetComponent<Animator>().Play("TitleSlideAnimation");
+	}
+
+	void Update(){
+		if (UI_StartPanel.activeSelf && Time.realtimeSinceStartup - lastTimePlayTitleJumpAnim > 10f) {
+			lastTimePlayTitleJumpAnim = Time.realtimeSinceStartup;
+			UI_StartPanel.GetComponent<Animator> ().Play ("TitleJumpAnimation");
+		}
 	}
 
 	public void playGiveFreeTokenSound()
@@ -720,9 +730,13 @@ public class GameSceneEvents : MonoBehaviour {
 			bPauseButtonDisabled = false; // enable pause button 
 	}
 
-	public void SetStartPanel(bool bActive)
+	public void SetStartPanel(bool bActive, bool wantTileSlideInAnim = true)
 	{
 		UI_StartPanel.SetActive (bActive);
+
+		//only when back from game will call this
+		if(wantTileSlideInAnim)
+			UI_StartPanel.GetComponent<Animator>().Play("TitleSlideAnimation");
 	}
 
 	public void SetColorIndicationPanel(bool bActive)

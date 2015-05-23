@@ -231,6 +231,8 @@ public class GameManager : MonoBehaviour {
 #if UNITY_IOS && !UNITY_EDITOR
 		MyiOSSharing.iOSRegisterWechat("wxf6b5d497940a676e");
 #endif
+
+		Screen.sleepTimeout = 300;
 	}
 
 	void OnConnect()
@@ -430,7 +432,6 @@ public class GameManager : MonoBehaviour {
 
 		gameStartTime = Time.time;
 
-
 	}
 
 	/*public void changeCameraBGColor(float playerHeight)
@@ -477,7 +478,6 @@ public class GameManager : MonoBehaviour {
 		eventHandler.ShowOneOfTheBannerViews(true);
 
 		eventHandler.isTitle = true;
-
 	}
 
 	void setBestScore(int score)
