@@ -77,6 +77,8 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject UI_AutoMessage  = null;
 	[SerializeField]
+	GameObject UI_CreditPanel  = null;
+	[SerializeField]
 	GameObject UI_RateQuestion = null;
 	[SerializeField]
 	GameObject UI_UnityAdsQuestion = null;
@@ -161,7 +163,7 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject transitionImg = null; 
 
-	public AudioClip menuClickedSound,screenShotSound;
+	public AudioClip menuClickedSound,screenShotSound,menuButtonDownSound;
 
 	
 	AudioSource audioSource;
@@ -239,10 +241,19 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void playMenuClickedSound()
 	{
-		audioSource.volume = 0.1f;
+		return;
+		audioSource.volume = 0.07f;
 		audioSource.clip = menuClickedSound;
 		audioSource.Play ();
 	}
+
+	public void playMenuButtonDownSound()
+	{
+		audioSource.volume = 0.07f;
+		audioSource.clip = menuButtonDownSound;
+		audioSource.Play ();
+	}
+
 
 	public void playScreenShotSound()
 	{
@@ -394,7 +405,7 @@ public class GameSceneEvents : MonoBehaviour {
 	
 	public void OnTryAgainButtonClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		
 		HideAllBannerViews ();
 		
@@ -519,7 +530,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onLeaderboardsButton_mainMenu_Clicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		if (!Social.localUser.authenticated) {
 			Utils.addLog ("authenticated = " + Social.localUser.authenticated.ToString ());
 			gameMgr.login ();
@@ -538,7 +549,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onLeaderboardButton_normalClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		#if UNITY_IOS && !UNITY_EDITOR
 		if (Social.localUser.authenticated)
 			GameCenterPlatform.ShowLeaderboardUI(GameManager.leaderboardId,UnityEngine.SocialPlatforms.TimeScope.AllTime);
@@ -547,7 +558,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onLeaderboardButton_hardlClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		#if UNITY_IOS && !UNITY_EDITOR
 		if (Social.localUser.authenticated)
 			GameCenterPlatform.ShowLeaderboardUI(GameManager.leaderboardId_hardcore,UnityEngine.SocialPlatforms.TimeScope.AllTime);
@@ -559,7 +570,7 @@ public class GameSceneEvents : MonoBehaviour {
 		if (bPauseButtonDisabled)
 			return;
 		
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		SetPausePanel (true);
 
 		ShowOneOfTheBannerViews();
@@ -569,14 +580,14 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onRestartButtonClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		onResumebuttonClicked ();
 		OnTryAgainButtonClicked ();
 	}
 
 	public void onResumebuttonClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		SetPausePanel (false);
 		SetScorePanel (true);
 		HideAllBannerViews();
@@ -586,7 +597,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onBackButtonClicked()//pause panel
 	{
 		//back to main menu
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 
 		Animator animator = ScreenShotFrame.GetComponent<Animator> ();
 		if(!animator.GetCurrentAnimatorStateInfo(0).IsName("ScreenShotImgAnimation"))
@@ -603,7 +614,7 @@ public class GameSceneEvents : MonoBehaviour {
 	/*	#if UNITY_EDITOR
 		PlayerPrefs.DeleteAll ();
 		#endif*/
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		gameMgr.RemoveAds ();
 
 		UnityAnalytics.CustomEvent("NoAdsButtonClicked",new Dictionary<string, object>{
@@ -614,14 +625,14 @@ public class GameSceneEvents : MonoBehaviour {
 	
 	public void onRateButtonClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		gameMgr.ratedGame ();
 		Utils.rateGame ();
 	}
 
 	public void onHardcoreClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 
 		if(ExtraButton.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("MovingUp"))
 			ExtraButton.GetComponent<Animator>().Play("MovingDown");
@@ -634,7 +645,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void OnStartButtonClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 
 		if(ExtraButton.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("MovingUp"))
 			ExtraButton.GetComponent<Animator>().Play("MovingDown");
@@ -814,7 +825,7 @@ public class GameSceneEvents : MonoBehaviour {
 	
 	public void UnityAdsNoButtonClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		NoAdsContinueDie ();
 	}
 
@@ -827,7 +838,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	void TickingUnityAdsYesButton()
 	{
-		//playMenuClickedSound ();
+		////playMenuClickedSound ();
 		UnityAdsYesNumText.text = (UnityAdsYesNum).ToString();
 		UnityAdsYesNum -= 1;
 
@@ -848,7 +859,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onRateQuestionNoClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		setRateQuestionPanel (false);
 		gameMgr.rateLater ();
 		gameMgr.UnPauseGame ();
@@ -877,7 +888,17 @@ public class GameSceneEvents : MonoBehaviour {
 		#endif
 	}
 
+	public void SetCreditPanel(bool bActive)
+	{
+		//playMenuClickedSound ();
+		UI_CreditPanel.SetActive (bActive);
+		SetDimImage (bActive);
+		
+		if (bActive) {
+			UI_CreditPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+		}
 
+	}
 
 	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null, bool wantOKButton = true, Sprite img = null, bool wantCenter = true, bool wantAnim = true)
 	{
@@ -1087,7 +1108,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void PurchaseCurrentSelectedSkin()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		Utils.addLog("PurchaseCurrentSelectedSkin");
 		PlayerSkin ps = gameMgr.SkinTemplates [currentShopItemDisplayIndex].GetComponent<PlayerSkin> ();
 		if(ps != null)
@@ -1116,13 +1137,13 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onShopButtonClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		SetShopPanel (true);
 	}
 
 	public void onShopBackButtonClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		SetShopPanel (false);
 
 		if (gameMgr.GetCurrentPlayer () != null)
@@ -1132,14 +1153,15 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onOptionButtonClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		SetOptionPanel (true);
 	}
 
 	public void onCreditButtonClicked()
 	{
-		playMenuClickedSound ();
-		ShowAutoMessage("COLOR  JUMP\nDEVELOPED  BY\n JUNSHENG YAO\n MUSIC  BY\n SHADY DAVE");
+		//playMenuClickedSound ();
+		//ShowAutoMessage("COLOR  JUMP\n\nDEVELOPED  BY\nJUNSHENG  YAO\n MUSIC  BY\n SHADY  DAVE\nSFX  BY  FREESOUND.ORG\nART BY  YANG  DU");
+		SetCreditPanel (true);
 	}
 
 	public void ToggleDebug()
@@ -1147,9 +1169,16 @@ public class GameSceneEvents : MonoBehaviour {
 		Utils.bDebug = !Utils.bDebug;
 	}
 
+	public void onCreditPanelOKButtonClicked()
+	{
+		//playMenuClickedSound ();
+		UI_CreditPanel.SetActive (false);
+		SetDimImage (false);
+	}
+
 	public void onAutoMessageOKButtonClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		UI_AutoMessage.SetActive (false);
 		SetDimImage (false, true);
 		if(currentMessageOkButtonDelegate != null)
@@ -1283,7 +1312,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onPausePanelRecordVideoButtonClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		setCountingPanel (true);
 		countingTime = 3f;
 		TickingCountCoroutine = TickingCountingForRecordingOnPausePanel ();
@@ -1315,18 +1344,18 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void endRecording()
 	{
-		//playMenuClickedSound ();
+		////playMenuClickedSound ();
 	}
 
 	public void playLastRecording()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		Everyplay.PlayLastRecording ();
 	}
 
 	public void SwitchLeftRightJump()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		gameMgr.mysave.currentJumpType = gameMgr.mysave.currentJumpType == 0 ? 1 : 0;
 		GameFile.Save ("save.data", gameMgr.mysave);
 		SwitchJumpLeftRightText.text = gameMgr.mysave.currentJumpType == 0 ? "SET RIGHT JUMP" : "SET LEFT JUMP";
@@ -1334,7 +1363,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onOptionBackButtonClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		SetOptionPanel (false);
 	}
 
@@ -1347,7 +1376,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onCountingCanceled()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		setCountingPanel (false);
 		StopCoroutine (TickingCountCoroutine);
 	}
@@ -1425,7 +1454,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onGiftButtonClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		SetGiftPanel (true);
 	}
 
@@ -1468,7 +1497,7 @@ public class GameSceneEvents : MonoBehaviour {
 	
 	public void onGiftPanelBackButtonClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		SetGiftPanel (false);
 		
 		if (gameMgr.GetCurrentPlayer () != null)
@@ -1524,7 +1553,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onScreenShotImgFrameClicked()
 	{
-		playMenuClickedSound ();
+		//playMenuClickedSound ();
 		Animator animator = ScreenShotFrame.GetComponent<Animator> ();
 		if(animator.GetCurrentAnimatorStateInfo(0).IsName("ScreenShotImgAnimation"))
 			animator.Play ("ScaleUp");
