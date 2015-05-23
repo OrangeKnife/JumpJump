@@ -20,6 +20,9 @@ public class GameSceneEvents : MonoBehaviour {
 	//GameObject yellowboardsButton = null;
 	//[SerializeField]
 	//GameObject UI_SmallLeaderBoardsPanel = null;
+
+	[SerializeField]
+	GameObject FreeTokenButton = null;
 	[SerializeField]
 	GameObject RecordVideoButton = null;
 	[SerializeField]
@@ -163,7 +166,7 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject transitionImg = null; 
 
-	public AudioClip menuClickedSound,screenShotSound,menuButtonDownSound;
+	public AudioClip menuClickedSound,screenShotSound,menuButtonDownSound,giveFreeTokenSound;
 
 	
 	AudioSource audioSource;
@@ -239,9 +242,15 @@ public class GameSceneEvents : MonoBehaviour {
 			Everyplay.ReadyForRecording += OnReadyForRecording;
 	}
 
+	public void playGiveFreeTokenSound()
+	{
+		audioSource.volume = 0.4f;
+		audioSource.clip = giveFreeTokenSound;
+		audioSource.Play ();
+	}
+
 	public void playMenuClickedSound()
 	{
-		return;
 		audioSource.volume = 0.07f;
 		audioSource.clip = menuClickedSound;
 		audioSource.Play ();
@@ -1469,17 +1478,20 @@ public class GameSceneEvents : MonoBehaviour {
 			UI_GiftPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 			updateMyTokenBalance();
 		
-			if(gameMgr.IsFreeTokenReady())
-				Invoke("GiveFreeGift",1f);
+
+			FreeTokenButton.SetActive( gameMgr.IsFreeTokenReady() );
+
+			//Invoke("GiveFreeTokens",1f);
 
 
  
 		}
 	}
 
-	void GiveFreeGift()
+	public void GiveFreeTokens()
 	{
-		if (true) {
+		if (gameMgr.IsFreeTokenReady()) {
+			playGiveFreeTokenSound();
 			int howManyToken = 0;
 			if(UnityEngine.Random.Range(0,10)<=1)// 20% get 10 tokens
 			{
@@ -1492,6 +1504,7 @@ public class GameSceneEvents : MonoBehaviour {
 			}
 			
 			ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,giftTokenImg,false);
+			FreeTokenButton.SetActive( gameMgr.IsFreeTokenReady() );
 		}
 	}
 	
@@ -1514,7 +1527,7 @@ public class GameSceneEvents : MonoBehaviour {
 			GiftImage.GetComponent<Animator> ().Play ("OpenGiftAnimation");
 			Invoke ("stopOpeningGift", 3f);
 		} else {
-			ShowAutoMessage("YOU CAN COLLECT TOKENS BY PLAYING THE GAME OR CHECK BACK TO GAME EVERY FEW MINUTUES !");
+			ShowAutoMessage("YOU  CAN  COLLECT  TOKENS  BY  PLAYING  THE  GAME  OR  COME  BACK  EVERY  FEW  MINUTUES !");
 		}
 	}
 
@@ -1534,6 +1547,7 @@ public class GameSceneEvents : MonoBehaviour {
 			PlayerSkin ps = gameMgr.GivePlayerRandomSkin();
 			if(ps != null)
 			{
+				playGiveFreeTokenSound();
 				ShowAutoMessage("!! "+ps.skinName + " !!",updateMyTokenBalance,true,ps.ShopIcon, false);
 			}
 			else
