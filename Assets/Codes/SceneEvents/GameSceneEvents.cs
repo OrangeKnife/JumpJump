@@ -1522,7 +1522,7 @@ public class GameSceneEvents : MonoBehaviour {
 	
 	public void onExtraButtonClicked()
 	{
-		Utils.forceAddToken (100);
+		//Utils.forceAddToken (100);
 		UnityEngine.AnimatorStateInfo animstateinfo = ExtraButton.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0);
 		if (animstateinfo.IsName ("MovingUp"))
 			ExtraButton.GetComponent<Animator> ().Play ("MovingDown");
