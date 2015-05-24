@@ -181,6 +181,9 @@ public class GameManager : MonoBehaviour {
 			bestScore_hardcore = mysave.bestScore_hardcore;
 			hardCoreUnlocked = mysave.unlockedHardCore;
 			currentSkinTemplateIdx = mysave.lastSelectedSkin;
+
+			if(currentSkinTemplateIdx > 0)//not random
+				currentSelectedSkinTemplate = SkinTemplates[currentSkinTemplateIdx];
 		}
 
 		#if UNITY_IOS && !UNITY_EDITOR
@@ -274,6 +277,7 @@ public class GameManager : MonoBehaviour {
 	void syncTime()
 	{
 		while (true) {
+			Thread.Sleep(2000);
 			try {
 
 				if(keepConnecting)
@@ -298,7 +302,7 @@ public class GameManager : MonoBehaviour {
 				Debug.Log (e.ToString ());
 			}
 
-			Thread.Sleep(5000);
+			Thread.Sleep(4000);
 
 		}
 	 

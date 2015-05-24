@@ -84,5 +84,10 @@ public class Utils {
 		result.Apply();
 		return result;
 	}
+
+	public static void forceAddToken(int i)
+	{
+		Soomla.Store.StoreInventory.GiveItem(ColorJumpStoreAssets.ONE_FREEGIFT_TOKEN.ItemId,i);
+	}
 	
 }

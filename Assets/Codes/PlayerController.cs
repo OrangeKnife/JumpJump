@@ -633,7 +633,8 @@ public class PlayerController : MonoBehaviour {
 	{
 		if (bButtonJumpDown && maxJumpCount > currentJumpCount) {
 
-			eventHandler.hideScorePanelShopAndGiftButton(); //only show you are at 0 floor
+			if(maxBarNum == 0)
+				eventHandler.hideScorePanelShopAndGiftButton(); //only show you are at 0 floor
 			
 			if(mySkinAnimator != null)
 				mySkinAnimator.Play ("PlayerSkinJump");

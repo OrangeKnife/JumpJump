@@ -28,6 +28,8 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject RecordVideoButtonOnPausePanel = null;
 	[SerializeField]
+	Sprite noGiftImg = null;
+	[SerializeField]
 	Sprite giftTokenImg = null;
 	[SerializeField]
 	GameObject shopPreviousButton = null;
@@ -40,7 +42,9 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	UnityEngine.UI.Text MyTokenBalanceText = null;
 	[SerializeField]
-	UnityEngine.UI.Image autoMessageImg = null; 
+	UnityEngine.UI.Image autoMessageImg = null;
+	[SerializeField]
+	UnityEngine.UI.Image autoMessageImgBG = null; 
 	[SerializeField]
 	GameObject GiftImage = null;
 	[SerializeField]
@@ -50,9 +54,11 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject ExtraButton = null;
 	/*[SerializeField]
-	GameObject ScorePanelShopButton = null;
+	GameObject ScorePanelShopButton = null;*/
 	[SerializeField]
-	GameObject ScorePanelGiftButton = null;*/
+	GameObject ScorePanelGiftButtonTextObj = null;
+	[SerializeField]
+	GameObject GiftButtonTextObj = null;
 	[SerializeField]
 	UnityEngine.UI.Text purchaseButtonText = null;
 	[SerializeField]
@@ -490,8 +496,10 @@ public class GameSceneEvents : MonoBehaviour {
 		SetScorePanel (true);
 		UpdateUISocre (gameMgr.currentScore);
 
-		if(gameMgr.getOwnedSkins().Count > 1 || gameMgr.GetTokenNum() > 0)
+		bool isTokenReadynow = gameMgr.IsFreeTokenReady ();
+		if (gameMgr.getOwnedSkins ().Count > 1 || gameMgr.GetTokenNum () > 0 || isTokenReadynow) {
 			UI_ScorePanel.GetComponent<Animator> ().Play ("ScorePanelShopAndGiftSlideIn");
+		}
 	}
 
 	public void onGameEnded()
@@ -701,6 +709,8 @@ public class GameSceneEvents : MonoBehaviour {
 
 		if(ExtraButton.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("MovingUp"))
 			ExtraButton.GetComponent<Animator>().Play("MovingDown");
+
+
 		
 		DoTransition (DoStartButton);
 	}
@@ -957,7 +967,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	}
 
-	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null, bool wantOKButton = true, Sprite img = null, bool wantCenter = true, bool wantAnim = true)
+	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null, bool wantOKButton = true, Sprite img = null, bool wantCenter = true, bool wantAnim = true, bool wantImgBG = false)
 	{
 		currentMessageOkButtonDelegate = messageOkDelegate;
 		bool bActive = message.Length > 0;
@@ -983,6 +993,8 @@ public class GameSceneEvents : MonoBehaviour {
 			}
 			else
 				autoMessageImg.enabled = false;
+
+			autoMessageImgBG.enabled = wantImgBG;
 		}
 
 
@@ -1503,17 +1515,21 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void hideScorePanelShopAndGiftButton ()
 	{
-		if(UI_ScorePanel.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("ScorePanelShopAndGiftSlideIn"))
-			UI_ScorePanel.GetComponent<Animator> ().Play ("ScorePanelShopAndGiftSlideOut");
+		Animator animator = UI_ScorePanel.GetComponent<Animator> ();
+		if(animator.GetCurrentAnimatorStateInfo (0).IsName("ScorePanelShopAndGiftSlideIn"))
+			animator.Play ("ScorePanelShopAndGiftSlideOut");
 	}
 	
 	public void onExtraButtonClicked()
 	{
+		Utils.forceAddToken (100);
 		UnityEngine.AnimatorStateInfo animstateinfo = ExtraButton.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0);
-		if( animstateinfo.IsName("MovingUp"))
-			ExtraButton.GetComponent<Animator>().Play("MovingDown");
-		else
-			ExtraButton.GetComponent<Animator>().Play("MovingUp");
+		if (animstateinfo.IsName ("MovingUp"))
+			ExtraButton.GetComponent<Animator> ().Play ("MovingDown");
+		else {
+			ExtraButton.GetComponent<Animator> ().Play ("MovingUp");
+
+		}
 	}
 
 	public void onGiftButtonClicked()
@@ -1558,8 +1574,20 @@ public class GameSceneEvents : MonoBehaviour {
 				
 			}
 			
-			ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,giftTokenImg,false);
+			ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,giftTokenImg,false,true,true);
 			FreeTokenButton.SetActive( gameMgr.IsFreeTokenReady() );
+		}
+
+		if (GiftButtonTextObj.activeSelf) {
+			Animator animator = GiftButtonTextObj.GetComponent<Animator> ();
+			if (animator != null)
+				animator.Play ("FlashText");
+		}
+
+		if (ScorePanelGiftButtonTextObj.activeSelf) {
+			Animator animator = ScorePanelGiftButtonTextObj.GetComponent<Animator> ();
+			if (animator != null)
+				animator.Play ("FlashText");
 		}
 	}
 	
@@ -1574,6 +1602,12 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onOpenGiftBoxButtonClicked()
 	{
+
+		if (gameMgr.getOwnedSkins ().Count == gameMgr.SkinTemplates.Count - 1) {
+			ShowAutoMessage ("!! WOW !!\nYOU  ALREADY  COLLECT  ALL  THE  SKINS !  MORE  FUN  SKINS  ARE  COMING  SOON !");
+			return;
+		}
+
 		int mytokenNum = gameMgr.GetTokenNum ();
 
 		if (mytokenNum >= gameMgr.TokenNumToOpenAGiftBox) {
@@ -1603,11 +1637,26 @@ public class GameSceneEvents : MonoBehaviour {
 			if(ps != null)
 			{
 				playGiveFreeTokenSound();
-				ShowAutoMessage("!! "+ps.skinName + " !!",updateMyTokenBalance,true,ps.ShopIcon, false);
+				ShowAutoMessage("!! "+ps.skinName + " !!",updateMyTokenBalance,true,ps.ShopIcon, false,true,true);
+			}
+			else if (UnityEngine.Random.Range(0,10) <= 6)
+			{
+				int howManyToken = 0;
+				if(UnityEngine.Random.Range(0,15)<=1)// chance to get more tokens
+				{
+					howManyToken = gameMgr.AddFreeGiftToken (15);
+				}
+				else
+				{
+					howManyToken = gameMgr.AddFreeGiftToken (UnityEngine.Random.Range(2,6));
+					
+				}
+				playGiveFreeTokenSound();
+				ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,giftTokenImg,false,true,true);
 			}
 			else
 			{
-				ShowAutoMessage("!! OH  NO !!",updateMyTokenBalance,true,null,false);
+				ShowAutoMessage("!! OH  NO !!",updateMyTokenBalance,true,noGiftImg,false,true,true);
 			}
 
 			GiftImage.GetComponent<Animator>().Play("Regular");

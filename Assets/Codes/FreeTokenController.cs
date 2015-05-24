@@ -18,7 +18,7 @@ public class FreeTokenController : MonoBehaviour
 
 	void Update()
 	{
-		if (gameMgr.syncTimeSuccess &&  !gameMgr.bGameStarted && Time.realtimeSinceStartup - lastTimeTick > 5f)
+		if (gameMgr.syncTimeSuccess &&  !gameMgr.bGameStarted && Time.realtimeSinceStartup - lastTimeTick > 2f)
 			CheckFreeTokenReady ();
 	}
 
