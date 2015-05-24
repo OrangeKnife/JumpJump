@@ -381,9 +381,16 @@ public class GameSceneEvents : MonoBehaviour {
 					"\n<color=#19AB21>TIME.</color>  " + ((int)gameMgr.getPlayTime ()).ToString ();
 			 
 				EndOfGameObj.GetComponentInChildren<TextMesh> ().text = EOGText;
-				EndOfGameObj.transform.position = new Vector3(0,gameMgr.MainCam.transform.position.y,-1);//lastBar.gameObject.transform.position;
+				EndOfGameObj.transform.position = new Vector3(0,gameMgr.MainCam.transform.position.y + 0.92f,-1);//hack 0.92f offset for skin display//lastBar.gameObject.transform.position;
 				EndOfGameObj.GetComponent<Animator>().Play("ScalePopInAnimation");
 				EndOfGameObj.GetComponent<AudioSource>().Play();
+
+			PlayerController pc = gameMgr.GetCurrentPlayer().GetComponent<PlayerController>();
+			pc.SetGravityScale(0);
+			pc.SetPlayerRenderer(true);
+			pc.GetComponent<PlayerController>().StopCurrentAnim();
+			pc.gameObject.transform.localScale *= 2;
+			pc.gameObject.transform.position = new Vector3(0,gameMgr.MainCam.transform.position.y -1.5f,-1);
 
 
 			UnityAnalytics.CustomEvent("GameEnded",new Dictionary<string, object>{

@@ -83,7 +83,7 @@ public class PlayerController : MonoBehaviour {
 	GameObject skinObject;
 	//PlayerSkin currentSkin = null;
 
-
+	bool standOnCheck;//if it's true, check the stand on , will off after one check , will on when you jump
 	void Awake()
 	{
 		
@@ -141,6 +141,11 @@ public class PlayerController : MonoBehaviour {
 		}
 	}
 
+	public void SetGravityScale(float newScale)
+	{
+		MyRigidBody.gravityScale = newScale;
+	}
+
 	public void DoDeath()
 	{
 		eventHandler.onPlayerDead ();
@@ -170,6 +175,18 @@ public class PlayerController : MonoBehaviour {
 			mySkinAnimator = skinObject.GetComponent<Animator> ();
 		}
 	 	 
+	}
+
+	public void SetPlayerRenderer(bool bActive)
+	{
+		spriteRenderer.enabled = bActive;
+		if(skinSpriteRenderer != null)
+			skinSpriteRenderer.enabled = bActive;
+	}
+
+	public void StopCurrentAnim()
+	{
+		myAnimator.Play ("Regular");//nothing there
 	}
 
 	void Die()
@@ -440,19 +457,38 @@ public class PlayerController : MonoBehaviour {
 
 			HandleInput (ButtonJumpDown, ButtonJumpHold, ButtonJumpUp);
 	 
+		if (MyRigidBody.velocity.y < 0) { //fall
+			GameObject obj_foot = FootTouched ();
+			if (obj_foot != null) {
+				BarController bc = obj_foot.GetComponent<BarController> ();
 
-		GameObject obj_foot = FootTouched ();
-		if (obj_foot != null) {
-			BarController bc = obj_foot.GetComponent<BarController> ();
-
-			if(lastBarFallThrough == null)
-				lastBarFallThrough = bc;
-			else if(bc != null)
-			{
-				if(bc.gameObject.transform.position.y > lastBarFallThrough.gameObject.transform.position.y)
-				{
+				if (lastBarFallThrough == null)
 					lastBarFallThrough = bc;
-					//Utils.addLog("lastBarFallThrough changed");
+				else if (bc != null) {
+					if (bc.gameObject.transform.position.y > lastBarFallThrough.gameObject.transform.position.y) {
+						lastBarFallThrough = bc;
+						//Utils.addLog("lastBarFallThrough changed");
+					}
+				}
+			}
+		}
+
+		if (standOnCheck && MyRigidBody.velocity.y == 0 ) {
+			GameObject obj_foot = FootTouched ();
+			if (obj_foot != null) {
+				BarController bc = obj_foot.GetComponent<BarController> ();
+				
+				if (lastBarFallThrough == null)
+					lastBarFallThrough = bc;
+				else if (bc != null) {
+					if (bc.gameObject.transform.position.y > lastBarFallThrough.gameObject.transform.position.y) {
+						lastBarFallThrough = bc;
+						//Utils.addLog("lastBarFallThrough changed");
+					}
+					
+					Utils.addLog ("Foot stand on something!");
+					standOnCheck = false;
+					bc.DoStandOnLogic(this);
 				}
 			}
 		}
@@ -643,7 +679,7 @@ public class PlayerController : MonoBehaviour {
 			jumped = true;
 			currentJumpCount += 1;
 			eventHandler.SetJumpCountText("JUMP "+getJumpXstring() );
-			MyRigidBody.velocity = Vector2.Min(Vector2.zero, Vector2.Max(new Vector2(0,-2f),MyRigidBody.velocity));//avoid crazy current vel !!!
+			MyRigidBody.velocity = Vector2.Min(Vector2.zero, Vector2.Max(new Vector2(0,-2f),MyRigidBody.velocity)) + new Vector2(0,0.01f);//avoid crazy current vel !!!
 			MyRigidBody.AddForce(new Vector3(0,jumpPower * 100f,0));
 			playSound(audioClips[0],0,false,0.1f); //jjump
 			if(lastBarStandOn != null)
@@ -656,6 +692,8 @@ public class PlayerController : MonoBehaviour {
 				}
 
 			}
+
+			standOnCheck = true;
 
 		}
 		/*
@@ -705,8 +743,7 @@ public class PlayerController : MonoBehaviour {
 
 	GameObject FootTouched()
 	{
-		if (MyRigidBody.velocity.y >= 0)
-			return null;
+
 
 		float halfPlayerSizeY = getHalfPlayerSizeY ();
 		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y - halfPlayerSizeY - 0.05f);
@@ -716,6 +753,7 @@ public class PlayerController : MonoBehaviour {
 			return hitDown.collider.gameObject;//foot touch into bar
 		return null;
 	}
+
 
 	public void SetJumpCountZero()
 	{

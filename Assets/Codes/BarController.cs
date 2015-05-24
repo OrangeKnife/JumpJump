@@ -299,82 +299,102 @@ public class BarController : MonoBehaviour
 
 	}	 */
 
-	void OnCollisionEnter2D(Collision2D other)
+	public void DoStandOnLogic(PlayerController pc)
 	{
-		if (other.gameObject.tag == "Player") {
-			if(other.gameObject.transform.position.y < gameObject.GetComponent<BoxCollider2D>().transform.position.y)
-				return;
+ 
+		if(pc.gameObject.transform.position.y < gameObject.GetComponent<BoxCollider2D>().transform.position.y)
+			return;
 
-			/*other.gameObject.GetComponent<PlayerController> ().SetJumpCountZero ();//hack
+ 
+		if(pc.gameObject.GetComponent<Rigidbody2D>().velocity.y > 0 )
+			return;
+			
+		if(pc.gameObject.transform.position.y  < gameObject.transform.position.y )
+			return;
+		
+		//other.gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
 
-			if(!audioSource.isPlaying)//hack
+		if(minusScore && score < 0 || score > 0)
+		{
+			pc.AddScore (score);
+		}
+		
+		if (score > 0) {
+			score = -1;
+			
+			
+			if(true)//!audioSource.isPlaying)
+			{
+				if(shallWeDisplayBarNum(barNum))
+				{
+					audioSource.clip = audioClips [3];//speical sfx for 10,20,30....
+					audioSource.volume = 0.4f;
+					
+					//lets change BG
+					gameMgr.ChangeRandomBG();
+				}
+				else
+				{
+					audioSource.clip = audioClips [0];
+					audioSource.volume = 0.7f;
+				}
+				audioSource.Play ();
+			}
+			
+			
+		} else {
+			score --;
+			
+			if(!audioSource.isPlaying)
 			{
 				audioSource.clip = audioClips [1];
-				audioSource.volume = 0.03f;
+				audioSource.volume = 0.05f;
 				audioSource.Play ();
-			}*/
-			
-			if(other.gameObject.GetComponent<Rigidbody2D>().velocity.y > 0 )
-				return;
-				
-			if(other.gameObject.transform.position.y  < gameObject.transform.position.y )
-				return;
-			
-			//other.gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
-			PlayerController pc = other.gameObject.GetComponent<PlayerController>();
-			if(minusScore && score < 0 || score > 0)
-			{
-				pc.AddScore (score);
 			}
 			
-			if (score > 0) {
-				score = -1;
-
-
-				if(true)//!audioSource.isPlaying)
-				{
-					if(shallWeDisplayBarNum(barNum))
-					{
-						audioSource.clip = audioClips [3];//speical sfx for 10,20,30....
-						audioSource.volume = 0.4f;
-
-						//lets change BG
-						gameMgr.ChangeRandomBG();
-					}
-					else
-					{
-						audioSource.clip = audioClips [0];
-						audioSource.volume = 0.7f;
-					}
-					audioSource.Play ();
-				}
-
-
-			} else {
-				score --;
-
-				if(!audioSource.isPlaying)
-				{
-					audioSource.clip = audioClips [1];
-					audioSource.volume = 0.05f;
-					audioSource.Play ();
-				}
-				
-			}
-			
-			other.gameObject.GetComponent<PlayerController> ().ResetJumpCount (0, this);
-
-
-			if(shaking)
-			{
-				CancelInvoke("DoShaking");
-				CancelInvoke("ShakingThenDisappear");
-				Invoke("DoShaking",beforeShakingTime);
-				//Utils.addLog("Start check shaking");
-				GetComponent<Animator>().Play("oneTimeShaking");
-			}
+		}
+		
+		pc.ResetJumpCount (0, this);
+		
+		
+		if(shaking)
+		{
+			CancelInvoke("DoShaking");
+			CancelInvoke("ShakingThenDisappear");
+			Invoke("DoShaking",beforeShakingTime);
+			//Utils.addLog("Start check shaking");
+			GetComponent<Animator>().Play("oneTimeShaking");
 		}
 	}
+
+//	void OnCollisionEnter2D(Collision2D other)
+//	{
+//		if (other.gameObject.tag == "Player") {
+//			if(other.gameObject.transform.position.y < gameObject.GetComponent<BoxCollider2D>().transform.position.y)
+//				return;
+//
+//			//other.gameObject.GetComponent<PlayerController> ().SetJumpCountZero ();//hack
+//			/*
+//			if(!audioSource.isPlaying)//hack
+//			{
+//				audioSource.clip = audioClips [1];
+//				audioSource.volume = 0.03f;
+//				audioSource.Play ();
+//			}*/
+//
+//			
+//			if(other.gameObject.GetComponent<Rigidbody2D>().velocity.y > 0 )
+//				return;
+//				
+//			if(other.gameObject.transform.position.y  < gameObject.transform.position.y )
+//				return;
+//			
+//			//other.gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+//			
+//			PlayerController pc = other.gameObject.GetComponent<PlayerController>();
+//			DoStandOnLogic(pc);
+//		}
+//	}
 
 	void DoShaking()
 	{
