@@ -1143,7 +1143,13 @@ public class GameSceneEvents : MonoBehaviour {
 			//show icon
 			currentShopItemImage.sprite = ps.ShopIcon;
 			currentShopItemName.text = ps.skinName;
-			currentShopItemPriceText.text = ps.skinPrice.ToString("0.00");
+
+			if(ps.purchasable)
+			{
+				VirtualGood vg = (VirtualGood)StoreInfo.GetItemByItemId(ps.skinId);
+				
+				currentShopItemPriceText.text = ((PurchaseWithMarket)vg.PurchaseType).MarketItem.Price.ToString("0.00");
+			}
 			currentShopItemId = ps.skinId;
 
 
