@@ -235,7 +235,14 @@ public class GameManager : MonoBehaviour {
 		MyiOSSharing.iOSRegisterWechat("wxf6b5d497940a676e");
 #endif
 
-		Screen.sleepTimeout = SleepTimeout.NeverSleep;
+		SetScreenNeverSleepIfHasAds ();
+
+	}
+
+	void SetScreenNeverSleepIfHasAds()
+	{
+		if(!NoAds)
+			Screen.sleepTimeout = SleepTimeout.NeverSleep;
 	}
 
 	void OnConnect()
@@ -461,7 +468,8 @@ public class GameManager : MonoBehaviour {
 
 		eventHandler.DoTransition(BackToMainMenuFromGame);
 
-		Screen.sleepTimeout = SleepTimeout.NeverSleep;
+
+		SetScreenNeverSleepIfHasAds ();
 
 	}
 
@@ -711,7 +719,8 @@ public class GameManager : MonoBehaviour {
 			savedTimeScale = Time.timeScale;
 		Time.timeScale = 0;
 		bGamePaused = true;
-		Screen.sleepTimeout = SleepTimeout.NeverSleep;
+
+		SetScreenNeverSleepIfHasAds ();
 	}
 
 	public void UnPauseGame()
