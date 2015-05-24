@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: fde159bf957977042bec9dd2b54b6eb0
-timeCreated: 1432503483
+guid: b58caaa76ee6f440f8ad98da71c1634c
+timeCreated: 1432497468
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName: {}
@@ -43,13 +43,13 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: .5, y: .5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spritePixelsToUnits: 50
+  spritePixelsToUnits: 100
   alphaIsTransparency: 1
   textureType: 8
   buildTargetSettings:
   - buildTarget: iPhone
     maxTextureSize: 512
-    textureFormat: -3
+    textureFormat: -1
     compressionQuality: 50
   spriteSheet:
     sprites: []
