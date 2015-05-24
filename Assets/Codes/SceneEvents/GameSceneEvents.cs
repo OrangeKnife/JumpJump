@@ -70,6 +70,8 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject UI_CountingPanel = null;
 	[SerializeField]
+	GameObject countingPanelCancelButton = null;
+	[SerializeField]
 	UnityEngine.UI.Text SwitchJumpLeftRightText = null;
 	[SerializeField]
 	GameObject UI_OptionPanel = null;
@@ -368,9 +370,9 @@ public class GameSceneEvents : MonoBehaviour {
 		if (bActive) {
 			int maxBarNum = gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().maxBarNum;
 			 
-				string EOGText = "<color=#FF00FFFF>FLOOR.</color>  " + maxBarNum.ToString () + "\n<color=#FF00FFFF>SCORE.</color>  " + gameMgr.currentScore.ToString () + 
-				"\n<color=#FF00FFFF>JUMP.</color>  " + (gameMgr.GetCurrentPlayer().GetComponent<PlayerController>().totalJumpCount).ToString () +
-				"\n<color=#FF00FFFF>TIME.</color>  " + ((int)gameMgr.getPlayTime ()).ToString ();
+			string EOGText = "<color=#19AB21>FLOOR.</color>  " + maxBarNum.ToString () + "\n<color=#19AB21>SCORE.</color>  " + gameMgr.currentScore.ToString () + 
+				"\n<color=#19AB21>JUMP.</color>  " + (gameMgr.GetCurrentPlayer().GetComponent<PlayerController>().totalJumpCount).ToString () +
+					"\n<color=#19AB21>TIME.</color>  " + ((int)gameMgr.getPlayTime ()).ToString ();
 			 
 				EndOfGameObj.GetComponentInChildren<TextMesh> ().text = EOGText;
 				EndOfGameObj.transform.position = new Vector3(0,gameMgr.MainCam.transform.position.y,-1);//lastBar.gameObject.transform.position;
@@ -600,17 +602,49 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onRestartButtonClicked()
 	{
 		//playMenuClickedSound ();
-		onResumebuttonClicked ();
+		ResumeGame ();
 		OnTryAgainButtonClicked ();
 	}
 
-	public void onResumebuttonClicked()
+	void ResumeGame()
 	{
-		//playMenuClickedSound ();
 		SetPausePanel (false);
 		SetScorePanel (true);
 		HideAllBannerViews();
 		gameMgr.UnPauseGame ();
+	}
+	public void onResumebuttonClicked()
+	{
+		//playMenuClickedSound ();
+
+		setCountingPanel (true,false);
+		countingTime = 3f;
+		TickingCountCoroutine = TickingCountingForResume ();
+		StartCoroutine (TickingCountCoroutine);
+
+	}
+
+
+	IEnumerator TickingCountingForResume()
+	{
+		//hide ui first
+		SetPausePanel (false);
+		SetScorePanel (true);
+		HideAllBannerViews();
+
+		CountingText.text = ((int)countingTime).ToString();
+		
+		while (countingTime > 0) {
+			yield return StartCoroutine (CoroutineUtil.WaitForRealSeconds (1f));
+			countingTime -= 1f;
+			CountingText.text = ((int)countingTime).ToString();
+		}
+		
+		setCountingPanel (false);
+
+		gameMgr.UnPauseGame ();
+		TickingCountCoroutine = null;
+		yield return null;
 	}
 
 	public void onBackButtonClicked()//pause panel
@@ -707,7 +741,7 @@ public class GameSceneEvents : MonoBehaviour {
 		SetDimImage (bActive);
 
 		if (bActive) {
-			UI_PausePanel.GetComponent<Animator> ().Play ("PausePanelOpened");
+			UI_PausePanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 
 			RecordVideoButtonOnPausePanel.GetComponent<UnityEngine.UI.Button>().interactable = !Everyplay.IsRecording();
 		}
@@ -731,6 +765,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void SetStartPanel(bool bActive, bool wantTileSlideInAnim = true)
 	{
+
 		UI_StartPanel.SetActive (bActive);
 
 		//only when back from game will call this
@@ -1392,18 +1427,22 @@ public class GameSceneEvents : MonoBehaviour {
 		SetOptionPanel (false);
 	}
 
-	public void setCountingPanel(bool bActive)
+	public void setCountingPanel(bool bActive, bool wantCancelButton = true)
 	{
 		UI_CountingPanel.SetActive(bActive);
-		if(bActive)
+		if (bActive) {
 			UI_CountingPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+
+			countingPanelCancelButton.SetActive(wantCancelButton);
+		}
 	}
 
 	public void onCountingCanceled()
 	{
 		//playMenuClickedSound ();
 		setCountingPanel (false);
-		StopCoroutine (TickingCountCoroutine);
+		if(TickingCountCoroutine != null)
+			StopCoroutine (TickingCountCoroutine);
 	}
 
 
