@@ -1147,8 +1147,8 @@ public class GameSceneEvents : MonoBehaviour {
 			if(ps.purchasable)
 			{
 				VirtualGood vg = (VirtualGood)StoreInfo.GetItemByItemId(ps.skinId);
-				
-				currentShopItemPriceText.text = ((PurchaseWithMarket)vg.PurchaseType).MarketItem.Price.ToString("0.00");
+				string pId = ((PurchaseWithMarket)vg.PurchaseType).MarketItem.ProductId;
+				currentShopItemPriceText.text = ((PurchaseWithMarket)StoreInfo.GetPurchasableItemWithProductId(pId).PurchaseType).MarketItem.Price.ToString("0.00");
 			}
 			currentShopItemId = ps.skinId;
 
