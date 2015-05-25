@@ -20,6 +20,7 @@ public class PlayerController : MonoBehaviour {
 	int combo = 0;//color combo
 	public bool wantColorCombo = false;
 	int jumpCombo = 0;
+	int maxCombo = -1;
 	public bool wantJumpCombo = true;
 	bool isDead = false;
 	public bool allowInput = true;
@@ -630,10 +631,12 @@ public class PlayerController : MonoBehaviour {
 	public void setJumpCombo(int i)
 	{
 		jumpCombo = i;
-		if(jumpCombo <= 1)
-			eventHandler.SetExtraInfoText("NO BONUS");
-		else
-			eventHandler.SetExtraInfoText("SCORE x "+jumpCombo);//combo bonus
+
+		if (jumpCombo > maxCombo) {
+			maxCombo = jumpCombo;
+			eventHandler.SetExtraInfoText("MAX COMBO X "+maxCombo.ToString());
+		}
+
 	}
 
 	void checkStandTime()
@@ -660,7 +663,7 @@ public class PlayerController : MonoBehaviour {
 		if (maxJumpCount - currentJumpCount < 3) 
 		{
 			for (int i = 0; i < maxJumpCount - currentJumpCount; ++i) {
-				Xstring += "X";
+				Xstring += "^ ";
 			}
 		} else
 			Xstring = "X " + (maxJumpCount - currentJumpCount).ToString ();
@@ -733,11 +736,13 @@ public class PlayerController : MonoBehaviour {
 	{
 		float halfPlayerSizeY = getHalfPlayerSizeY ();
 		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y + halfPlayerSizeY);
-		Debug.DrawLine (myPos, myPos + Vector2.up * 0.1f,new Color(1,0,0,1));
+
 
 		LayerMask lmask = (~(1 << (gameObject.layer))) - (1 <<  LayerMask.NameToLayer("NoCollision")) - (1 <<LayerMask.NameToLayer("Pickup"));
-
-		RaycastHit2D hitup = Physics2D.Raycast(myPos, Vector2.up, 0.1f,lmask  );
+		float velY = MyRigidBody.velocity.y;
+		float scaleRayDis = Mathf.Max (0.2f, Mathf.Min (1f, velY / 3f));
+		Debug.DrawLine (myPos, myPos + Vector2.up * 0.1f * scaleRayDis,new Color(1,0,0,1));
+		RaycastHit2D hitup = Physics2D.Raycast(myPos, Vector2.up, 0.1f * scaleRayDis ,lmask  );
 		if (hitup.collider != null && MyRigidBody.velocity.y > 0 )
 			return hitup.collider.gameObject;//knock into bar
 		return null;
