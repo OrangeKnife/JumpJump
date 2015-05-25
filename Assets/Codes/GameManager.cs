@@ -76,7 +76,7 @@ public class GameManager : MonoBehaviour {
 	float gameStartTime;
 
 	public List<GameObject> SkinTemplates;
-	List<GameObject> ownedSkins;
+	List<GameObject> ownedSkins,notOwnedSkins;
 	GameObject currentSelectedSkinTemplate;
 	public int currentSkinTemplateIdx { get; private set;}
 
@@ -98,6 +98,10 @@ public class GameManager : MonoBehaviour {
 	int savedMinutes = 0;
 	public int synchronizedMinutes {get; private set;}
 	float realtimeSinceStartupSec_syncTimeSuccess = 0f;
+
+	public int freeSkinTrialDeathNum;
+	int freeSkinTrialDeathCount = -1;//for count how many deaths you can play with free skin
+	int alreadyAskedTrialQuestionOnDeathCount = -1;
 	public void login()
 	{
 
@@ -220,6 +224,7 @@ public class GameManager : MonoBehaviour {
 		SendPhoneNotification ();//haha
 
 		ownedSkins = new List<GameObject> ();
+		notOwnedSkins = new List<GameObject> ();
 		checkOwnedSkins ();
 
 
@@ -325,6 +330,8 @@ public class GameManager : MonoBehaviour {
 			{
 				if(ps.freeToUse || ps.purchasable && ps.skinId != "" && StoreInventory.GetItemBalance (ps.skinId) > 0)
 					ownedSkins.Add (SkinTemplates[i]);
+				else if(ps.purchasable && ps.skinId != "" && StoreInventory.GetItemBalance (ps.skinId) == 0)
+					notOwnedSkins.Add(SkinTemplates[i]);
 			}
 		}
 	}
@@ -586,7 +593,7 @@ public class GameManager : MonoBehaviour {
 
 		if (Input.GetKeyDown(KeyCode.Escape)) 
 		{
-			if(eventHandler.isTitle || bGamePaused)
+			if(eventHandler.isTitle || bGamePaused || !bGameStarted)
 				Application.Quit(); 
 			else if(!bGamePaused)
 				eventHandler.onPauseButtonClicked();
@@ -644,8 +651,12 @@ public class GameManager : MonoBehaviour {
 
 		CurrentPlayer = Instantiate(CurrentPlayerTemplate);
 
-		if (currentSkinTemplateIdx == 0)
-			UseSkin (currentSkinTemplateIdx); // do random every game if choose 0
+		if (freeSkinTrialDeathCount <= 0) 
+		{
+			//no free trial
+			if (currentSkinTemplateIdx == 0)
+				UseSkin (currentSkinTemplateIdx); // do random every game if choose 0
+		}
 
 		ApplySkinSetting ();
 
@@ -656,11 +667,20 @@ public class GameManager : MonoBehaviour {
 
 		Time.timeScale = 1f;
 
+		bool askForRating = false;
 		if (!mysave.rated)
 		{
 			if(mysave.deathCount == mysave.rateLaterDeathCount) {
 				eventHandler.setRateQuestionPanel(true);
+				askForRating = true;
 			}
+		}
+
+		if (!askForRating && IsFreeSkinTrialAvailable()) {
+			//try trial
+			alreadyAskedTrialQuestionOnDeathCount = mysave.deathCount; // only ask once per game run
+			eventHandler.setFreeSkinTrialPanel(true);
+
 		}
 
 		//BGSpriteRenderer.sprite = getRandomBG (gameMode);
@@ -776,7 +796,10 @@ public class GameManager : MonoBehaviour {
 		case "skin12":
 				GameObject skinJustBought = getSkinBySkinId(itemId);
 				if(skinJustBought != null)
+				{
 					ownedSkins.Add(skinJustBought);
+					notOwnedSkins.Remove(skinJustBought);
+				}
 				else
 					Utils.addLog("WTF, CANNOT FIND SKIN YOU JUST BOUGHT");
 
@@ -848,6 +871,9 @@ public class GameManager : MonoBehaviour {
 
 	public void UseSkin(int skinTemplateIdx)
 	{
+		//cancel trial
+		freeSkinTrialDeathCount = -1;
+
 		currentSkinTemplateIdx = skinTemplateIdx;
 		if (skinTemplateIdx == 0) //force random a skin
 		{
@@ -866,6 +892,9 @@ public class GameManager : MonoBehaviour {
 	{
 		mysave.deathCount += d;
 		GameFile.Save ("save.data",mysave);
+
+		if (freeSkinTrialDeathCount > 0)
+			freeSkinTrialDeathCount -= d;
 	}
 
 	public void unlockHardcoreMode(bool wantToUnlock)
@@ -883,7 +912,7 @@ public class GameManager : MonoBehaviour {
 
 	public void rateLater()
 	{
-		mysave.rateLaterDeathCount *= 5;
+		mysave.rateLaterDeathCount *= 4;
 		GameFile.Save ("save.data",mysave);
 	}
 
@@ -937,6 +966,7 @@ public class GameManager : MonoBehaviour {
  		if (ownedSkins.IndexOf (rtObj) == -1) {
 			StoreInventory.GiveItem(rtObj.GetComponent<PlayerSkin>().skinId,1);
 			ownedSkins.Add(rtObj);
+			notOwnedSkins.Remove(rtObj);
 			return rtObj.GetComponent<PlayerSkin> ();
 		}
 		else
@@ -946,6 +976,11 @@ public class GameManager : MonoBehaviour {
 	public List<GameObject> getOwnedSkins()
 	{
 		return ownedSkins;
+	}
+
+	public int getTotalSkinTemplatesCount()
+	{
+		return SkinTemplates.Count - 1;// first one is random
 	}
 
 	public int getNextTimeFreeTokenMinutes()
@@ -971,6 +1006,22 @@ public class GameManager : MonoBehaviour {
 		int myCurrentSyncTimeMins = synchronizedMinutes + (int)GetTimeElaspeSinceSyncTimeSuccessMins();
 
 		return myCurrentSyncTimeMins >= freeTokenTime;
+	}
+
+	bool IsFreeSkinTrialAvailable()
+	{
+		return (mysave.deathCount + 1) % 4 == 0 && getOwnedSkins ().Count < getTotalSkinTemplatesCount () && freeSkinTrialDeathCount <= 0 && alreadyAskedTrialQuestionOnDeathCount != mysave.deathCount;
+	}
+
+	public GameObject FreeSkinTrial()
+	{
+
+		freeSkinTrialDeathCount = freeSkinTrialDeathNum;
+		currentSelectedSkinTemplate = notOwnedSkins[ UnityEngine.Random.Range (0, notOwnedSkins.Count) ];
+
+		ApplySkinSetting ();
+
+		return currentSelectedSkinTemplate;
 	}
 
 }

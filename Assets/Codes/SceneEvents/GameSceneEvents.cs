@@ -92,6 +92,8 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject UI_RateQuestion = null;
 	[SerializeField]
+	GameObject UI_FreeSkinTrialQuestion = null;
+	[SerializeField]
 	GameObject UI_UnityAdsQuestion = null;
 	[SerializeField]
 	GameObject UI_PausePanel = null;
@@ -939,6 +941,35 @@ public class GameSceneEvents : MonoBehaviour {
 		gameMgr.UnPauseGame ();
 	}
 
+	public void setFreeSkinTrialPanel(bool bActive)
+	{
+		UI_FreeSkinTrialQuestion.SetActive (bActive);
+		SetDimImage (bActive);
+		
+		if (bActive) {
+			UI_FreeSkinTrialQuestion.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+		}
+
+	}
+
+	public void onFreeSkinTrialPanelSureButtonClicked()
+	{
+		setFreeSkinTrialPanel (false);
+		GameObject freeSkinTrialTemplate = gameMgr.FreeSkinTrial ();
+		if (freeSkinTrialTemplate != null) {
+			PlayerSkin ps = freeSkinTrialTemplate.GetComponent<PlayerSkin>();
+			if(ps != null && ps.skinId != "")
+			{
+				ShowAutoMessage("!! "+ps.skinName + " !!",null,true,ps.ShopIcon, false,true,true);
+			}
+		}
+	}
+
+	public void onFreeSkinTrialPanelNahButtonClicked()
+	{
+		setFreeSkinTrialPanel (false);
+	}
+
 	public void setRateQuestionPanel(bool bActive)
 	{
 		UI_RateQuestion.SetActive (bActive);
@@ -1647,11 +1678,33 @@ public class GameSceneEvents : MonoBehaviour {
 		if ( gameMgr.consumeToken (10)) {
 
 
-			PlayerSkin ps = gameMgr.GivePlayerRandomSkin();
-			if(ps != null)
+			if(UnityEngine.Random.Range(0,3) == 0)
 			{
-				playGiveFreeTokenSound();
-				ShowAutoMessage("!! "+ps.skinName + " !!",updateMyTokenBalance,true,ps.ShopIcon, false,true,true);
+				PlayerSkin ps = gameMgr.GivePlayerRandomSkin();
+				if(ps != null)
+				{
+					playGiveFreeTokenSound();
+					ShowAutoMessage("!! "+ps.skinName + " !!",updateMyTokenBalance,true,ps.ShopIcon, false,true,true);
+				}
+				else if (UnityEngine.Random.Range(0,10) <= 6)
+				{
+					int howManyToken = 0;
+					if(UnityEngine.Random.Range(0,15)<=1)// chance to get more tokens
+					{
+						howManyToken = gameMgr.AddFreeGiftToken (15);
+					}
+					else
+					{
+						howManyToken = gameMgr.AddFreeGiftToken (UnityEngine.Random.Range(2,6));
+						
+					}
+					playGiveFreeTokenSound();
+					ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,giftTokenImg,false,true,true);
+				}
+				else
+				{
+					ShowAutoMessage("!! OH  NO !!",updateMyTokenBalance,true,noGiftImg,false,true,true);
+				}
 			}
 			else if (UnityEngine.Random.Range(0,10) <= 6)
 			{
@@ -1672,7 +1725,7 @@ public class GameSceneEvents : MonoBehaviour {
 			{
 				ShowAutoMessage("!! OH  NO !!",updateMyTokenBalance,true,noGiftImg,false,true,true);
 			}
-
+			
 			GiftImage.GetComponent<Animator>().Play("Regular");
 		}
 	}
