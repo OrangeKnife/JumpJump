@@ -102,6 +102,7 @@ public class GameManager : MonoBehaviour {
 	public int freeSkinTrialDeathNum;
 	int freeSkinTrialDeathCount = -1;//for count how many deaths you can play with free skin
 	int alreadyAskedTrialQuestionOnDeathCount = -1;
+	public int freeSkinTrialEveryFewDeathNum;
 	public void login()
 	{
 
@@ -323,6 +324,8 @@ public class GameManager : MonoBehaviour {
 
 	void checkOwnedSkins()
 	{
+		ownedSkins.Clear ();
+		notOwnedSkins.Clear ();
 		for(int i = 1; i < SkinTemplates.Count; ++i)
 		{
 			PlayerSkin ps = SkinTemplates[i].GetComponent<PlayerSkin>();
@@ -830,6 +833,9 @@ public class GameManager : MonoBehaviour {
 
 	public void onRestoreTransactionsFinished(bool success) {
 		eventHandler.onRestoreTransactionsFinished (success);
+
+		if (success)
+			checkOwnedSkins ();
 	}
 
 	public void onPurchaseStarted(string itemId)
@@ -1017,7 +1023,7 @@ public class GameManager : MonoBehaviour {
 
 	bool IsFreeSkinTrialAvailable()
 	{
-		return (mysave.deathCount + 1) % 4 == 0 && getOwnedSkins ().Count < getTotalSkinTemplatesCount () && freeSkinTrialDeathCount <= 0 && alreadyAskedTrialQuestionOnDeathCount != mysave.deathCount;
+		return (mysave.deathCount + 1) % freeSkinTrialEveryFewDeathNum == 0 && getOwnedSkins ().Count < getTotalSkinTemplatesCount () && freeSkinTrialDeathCount <= 0 && alreadyAskedTrialQuestionOnDeathCount != mysave.deathCount;
 	}
 
 	public GameObject FreeSkinTrial()

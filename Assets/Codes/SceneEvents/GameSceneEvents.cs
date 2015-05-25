@@ -964,9 +964,15 @@ public class GameSceneEvents : MonoBehaviour {
 			PlayerSkin ps = freeSkinTrialTemplate.GetComponent<PlayerSkin>();
 			if(ps != null && ps.skinId != "")
 			{
-				ShowAutoMessage("!! "+ps.skinName + " !!",null,true,ps.ShopIcon, false,true,true);
+				ShowAutoMessage("!! "+ps.skinName + " !!",turnOnPlayerInput,true,ps.ShopIcon, false,true,true,true);
 			}
 		}
+	}
+
+	void turnOnPlayerInput()
+	{
+		if (gameMgr.GetCurrentPlayer () != null)
+			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = true;
 	}
 
 	public void onFreeSkinTrialPanelNahButtonClicked()
@@ -1013,7 +1019,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	}
 
-	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null, bool wantOKButton = true, Sprite img = null, bool wantCenter = true, bool wantAnim = true, bool wantImgBG = false)
+	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null, bool wantOKButton = true, Sprite img = null, bool wantCenter = true, bool wantAnim = true, bool wantImgBG = false, bool wantDisableInput = false)
 	{
 		currentMessageOkButtonDelegate = messageOkDelegate;
 		bool bActive = message.Length > 0;
@@ -1022,9 +1028,6 @@ public class GameSceneEvents : MonoBehaviour {
 
 		autoMessageImg.enabled = false;
 
-		
-		if (gameMgr.GetCurrentPlayer () != null)
-			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = !bActive;
 
 		if(bActive)
 		{
@@ -1046,6 +1049,10 @@ public class GameSceneEvents : MonoBehaviour {
 				autoMessageImg.enabled = false;
 
 			autoMessageImgBG.enabled = wantImgBG;
+
+			if(wantDisableInput && gameMgr.GetCurrentPlayer () != null)
+			   gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = false;//disable it !
+
 		}
 
 
@@ -1309,9 +1316,11 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onAutoMessageOKButtonClicked()
 	{
 		//playMenuClickedSound ();
-		ShowAutoMessage ("");
+		
 		if(currentMessageOkButtonDelegate != null)
 			currentMessageOkButtonDelegate ();
+
+		ShowAutoMessage ("");
 	}
 
 	public void SetDimImage(bool bActive, bool forAutoMessage = false)
@@ -1567,7 +1576,8 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void  onScorePanelShopORGiftButtonDown()
 	{
-		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = false;
+		if(gameMgr.GetCurrentPlayer () != null)
+			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = false;
 	}
 
 	public void hideScorePanelShopAndGiftButton ()

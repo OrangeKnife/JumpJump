@@ -16,7 +16,6 @@ public class SaveObject
 
 		currentJumpType = 1;
 
-		accumulatedPlayTime = 0;
 		lastSelectedSkin = 0;
 	}
 	public bool firstRun;
