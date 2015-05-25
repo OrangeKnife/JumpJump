@@ -212,6 +212,11 @@ public class GameManager : MonoBehaviour {
 			SoomlaStore.Initialize(new ColorJumpStoreAssets());
 
 		NoAds = StoreInventory.GetItemBalance (ColorJumpStoreAssets.NO_ADS_LTVG.ItemId) > 0;
+
+#if UNITY_EDITOR
+		NoAds = true;
+#endif
+
 		Utils.addLog ("balance = " + StoreInventory.GetItemBalance (ColorJumpStoreAssets.NO_ADS_LTVG.ItemId));
 
 		if (!NoAds)
@@ -979,6 +984,11 @@ public class GameManager : MonoBehaviour {
 		rtObj = SkinTemplates[RandomNum];
 		 
  		if (ownedSkins.IndexOf (rtObj) == -1) {
+
+			UnityAnalytics.CustomEvent("GetSkinFromGiftBox",new Dictionary<string, object>{
+				{ "GetSkinFromGiftBox", 1 }
+			} );
+
 			StoreInventory.GiveItem(rtObj.GetComponent<PlayerSkin>().skinId,1);
 			ownedSkins.Add(rtObj);
 			notOwnedSkins.Remove(rtObj);

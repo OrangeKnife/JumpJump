@@ -529,10 +529,6 @@ public class GameSceneEvents : MonoBehaviour {
 		Invoke ("TakeAScreenShotAndShowDeathPanel", 2f);
 	}
 
-	public void addLog(string logstring)
-	{
-		GameObject.Find ("LogText").GetComponent<UnityEngine.UI.Text> ().text += logstring;
-	}
 
 	public void showTutorial(bool wantToShow)
 	{
@@ -708,6 +704,10 @@ public class GameSceneEvents : MonoBehaviour {
 		//playMenuClickedSound ();
 		gameMgr.ratedGame ();
 		Utils.rateGame ();
+
+		UnityAnalytics.CustomEvent("RateButtonClicked",new Dictionary<string, object>{
+			{ "RateButtonClicked", 1 }
+		} );
 	}
 
 	public void onHardcoreClicked()
@@ -1191,6 +1191,9 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 #if UNITY_IOS && !UNITY_EDITOR
 		SoomlaStore.RestoreTransactions ();
+		UnityAnalytics.CustomEvent("IOSRestorePurchaseButtonClicked",new Dictionary<string, object>{
+			{ "IOSRestorePurchaseButtonClicked", 1 }
+		} );
 #endif
 #if UNITY_ANDROID
 		ShowAutoMessage("ANDROID  USES  DONT  HAVE  TO  RESTORE!");
@@ -1654,6 +1657,11 @@ public class GameSceneEvents : MonoBehaviour {
 			
 			ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,giftTokenImg,false,true,true);
 			FreeTokenButton.SetActive( gameMgr.IsFreeTokenReady() );
+
+			
+			UnityAnalytics.CustomEvent("GetFreeTokens",new Dictionary<string, object>{
+				{ "GetFreeTokens", howManyToken }
+			} );
 		}
 
 		if (GiftButtonTextObj.activeSelf) {
@@ -1694,6 +1702,8 @@ public class GameSceneEvents : MonoBehaviour {
 			GiftImage.GetComponent<Animator> ().Play ("OpenGiftAnimation");
 			playOpenGiftSound ();
 			Invoke ("stopOpeningGift", 3f);
+
+
 		} else {
 			ShowAutoMessage("YOU  CAN  COLLECT  TOKENS  BY  PLAYING  THE  GAME  OR  COME  BACK  EVERY  FEW  MINUTUES !");
 		}
@@ -1725,15 +1735,19 @@ public class GameSceneEvents : MonoBehaviour {
 					int howManyToken = 0;
 					if(UnityEngine.Random.Range(0,15)<=1)// chance to get more tokens
 					{
-						howManyToken = gameMgr.AddFreeGiftToken (15);
+						howManyToken = gameMgr.AddFreeGiftToken (15,false);
 					}
 					else
 					{
-						howManyToken = gameMgr.AddFreeGiftToken (UnityEngine.Random.Range(2,6));
+						howManyToken = gameMgr.AddFreeGiftToken (UnityEngine.Random.Range(2,6),false);
 						
 					}
 					playGiveFreeTokenSound();
 					ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,giftTokenImg,false,true,true);
+
+					UnityAnalytics.CustomEvent("RandomTokensFromGiftBox",new Dictionary<string, object>{
+						{ "RandomTokensFromGiftBox", howManyToken }
+					} );
 				}
 				else
 				{
@@ -1746,15 +1760,20 @@ public class GameSceneEvents : MonoBehaviour {
 				int howManyToken = 0;
 				if(UnityEngine.Random.Range(0,15)<=1)// chance to get more tokens
 				{
-					howManyToken = gameMgr.AddFreeGiftToken (15);
+					howManyToken = gameMgr.AddFreeGiftToken (15,false);
 				}
 				else
 				{
-					howManyToken = gameMgr.AddFreeGiftToken (UnityEngine.Random.Range(2,6));
+					howManyToken = gameMgr.AddFreeGiftToken (UnityEngine.Random.Range(2,6),false);
 					
 				}
 				playGiveFreeTokenSound();
 				ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,giftTokenImg,false,true,true);
+
+				
+				UnityAnalytics.CustomEvent("RandomTokensFromGiftBox",new Dictionary<string, object>{
+					{ "RandomTokensFromGiftBox", howManyToken }
+				} );
 			}
 			else
 			{
