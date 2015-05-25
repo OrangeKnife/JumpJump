@@ -176,7 +176,7 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject transitionImg = null; 
 
-	public AudioClip menuClickedSound,screenShotSound,menuButtonDownSound,giveFreeTokenSound;
+	public AudioClip menuClickedSound,screenShotSound,menuButtonDownSound,giveFreeTokenSound,noGiftSound,openGiftSound;
 
 	
 	AudioSource audioSource;
@@ -266,6 +266,20 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		audioSource.volume = 0.4f;
 		audioSource.clip = giveFreeTokenSound;
+		audioSource.Play ();
+	}
+
+	public void playNoGiftSound()
+	{
+		audioSource.volume = 0.4f;
+		audioSource.clip = noGiftSound;
+		audioSource.Play ();
+	}
+
+	public void playOpenGiftSound()
+	{
+		audioSource.volume = 1f;
+		audioSource.clip = openGiftSound;
 		audioSource.Play ();
 	}
 
@@ -1681,6 +1695,7 @@ public class GameSceneEvents : MonoBehaviour {
 			CancelInvoke ("stopOpeningGift");
 			OpenGiftBoxButtonText.text = "OPENING...";
 			GiftImage.GetComponent<Animator> ().Play ("OpenGiftAnimation");
+			playOpenGiftSound ();
 			Invoke ("stopOpeningGift", 3f);
 		} else {
 			ShowAutoMessage("YOU  CAN  COLLECT  TOKENS  BY  PLAYING  THE  GAME  OR  COME  BACK  EVERY  FEW  MINUTUES !");
@@ -1725,6 +1740,7 @@ public class GameSceneEvents : MonoBehaviour {
 				}
 				else
 				{
+					playNoGiftSound();
 					ShowAutoMessage("!! OH  NO !!",updateMyTokenBalance,true,noGiftImg,false,true,true);
 				}
 			}
@@ -1745,6 +1761,7 @@ public class GameSceneEvents : MonoBehaviour {
 			}
 			else
 			{
+				playNoGiftSound();
 				ShowAutoMessage("!! OH  NO !!",updateMyTokenBalance,true,noGiftImg,false,true,true);
 			}
 			
