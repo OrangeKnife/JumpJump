@@ -224,19 +224,16 @@ public class GameSceneEvents : MonoBehaviour {
 		#endif
 		
 		if (bannerView == null) {
-			bannerView = new BannerView (
-				bannerAdsId, AdSize.SmartBanner, AdPosition.Top);
-			
-			
-			
-			
-			
-			bannerViewBottom = new BannerView (
-				bannerAdsId, AdSize.SmartBanner, AdPosition.Bottom);
-			
-			ShowOneOfTheBannerViews (true);
-			
+			bannerView = new BannerView (bannerAdsId, AdSize.SmartBanner, AdPosition.Top);
 		}
+
+		if (bannerViewBottom == null) {
+			bannerViewBottom = new BannerView (bannerAdsId, AdSize.SmartBanner, AdPosition.Bottom);
+		}	
+
+		ShowOneOfTheBannerViews (true);
+			
+
 	}
 
 	void Start () {
