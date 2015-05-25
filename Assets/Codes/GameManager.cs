@@ -651,11 +651,16 @@ public class GameManager : MonoBehaviour {
 
 		CurrentPlayer = Instantiate(CurrentPlayerTemplate);
 
-		if (freeSkinTrialDeathCount <= 0) 
-		{
+		if (freeSkinTrialDeathCount < 0) {
 			//no free trial
 			if (currentSkinTemplateIdx == 0)
 				UseSkin (currentSkinTemplateIdx); // do random every game if choose 0
+		} 
+		else if (freeSkinTrialDeathCount == 0)
+		{
+			//just finish the last death for trial
+			//reset the template so we can spawn old skin again
+			UseSkin(currentSkinTemplateIdx,false);//no need save
 		}
 
 		ApplySkinSetting ();
@@ -869,7 +874,7 @@ public class GameManager : MonoBehaviour {
 		return rtObj;
 	}
 
-	public void UseSkin(int skinTemplateIdx)
+	public void UseSkin(int skinTemplateIdx, bool bSaveSkin = true)
 	{
 		//cancel trial
 		freeSkinTrialDeathCount = -1;
@@ -884,8 +889,10 @@ public class GameManager : MonoBehaviour {
 		else 
 			currentSelectedSkinTemplate = SkinTemplates [skinTemplateIdx];
 
-		mysave.lastSelectedSkin = currentSkinTemplateIdx;
-		GameFile.Save ("save.data", mysave);
+		if (bSaveSkin) {
+			mysave.lastSelectedSkin = currentSkinTemplateIdx;
+			GameFile.Save ("save.data", mysave);
+		}
 	}
 
 	public void AddDeathCount(int d)
@@ -893,8 +900,8 @@ public class GameManager : MonoBehaviour {
 		mysave.deathCount += d;
 		GameFile.Save ("save.data",mysave);
 
-		if (freeSkinTrialDeathCount > 0)
-			freeSkinTrialDeathCount -= d;
+
+		freeSkinTrialDeathCount -= d;
 	}
 
 	public void unlockHardcoreMode(bool wantToUnlock)

@@ -945,7 +945,11 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		UI_FreeSkinTrialQuestion.SetActive (bActive);
 		SetDimImage (bActive);
+
 		
+		if (gameMgr.GetCurrentPlayer () != null)
+			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = !bActive;
+
 		if (bActive) {
 			UI_FreeSkinTrialQuestion.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 		}
@@ -974,6 +978,10 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		UI_RateQuestion.SetActive (bActive);
 		SetDimImage (bActive);
+
+		
+		if (gameMgr.GetCurrentPlayer () != null)
+			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = !bActive;
 
 		if (bActive) {
 			gameMgr.PauseGame ();
@@ -1013,6 +1021,11 @@ public class GameSceneEvents : MonoBehaviour {
 		SetDimImage (bActive, true);
 
 		autoMessageImg.enabled = false;
+
+		
+		if (gameMgr.GetCurrentPlayer () != null)
+			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = !bActive;
+
 		if(bActive)
 		{
 			if(wantAnim)
@@ -1296,8 +1309,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onAutoMessageOKButtonClicked()
 	{
 		//playMenuClickedSound ();
-		UI_AutoMessage.SetActive (false);
-		SetDimImage (false, true);
+		ShowAutoMessage ("");
 		if(currentMessageOkButtonDelegate != null)
 			currentMessageOkButtonDelegate ();
 	}
