@@ -938,16 +938,18 @@ public class GameManager : MonoBehaviour {
 		return Time.time - gameStartTime;
 	}
 
-	public int AddFreeGiftToken(int num = 1)
+	public int AddFreeGiftToken(int num = 1, bool resetFreeTokenTimer = true)
 	{
 		StoreInventory.GiveItem (ColorJumpStoreAssets.ONE_FREEGIFT_TOKEN.ItemId,num);
-		StoreInventory.GiveItem (ColorJumpStoreAssets.FREEGIFT_COUNTER.ItemId,1);
-		freeGiftCounterBalance += 1;
-		
-		int savedGameTime = StoreInventory.GetItemBalance(ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId);
-		savedMinutes = synchronizedMinutes + (int)GetTimeElaspeSinceSyncTimeSuccessMins ();
-		StoreInventory.GiveItem(ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId,  savedMinutes - savedGameTime ); //set to current time Mins
 
+		if (resetFreeTokenTimer) {
+			StoreInventory.GiveItem (ColorJumpStoreAssets.FREEGIFT_COUNTER.ItemId, 1);
+			freeGiftCounterBalance += 1;
+		
+			int savedGameTime = StoreInventory.GetItemBalance (ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId);
+			savedMinutes = synchronizedMinutes + (int)GetTimeElaspeSinceSyncTimeSuccessMins ();
+			StoreInventory.GiveItem (ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId, savedMinutes - savedGameTime); //set to current time Mins
+		}
 		//gameActiveTime = 0;
 
 		return num;

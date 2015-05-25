@@ -936,7 +936,7 @@ public class PlayerController : MonoBehaviour {
 		}
 
 		if (something.GiveToken) {
-			gameMgr.AddFreeGiftToken(something.GiveTokenNum);
+			gameMgr.AddFreeGiftToken(something.GiveTokenNum, false);
 		}
 
 		AddPopup(something.popupMessage,  gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + something.popUpTextOffset), Time.time, something.popupStyle);
