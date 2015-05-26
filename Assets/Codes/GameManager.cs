@@ -7,6 +7,7 @@ using UnityEngine.Cloud.Analytics;
 using Soomla.Store;
 using System.Net.Sockets;
 using System.Threading;
+using anysdk;
 #if UNITY_ANDROID && !UNITY_EDITOR
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
@@ -233,8 +234,58 @@ public class GameManager : MonoBehaviour {
 #endif
 
 		Screen.sleepTimeout = SleepTimeout.NeverSleep;
+
+
+		//anysdk
+#if UNITY_ANDROID && !UNITY_EDITOR 
+		string appKey = "D9ABE5B8-72CF-F242-99F3-AF60A6DF4699";
+		string appSecret = "68089fe7f42b02b04d94db0f0880896a";
+		string privateKey = "12B141A054317BD65C223773880BBDFB";
+		string oauthLoginServer = "http://oauth.anysdk.com/api/OauthLoginDemo/Login.php";
+		AnySDK.getInstance ().init (appKey, appSecret, privateKey, oauthLoginServer);
+		AnySDK.getInstance ().loadALLPlugin ();
+		AnySDKIAP.getInstance () .setListener (this,"IAPExternalCall");
+#endif
 	}
 
+	void IAPExternalCall(string msg)
+	{
+		Debug.Log("IAPExternalCall("+ msg+")");
+		Dictionary<string,string> dic = AnySDKUtil.stringToDictionary (msg);
+		int code = System.Convert.ToInt32(dic["code"]);
+		string result = dic["msg"];
+		
+		switch(code)
+		{
+		case (int)PayResultCode.kPaySuccess://支付成功回调
+			Utils.addLog ("IAPExternalCall: kPaySuccess");
+			break;
+		case (int)PayResultCode.kPayFail://支付失败回调
+			Utils.addLog ("IAPExternalCall: kPayFail");
+			break;
+		case (int)PayResultCode.kPayCancel://支付取消回调
+			Utils.addLog ("IAPExternalCall: kPayCancel");
+			break;
+		case (int)PayResultCode.kPayNetworkError://支付超时回调
+			Utils.addLog ("IAPExternalCall: kPayNetworkError");
+			break;
+		case (int)PayResultCode.kPayProductionInforIncomplete://支付信息不完整
+			Utils.addLog ("IAPExternalCall: kPayProductionInforIncomplete");
+			break;
+			/**
+        * 新增加:正在进行中回调
+        * 支付过程中若SDK没有回调结果，就认为支付正在进行中
+        * 游戏开发商可让玩家去判断是否需要等待，若不等待则进行下一次的支付
+        */
+		case (int)PayResultCode.kPayNowPaying:
+			Utils.addLog ("IAPExternalCall: kPayNowPaying");
+			break;
+		default:
+			break;
+		}
+
+	}
+	
 	void OnConnect()
 	{
 		//Utils.addLog ("OnConnect!");
@@ -804,11 +855,32 @@ public class GameManager : MonoBehaviour {
 
 	public void RemoveAds()
 	{
+
+		Dictionary<string,string> mProductionInfo = new Dictionary<string,string>();
+		mProductionInfo["Product_Price"]= "1";
+		mProductionInfo["Product_Id"]= "10";
+		mProductionInfo["Product_Name"]= "gold";
+		mProductionInfo["Server_Id"]= "13";
+		mProductionInfo["Product_Count"]= "1";
+		mProductionInfo["Role_Id"]= "1";
+		mProductionInfo["Role_Name"]= "1";
+		mProductionInfo["Role_Grade"]= "1";
+		mProductionInfo["Role_Balance"]= "1";
+		
+		List<string> idArrayList =  AnySDKIAP.getInstance().getPluginId();
+		if (idArrayList.Count == 1) {
+			AnySDKIAP.getInstance().payForProduct(mProductionInfo);//若为单支付，可直接调用
+			//AnySDKIAP.getInstance().payForProduct(mProductionInfo,idArrayList[0]));
+		}
+		else {
+			//多支付
+		}
+		/*
 		try{
 			StoreInventory.BuyItem(ColorJumpStoreAssets.NO_ADS_LTVG.ItemId);
 		} catch (System.Exception e) {
 			Utils.addLog ("SOOMLA/UNITY " + e.Message);
-		}
+		}*/
 	}
 
 	public void BuySkin(string soomlaId)
