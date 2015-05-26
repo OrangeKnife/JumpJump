@@ -202,9 +202,6 @@ public class GameManager : MonoBehaviour {
 
 		login ();
 
- 
-
-
 
 		eventHandler = GameObject.Find ("eventHandler").GetComponent<GameSceneEvents>();
 
