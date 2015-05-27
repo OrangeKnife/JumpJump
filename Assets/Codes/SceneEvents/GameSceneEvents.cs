@@ -560,35 +560,40 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onLeaderboardsButtonCilicked()
 	{
+		#if UNITY_ANDROID && !UNITY_EDITOR
 		if (!Social.localUser.authenticated) {
 			Utils.addLog ("authenticated = " + Social.localUser.authenticated.ToString ());
 			gameMgr.login ();
 		} else {
-			#if UNITY_ANDROID && !UNITY_EDITOR
+
 		Social.ShowLeaderboardUI();
-			#elif UNITY_IOS && !UNITY_EDITOR
-		GameCenterPlatform.ShowLeaderboardUI(gameMgr.getCurrentLeaderBoardId(),UnityEngine.SocialPlatforms.TimeScope.AllTime);
-			#endif
+		
+
 		}
+		#elif UNITY_IOS && !UNITY_EDITOR
+		GameCenterPlatform.ShowLeaderboardUI(gameMgr.getCurrentLeaderBoardId(),UnityEngine.SocialPlatforms.TimeScope.AllTime);
+		#endif
+
+
 
 	}
 
 	public void onLeaderboardsButton_mainMenu_Clicked()
 	{
-		//playMenuClickedSound ();
+
+		#if UNITY_ANDROID && !UNITY_EDITOR
 		if (!Social.localUser.authenticated) {
 			Utils.addLog ("authenticated = " + Social.localUser.authenticated.ToString ());
 			gameMgr.login ();
 		} else {
-			#if UNITY_ANDROID && !UNITY_EDITOR
-		Social.ShowLeaderboardUI();
-			#elif UNITY_IOS && !UNITY_EDITOR
-		GameCenterPlatform.ShowLeaderboardUI("",UnityEngine.SocialPlatforms.TimeScope.AllTime);
-
-		//UI_SmallLeaderBoardsPanel.SetActive (true);
-		//yellowboardsButton.SetActive (false);
-			#endif
+			
+			Social.ShowLeaderboardUI();
+			
+			
 		}
+		#elif UNITY_IOS && !UNITY_EDITOR
+		GameCenterPlatform.ShowLeaderboardUI(gameMgr.getCurrentLeaderBoardId(),UnityEngine.SocialPlatforms.TimeScope.AllTime);
+		#endif
 
 	}
 
