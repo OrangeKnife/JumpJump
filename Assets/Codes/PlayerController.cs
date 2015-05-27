@@ -20,6 +20,7 @@ public class PlayerController : MonoBehaviour {
 	int combo = 0;//color combo
 	public bool wantColorCombo = false;
 	int jumpCombo = 0;
+	int maxCombo = -1;
 	public bool wantJumpCombo = true;
 	bool isDead = false;
 	public bool allowInput = true;
@@ -83,7 +84,7 @@ public class PlayerController : MonoBehaviour {
 	GameObject skinObject;
 	//PlayerSkin currentSkin = null;
 
-
+	bool standOnCheck;//if it's true, check the stand on , will off after one check , will on when you jump
 	void Awake()
 	{
 		
@@ -141,6 +142,11 @@ public class PlayerController : MonoBehaviour {
 		}
 	}
 
+	public void SetGravityScale(float newScale)
+	{
+		MyRigidBody.gravityScale = newScale;
+	}
+
 	public void DoDeath()
 	{
 		eventHandler.onPlayerDead ();
@@ -170,6 +176,18 @@ public class PlayerController : MonoBehaviour {
 			mySkinAnimator = skinObject.GetComponent<Animator> ();
 		}
 	 	 
+	}
+
+	public void SetPlayerRenderer(bool bActive)
+	{
+		spriteRenderer.enabled = bActive;
+		if(skinSpriteRenderer != null)
+			skinSpriteRenderer.enabled = bActive;
+	}
+
+	public void StopCurrentAnim()
+	{
+		myAnimator.Play ("Regular");//nothing there
 	}
 
 	void Die()
@@ -225,8 +243,10 @@ public class PlayerController : MonoBehaviour {
 		myAnimator.Play("Regular");
 		gameObject.layer = 10 + (int)currentColor;
 		spriteRenderer.enabled = true;
-		if(skinSpriteRenderer != null)
+		if (skinSpriteRenderer != null) {
 			skinSpriteRenderer.enabled = true;
+			skinObject.GetComponent<Animator>().Play("PlayerSkinIdle");
+		}
 		allowInput_jump = true;
 		isDead = false;
 		deathSoundPlayed = false;
@@ -440,19 +460,38 @@ public class PlayerController : MonoBehaviour {
 
 			HandleInput (ButtonJumpDown, ButtonJumpHold, ButtonJumpUp);
 	 
+		if (MyRigidBody.velocity.y < 0) { //fall
+			GameObject obj_foot = FootTouched ();
+			if (obj_foot != null) {
+				BarController bc = obj_foot.GetComponent<BarController> ();
 
-		GameObject obj_foot = FootTouched ();
-		if (obj_foot != null) {
-			BarController bc = obj_foot.GetComponent<BarController> ();
-
-			if(lastBarFallThrough == null)
-				lastBarFallThrough = bc;
-			else if(bc != null)
-			{
-				if(bc.gameObject.transform.position.y > lastBarFallThrough.gameObject.transform.position.y)
-				{
+				if (lastBarFallThrough == null)
 					lastBarFallThrough = bc;
-					//Utils.addLog("lastBarFallThrough changed");
+				else if (bc != null) {
+					if (bc.gameObject.transform.position.y > lastBarFallThrough.gameObject.transform.position.y) {
+						lastBarFallThrough = bc;
+						//Utils.addLog("lastBarFallThrough changed");
+					}
+				}
+			}
+		}
+
+		if (standOnCheck && MyRigidBody.velocity.y == 0 ) {
+			GameObject obj_foot = FootTouched ();
+			if (obj_foot != null) {
+				BarController bc = obj_foot.GetComponent<BarController> ();
+				
+				if (lastBarFallThrough == null)
+					lastBarFallThrough = bc;
+				else if (bc != null) {
+					if (bc.gameObject.transform.position.y > lastBarFallThrough.gameObject.transform.position.y) {
+						lastBarFallThrough = bc;
+						//Utils.addLog("lastBarFallThrough changed");
+					}
+					
+					Utils.addLog ("Foot stand on something!");
+					standOnCheck = false;
+					bc.DoStandOnLogic(this);
 				}
 			}
 		}
@@ -592,10 +631,12 @@ public class PlayerController : MonoBehaviour {
 	public void setJumpCombo(int i)
 	{
 		jumpCombo = i;
-		if(jumpCombo <= 1)
-			eventHandler.SetExtraInfoText("NO BONUS");
-		else
-			eventHandler.SetExtraInfoText("SCORE x "+jumpCombo);//combo bonus
+
+		if (jumpCombo > maxCombo) {
+			maxCombo = jumpCombo;
+			eventHandler.SetExtraInfoText("MAX COMBO X "+maxCombo.ToString());
+		}
+
 	}
 
 	void checkStandTime()
@@ -622,7 +663,7 @@ public class PlayerController : MonoBehaviour {
 		if (maxJumpCount - currentJumpCount < 3) 
 		{
 			for (int i = 0; i < maxJumpCount - currentJumpCount; ++i) {
-				Xstring += "X";
+				Xstring += "^ ";
 			}
 		} else
 			Xstring = "X " + (maxJumpCount - currentJumpCount).ToString ();
@@ -633,7 +674,8 @@ public class PlayerController : MonoBehaviour {
 	{
 		if (bButtonJumpDown && maxJumpCount > currentJumpCount) {
 
-			eventHandler.hideScorePanelShopAndGiftButton(); //only show you are at 0 floor
+			if(maxBarNum == 0)
+				eventHandler.hideScorePanelShopAndGiftButton(); //only show you are at 0 floor
 			
 			if(mySkinAnimator != null)
 				mySkinAnimator.Play ("PlayerSkinJump");
@@ -642,7 +684,7 @@ public class PlayerController : MonoBehaviour {
 			jumped = true;
 			currentJumpCount += 1;
 			eventHandler.SetJumpCountText("JUMP "+getJumpXstring() );
-			MyRigidBody.velocity = Vector2.Min(Vector2.zero, Vector2.Max(new Vector2(0,-2f),MyRigidBody.velocity));//avoid crazy current vel !!!
+			MyRigidBody.velocity = Vector2.Min(Vector2.zero, Vector2.Max(new Vector2(0,-2f),MyRigidBody.velocity)) + new Vector2(0,0.01f);//avoid crazy current vel !!!
 			MyRigidBody.AddForce(new Vector3(0,jumpPower * 100f,0));
 			playSound(audioClips[0],0,false,0.1f); //jjump
 			if(lastBarStandOn != null)
@@ -655,6 +697,8 @@ public class PlayerController : MonoBehaviour {
 				}
 
 			}
+
+			standOnCheck = true;
 
 		}
 		/*
@@ -692,11 +736,13 @@ public class PlayerController : MonoBehaviour {
 	{
 		float halfPlayerSizeY = getHalfPlayerSizeY ();
 		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y + halfPlayerSizeY);
-		Debug.DrawLine (myPos, myPos + Vector2.up * 0.1f,new Color(1,0,0,1));
+
 
 		LayerMask lmask = (~(1 << (gameObject.layer))) - (1 <<  LayerMask.NameToLayer("NoCollision")) - (1 <<LayerMask.NameToLayer("Pickup"));
-
-		RaycastHit2D hitup = Physics2D.Raycast(myPos, Vector2.up, 0.1f,lmask  );
+		float velY = MyRigidBody.velocity.y;
+		float scaleRayDis = Mathf.Max (0.2f, Mathf.Min (1f, velY / 3f));
+		Debug.DrawLine (myPos, myPos + Vector2.up * 0.1f * scaleRayDis,new Color(1,0,0,1));
+		RaycastHit2D hitup = Physics2D.Raycast(myPos, Vector2.up, 0.1f * scaleRayDis ,lmask  );
 		if (hitup.collider != null && MyRigidBody.velocity.y > 0 )
 			return hitup.collider.gameObject;//knock into bar
 		return null;
@@ -704,8 +750,7 @@ public class PlayerController : MonoBehaviour {
 
 	GameObject FootTouched()
 	{
-		if (MyRigidBody.velocity.y >= 0)
-			return null;
+
 
 		float halfPlayerSizeY = getHalfPlayerSizeY ();
 		Vector2 myPos = new Vector2 (gameObject.transform.position.x, gameObject.transform.position.y - halfPlayerSizeY - 0.05f);
@@ -715,6 +760,7 @@ public class PlayerController : MonoBehaviour {
 			return hitDown.collider.gameObject;//foot touch into bar
 		return null;
 	}
+
 
 	public void SetJumpCountZero()
 	{
@@ -895,7 +941,7 @@ public class PlayerController : MonoBehaviour {
 		}
 
 		if (something.GiveToken) {
-			gameMgr.AddFreeGiftToken(something.GiveTokenNum);
+			gameMgr.AddFreeGiftToken(something.GiveTokenNum, false);
 		}
 
 		AddPopup(something.popupMessage,  gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + something.popUpTextOffset), Time.time, something.popupStyle);

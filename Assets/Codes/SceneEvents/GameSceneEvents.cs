@@ -28,6 +28,8 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject RecordVideoButtonOnPausePanel = null;
 	[SerializeField]
+	Sprite noGiftImg = null;
+	[SerializeField]
 	Sprite giftTokenImg = null;
 	[SerializeField]
 	GameObject shopPreviousButton = null;
@@ -40,7 +42,9 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	UnityEngine.UI.Text MyTokenBalanceText = null;
 	[SerializeField]
-	UnityEngine.UI.Image autoMessageImg = null; 
+	UnityEngine.UI.Image autoMessageImg = null;
+	[SerializeField]
+	UnityEngine.UI.Image autoMessageImgBG = null; 
 	[SerializeField]
 	GameObject GiftImage = null;
 	[SerializeField]
@@ -50,9 +54,11 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject ExtraButton = null;
 	/*[SerializeField]
-	GameObject ScorePanelShopButton = null;
+	GameObject ScorePanelShopButton = null;*/
 	[SerializeField]
-	GameObject ScorePanelGiftButton = null;*/
+	GameObject ScorePanelGiftButtonTextObj = null;
+	[SerializeField]
+	GameObject GiftButtonTextObj = null;
 	[SerializeField]
 	UnityEngine.UI.Text purchaseButtonText = null;
 	[SerializeField]
@@ -70,6 +76,8 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject UI_CountingPanel = null;
 	[SerializeField]
+	GameObject countingPanelCancelButton = null;
+	[SerializeField]
 	UnityEngine.UI.Text SwitchJumpLeftRightText = null;
 	[SerializeField]
 	GameObject UI_OptionPanel = null;
@@ -83,6 +91,8 @@ public class GameSceneEvents : MonoBehaviour {
 	GameObject UI_CreditPanel  = null;
 	[SerializeField]
 	GameObject UI_RateQuestion = null;
+	[SerializeField]
+	GameObject UI_FreeSkinTrialQuestion = null;
 	[SerializeField]
 	GameObject UI_UnityAdsQuestion = null;
 	[SerializeField]
@@ -166,7 +176,7 @@ public class GameSceneEvents : MonoBehaviour {
 	[SerializeField]
 	GameObject transitionImg = null; 
 
-	public AudioClip menuClickedSound,screenShotSound,menuButtonDownSound,giveFreeTokenSound;
+	public AudioClip menuClickedSound,screenShotSound,menuButtonDownSound,giveFreeTokenSound,noGiftSound,openGiftSound;
 
 	
 	AudioSource audioSource;
@@ -214,19 +224,16 @@ public class GameSceneEvents : MonoBehaviour {
 		#endif
 		
 		if (bannerView == null) {
-			bannerView = new BannerView (
-				bannerAdsId, AdSize.SmartBanner, AdPosition.Top);
-			
-			
-			
-			
-			
-			bannerViewBottom = new BannerView (
-				bannerAdsId, AdSize.SmartBanner, AdPosition.Bottom);
-			
-			ShowOneOfTheBannerViews (true);
-			
+			bannerView = new BannerView (bannerAdsId, AdSize.SmartBanner, AdPosition.Top);
 		}
+
+		if (bannerViewBottom == null) {
+			bannerViewBottom = new BannerView (bannerAdsId, AdSize.SmartBanner, AdPosition.Bottom);
+		}	
+
+		ShowOneOfTheBannerViews (true);
+			
+
 	}
 
 	void Start () {
@@ -256,6 +263,20 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		audioSource.volume = 0.4f;
 		audioSource.clip = giveFreeTokenSound;
+		audioSource.Play ();
+	}
+
+	public void playNoGiftSound()
+	{
+		audioSource.volume = 0.4f;
+		audioSource.clip = noGiftSound;
+		audioSource.Play ();
+	}
+
+	public void playOpenGiftSound()
+	{
+		audioSource.volume = 1f;
+		audioSource.clip = openGiftSound;
 		audioSource.Play ();
 	}
 
@@ -368,14 +389,21 @@ public class GameSceneEvents : MonoBehaviour {
 		if (bActive) {
 			int maxBarNum = gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().maxBarNum;
 			 
-				string EOGText = "<color=#FF00FFFF>FLOOR.</color>  " + maxBarNum.ToString () + "\n<color=#FF00FFFF>SCORE.</color>  " + gameMgr.currentScore.ToString () + 
-				"\n<color=#FF00FFFF>JUMP.</color>  " + (gameMgr.GetCurrentPlayer().GetComponent<PlayerController>().totalJumpCount).ToString () +
-				"\n<color=#FF00FFFF>TIME.</color>  " + ((int)gameMgr.getPlayTime ()).ToString ();
+			string EOGText = "<color=#19AB21>FLOOR.</color>  " + maxBarNum.ToString () + "\n<color=#19AB21>SCORE.</color>  " + gameMgr.currentScore.ToString () + 
+				"\n<color=#19AB21>JUMP.</color>  " + (gameMgr.GetCurrentPlayer().GetComponent<PlayerController>().totalJumpCount).ToString () +
+					"\n<color=#19AB21>TIME.</color>  " + ((int)gameMgr.getPlayTime ()).ToString ();
 			 
 				EndOfGameObj.GetComponentInChildren<TextMesh> ().text = EOGText;
-				EndOfGameObj.transform.position = new Vector3(0,gameMgr.MainCam.transform.position.y,-1);//lastBar.gameObject.transform.position;
+				EndOfGameObj.transform.position = new Vector3(0,gameMgr.MainCam.transform.position.y + 0.92f,-1);//hack 0.92f offset for skin display//lastBar.gameObject.transform.position;
 				EndOfGameObj.GetComponent<Animator>().Play("ScalePopInAnimation");
 				EndOfGameObj.GetComponent<AudioSource>().Play();
+
+			PlayerController pc = gameMgr.GetCurrentPlayer().GetComponent<PlayerController>();
+			pc.SetGravityScale(0);
+			pc.SetPlayerRenderer(true);
+			pc.GetComponent<PlayerController>().StopCurrentAnim();
+			pc.gameObject.transform.localScale *= 2;
+			pc.gameObject.transform.position = new Vector3(0,gameMgr.MainCam.transform.position.y -1.5f,-1);
 
 
 			UnityAnalytics.CustomEvent("GameEnded",new Dictionary<string, object>{
@@ -488,8 +516,10 @@ public class GameSceneEvents : MonoBehaviour {
 		SetScorePanel (true);
 		UpdateUISocre (gameMgr.currentScore);
 
-		if(gameMgr.getOwnedSkins().Count > 1 || gameMgr.GetTokenNum() > 0)
+		bool isTokenReadynow = gameMgr.IsFreeTokenReady ();
+		if (gameMgr.getOwnedSkins ().Count > 1 || gameMgr.GetTokenNum () > 0 || isTokenReadynow) {
 			UI_ScorePanel.GetComponent<Animator> ().Play ("ScorePanelShopAndGiftSlideIn");
+		}
 	}
 
 	public void onGameEnded()
@@ -499,10 +529,6 @@ public class GameSceneEvents : MonoBehaviour {
 		Invoke ("TakeAScreenShotAndShowDeathPanel", 2f);
 	}
 
-	public void addLog(string logstring)
-	{
-		GameObject.Find ("LogText").GetComponent<UnityEngine.UI.Text> ().text += logstring;
-	}
 
 	public void showTutorial(bool wantToShow)
 	{
@@ -600,17 +626,49 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onRestartButtonClicked()
 	{
 		//playMenuClickedSound ();
-		onResumebuttonClicked ();
+		ResumeGame ();
 		OnTryAgainButtonClicked ();
 	}
 
-	public void onResumebuttonClicked()
+	void ResumeGame()
 	{
-		//playMenuClickedSound ();
 		SetPausePanel (false);
 		SetScorePanel (true);
 		HideAllBannerViews();
 		gameMgr.UnPauseGame ();
+	}
+	public void onResumebuttonClicked()
+	{
+		//playMenuClickedSound ();
+
+		setCountingPanel (true,false);
+		countingTime = 3f;
+		TickingCountCoroutine = TickingCountingForResume ();
+		StartCoroutine (TickingCountCoroutine);
+
+	}
+
+
+	IEnumerator TickingCountingForResume()
+	{
+		//hide ui first
+		SetPausePanel (false);
+		SetScorePanel (true);
+		HideAllBannerViews();
+
+		CountingText.text = ((int)countingTime).ToString();
+		
+		while (countingTime > 0) {
+			yield return StartCoroutine (CoroutineUtil.WaitForRealSeconds (1f));
+			countingTime -= 1f;
+			CountingText.text = ((int)countingTime).ToString();
+		}
+		
+		setCountingPanel (false);
+
+		gameMgr.UnPauseGame ();
+		TickingCountCoroutine = null;
+		yield return null;
 	}
 
 	public void onBackButtonClicked()//pause panel
@@ -646,6 +704,10 @@ public class GameSceneEvents : MonoBehaviour {
 		//playMenuClickedSound ();
 		gameMgr.ratedGame ();
 		Utils.rateGame ();
+
+		UnityAnalytics.CustomEvent("RateButtonClicked",new Dictionary<string, object>{
+			{ "RateButtonClicked", 1 }
+		} );
 	}
 
 	public void onHardcoreClicked()
@@ -667,6 +729,8 @@ public class GameSceneEvents : MonoBehaviour {
 
 		if(ExtraButton.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("MovingUp"))
 			ExtraButton.GetComponent<Animator>().Play("MovingDown");
+
+
 		
 		DoTransition (DoStartButton);
 	}
@@ -707,7 +771,7 @@ public class GameSceneEvents : MonoBehaviour {
 		SetDimImage (bActive);
 
 		if (bActive) {
-			UI_PausePanel.GetComponent<Animator> ().Play ("PausePanelOpened");
+			UI_PausePanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
 
 			RecordVideoButtonOnPausePanel.GetComponent<UnityEngine.UI.Button>().interactable = !Everyplay.IsRecording();
 		}
@@ -731,6 +795,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void SetStartPanel(bool bActive, bool wantTileSlideInAnim = true)
 	{
+
 		UI_StartPanel.SetActive (bActive);
 
 		//only when back from game will call this
@@ -887,10 +952,53 @@ public class GameSceneEvents : MonoBehaviour {
 		gameMgr.UnPauseGame ();
 	}
 
+	public void setFreeSkinTrialPanel(bool bActive)
+	{
+		UI_FreeSkinTrialQuestion.SetActive (bActive);
+		SetDimImage (bActive);
+
+		
+		if (gameMgr.GetCurrentPlayer () != null)
+			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = !bActive;
+
+		if (bActive) {
+			UI_FreeSkinTrialQuestion.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+		}
+
+	}
+
+	public void onFreeSkinTrialPanelSureButtonClicked()
+	{
+		setFreeSkinTrialPanel (false);
+		GameObject freeSkinTrialTemplate = gameMgr.FreeSkinTrial ();
+		if (freeSkinTrialTemplate != null) {
+			PlayerSkin ps = freeSkinTrialTemplate.GetComponent<PlayerSkin>();
+			if(ps != null && ps.skinId != "")
+			{
+				ShowAutoMessage("!! "+ps.skinName + " !!",turnOnPlayerInput,true,ps.ShopIcon, false,true,true,true);
+			}
+		}
+	}
+
+	void turnOnPlayerInput()
+	{
+		if (gameMgr.GetCurrentPlayer () != null)
+			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = true;
+	}
+
+	public void onFreeSkinTrialPanelNahButtonClicked()
+	{
+		setFreeSkinTrialPanel (false);
+	}
+
 	public void setRateQuestionPanel(bool bActive)
 	{
 		UI_RateQuestion.SetActive (bActive);
 		SetDimImage (bActive);
+
+		
+		if (gameMgr.GetCurrentPlayer () != null)
+			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = !bActive;
 
 		if (bActive) {
 			gameMgr.PauseGame ();
@@ -922,7 +1030,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	}
 
-	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null, bool wantOKButton = true, Sprite img = null, bool wantCenter = true, bool wantAnim = true)
+	public void ShowAutoMessage(string message, AutoMessageOKButtonDelegate messageOkDelegate = null, bool wantOKButton = true, Sprite img = null, bool wantCenter = true, bool wantAnim = true, bool wantImgBG = false, bool wantDisableInput = false)
 	{
 		currentMessageOkButtonDelegate = messageOkDelegate;
 		bool bActive = message.Length > 0;
@@ -930,6 +1038,8 @@ public class GameSceneEvents : MonoBehaviour {
 		SetDimImage (bActive, true);
 
 		autoMessageImg.enabled = false;
+
+
 		if(bActive)
 		{
 			if(wantAnim)
@@ -948,6 +1058,12 @@ public class GameSceneEvents : MonoBehaviour {
 			}
 			else
 				autoMessageImg.enabled = false;
+
+			autoMessageImgBG.enabled = wantImgBG;
+
+			if(wantDisableInput && gameMgr.GetCurrentPlayer () != null)
+			   gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = false;//disable it !
+
 		}
 
 
@@ -991,7 +1107,10 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onShopPreviousButtonUp()
 	{
-		StopCoroutine (ButtonHoldLoopCoroutine);
+		if (ButtonHoldLoopCoroutine != null) {
+			StopCoroutine (ButtonHoldLoopCoroutine);
+			ButtonHoldLoopCoroutine = null;
+		}
 	}
 
 	IEnumerator previousButtonLoop(float loopinterval)
@@ -1072,6 +1191,9 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 #if UNITY_IOS && !UNITY_EDITOR
 		SoomlaStore.RestoreTransactions ();
+		UnityAnalytics.CustomEvent("IOSRestorePurchaseButtonClicked",new Dictionary<string, object>{
+			{ "IOSRestorePurchaseButtonClicked", 1 }
+		} );
 #endif
 #if UNITY_ANDROID
 		ShowAutoMessage("ANDROID  USES  DONT  HAVE  TO  RESTORE!");
@@ -1086,7 +1208,14 @@ public class GameSceneEvents : MonoBehaviour {
 			//show icon
 			currentShopItemImage.sprite = ps.ShopIcon;
 			currentShopItemName.text = ps.skinName;
-			currentShopItemPriceText.text = ps.skinPrice.ToString("0.00");
+
+			if(ps.purchasable)
+			{
+				VirtualGood vg = (VirtualGood)StoreInfo.GetItemByItemId(ps.skinId);
+				string strfromStore = ((PurchaseWithMarket)vg.PurchaseType).MarketItem.MarketPriceAndCurrency;
+				currentShopItemPriceText.text = strfromStore;
+				Debug.Log("str from store:" + strfromStore);
+			}
 			currentShopItemId = ps.skinId;
 
 
@@ -1201,10 +1330,11 @@ public class GameSceneEvents : MonoBehaviour {
 	public void onAutoMessageOKButtonClicked()
 	{
 		//playMenuClickedSound ();
-		UI_AutoMessage.SetActive (false);
-		SetDimImage (false, true);
+		
 		if(currentMessageOkButtonDelegate != null)
 			currentMessageOkButtonDelegate ();
+
+		ShowAutoMessage ("");
 	}
 
 	public void SetDimImage(bool bActive, bool forAutoMessage = false)
@@ -1389,18 +1519,22 @@ public class GameSceneEvents : MonoBehaviour {
 		SetOptionPanel (false);
 	}
 
-	public void setCountingPanel(bool bActive)
+	public void setCountingPanel(bool bActive, bool wantCancelButton = true)
 	{
 		UI_CountingPanel.SetActive(bActive);
-		if(bActive)
+		if (bActive) {
 			UI_CountingPanel.GetComponent<Animator> ().Play ("GenericMenuOpenedAnimation");
+
+			countingPanelCancelButton.SetActive(wantCancelButton);
+		}
 	}
 
 	public void onCountingCanceled()
 	{
 		//playMenuClickedSound ();
 		setCountingPanel (false);
-		StopCoroutine (TickingCountCoroutine);
+		if(TickingCountCoroutine != null)
+			StopCoroutine (TickingCountCoroutine);
 	}
 
 
@@ -1456,22 +1590,27 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void  onScorePanelShopORGiftButtonDown()
 	{
-		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = false;
+		if(gameMgr.GetCurrentPlayer () != null)
+			gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().allowInput = false;
 	}
 
 	public void hideScorePanelShopAndGiftButton ()
 	{
-		if(UI_ScorePanel.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("ScorePanelShopAndGiftSlideIn"))
-			UI_ScorePanel.GetComponent<Animator> ().Play ("ScorePanelShopAndGiftSlideOut");
+		Animator animator = UI_ScorePanel.GetComponent<Animator> ();
+		if(animator.GetCurrentAnimatorStateInfo (0).IsName("ScorePanelShopAndGiftSlideIn"))
+			animator.Play ("ScorePanelShopAndGiftSlideOut");
 	}
 	
 	public void onExtraButtonClicked()
 	{
+		//Utils.forceAddToken (100);
 		UnityEngine.AnimatorStateInfo animstateinfo = ExtraButton.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0);
-		if( animstateinfo.IsName("MovingUp"))
-			ExtraButton.GetComponent<Animator>().Play("MovingDown");
-		else
-			ExtraButton.GetComponent<Animator>().Play("MovingUp");
+		if (animstateinfo.IsName ("MovingUp"))
+			ExtraButton.GetComponent<Animator> ().Play ("MovingDown");
+		else {
+			ExtraButton.GetComponent<Animator> ().Play ("MovingUp");
+
+		}
 	}
 
 	public void onGiftButtonClicked()
@@ -1516,8 +1655,25 @@ public class GameSceneEvents : MonoBehaviour {
 				
 			}
 			
-			ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,giftTokenImg,false);
+			ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,giftTokenImg,false,true,true);
 			FreeTokenButton.SetActive( gameMgr.IsFreeTokenReady() );
+
+			
+			UnityAnalytics.CustomEvent("GetFreeTokens",new Dictionary<string, object>{
+				{ "GetFreeTokens", howManyToken }
+			} );
+		}
+
+		if (GiftButtonTextObj.activeSelf) {
+			Animator animator = GiftButtonTextObj.GetComponent<Animator> ();
+			if (animator != null)
+				animator.Play ("FlashText");
+		}
+
+		if (ScorePanelGiftButtonTextObj.activeSelf) {
+			Animator animator = ScorePanelGiftButtonTextObj.GetComponent<Animator> ();
+			if (animator != null)
+				animator.Play ("FlashText");
 		}
 	}
 	
@@ -1532,13 +1688,22 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onOpenGiftBoxButtonClicked()
 	{
+
+		if (gameMgr.getOwnedSkins ().Count == gameMgr.SkinTemplates.Count - 1) {
+			ShowAutoMessage ("!! WOW !!\nYOU  ALREADY  COLLECT  ALL  THE  SKINS !  MORE  FUN  SKINS  ARE  COMING  SOON !");
+			return;
+		}
+
 		int mytokenNum = gameMgr.GetTokenNum ();
 
 		if (mytokenNum >= gameMgr.TokenNumToOpenAGiftBox) {
 			CancelInvoke ("stopOpeningGift");
 			OpenGiftBoxButtonText.text = "OPENING...";
 			GiftImage.GetComponent<Animator> ().Play ("OpenGiftAnimation");
+			playOpenGiftSound ();
 			Invoke ("stopOpeningGift", 3f);
+
+
 		} else {
 			ShowAutoMessage("YOU  CAN  COLLECT  TOKENS  BY  PLAYING  THE  GAME  OR  COME  BACK  EVERY  FEW  MINUTUES !");
 		}
@@ -1557,17 +1722,65 @@ public class GameSceneEvents : MonoBehaviour {
 		if ( gameMgr.consumeToken (10)) {
 
 
-			PlayerSkin ps = gameMgr.GivePlayerRandomSkin();
-			if(ps != null)
+			if(UnityEngine.Random.Range(0,3) == 0)
 			{
+				PlayerSkin ps = gameMgr.GivePlayerRandomSkin();
+				if(ps != null)
+				{
+					playGiveFreeTokenSound();
+					ShowAutoMessage("!! "+ps.skinName + " !!",updateMyTokenBalance,true,ps.ShopIcon, false,true,true);
+				}
+				else if (UnityEngine.Random.Range(0,10) <= 6)
+				{
+					int howManyToken = 0;
+					if(UnityEngine.Random.Range(0,15)<=1)// chance to get more tokens
+					{
+						howManyToken = gameMgr.AddFreeGiftToken (15,false);
+					}
+					else
+					{
+						howManyToken = gameMgr.AddFreeGiftToken (UnityEngine.Random.Range(2,6),false);
+						
+					}
+					playGiveFreeTokenSound();
+					ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,giftTokenImg,false,true,true);
+
+					UnityAnalytics.CustomEvent("RandomTokensFromGiftBox",new Dictionary<string, object>{
+						{ "RandomTokensFromGiftBox", howManyToken }
+					} );
+				}
+				else
+				{
+					playNoGiftSound();
+					ShowAutoMessage("!! OH  NO !!",updateMyTokenBalance,true,noGiftImg,false,true,true);
+				}
+			}
+			else if (UnityEngine.Random.Range(0,10) <= 6)
+			{
+				int howManyToken = 0;
+				if(UnityEngine.Random.Range(0,15)<=1)// chance to get more tokens
+				{
+					howManyToken = gameMgr.AddFreeGiftToken (15,false);
+				}
+				else
+				{
+					howManyToken = gameMgr.AddFreeGiftToken (UnityEngine.Random.Range(2,6),false);
+					
+				}
 				playGiveFreeTokenSound();
-				ShowAutoMessage("!! "+ps.skinName + " !!",updateMyTokenBalance,true,ps.ShopIcon, false);
+				ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,giftTokenImg,false,true,true);
+
+				
+				UnityAnalytics.CustomEvent("RandomTokensFromGiftBox",new Dictionary<string, object>{
+					{ "RandomTokensFromGiftBox", howManyToken }
+				} );
 			}
 			else
 			{
-				ShowAutoMessage("!! OH  NO !!",updateMyTokenBalance,true,null,false);
+				playNoGiftSound();
+				ShowAutoMessage("!! OH  NO !!",updateMyTokenBalance,true,noGiftImg,false,true,true);
 			}
-
+			
 			GiftImage.GetComponent<Animator>().Play("Regular");
 		}
 	}
