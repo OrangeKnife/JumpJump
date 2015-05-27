@@ -195,8 +195,8 @@ public class GameManager : MonoBehaviour {
 		leaderboardId = "ColorJumpScore";
 		leaderboardId_hardcore = "ColorJumpScore_HardCore";
 		#elif UNITY_ANDROID && !UNITY_EDITOR
-		leaderboardId = "CgkI_ab0x7wJEAIQCA";
-		leaderboardId_hardcore = "CgkI_ab0x7wJEAIQCQ";
+		leaderboardId = "CgkI_ab0x7wJEAIQCg";
+		leaderboardId_hardcore = "CgkI_ab0x7wJEAIQDA";
 		#endif
 
 
