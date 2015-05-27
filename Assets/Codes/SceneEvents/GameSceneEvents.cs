@@ -864,6 +864,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void UnityAdsYesButtonClicked()
 	{
+		SetPauseButton(true);
 #if UNITY_EDITOR
 		gameMgr.GetCurrentPlayer ().GetComponent<PlayerController> ().AfterWatchAds();
 		SetUnityAdsQuestion (false);
@@ -918,6 +919,7 @@ public class GameSceneEvents : MonoBehaviour {
 	public void UnityAdsNoButtonClicked()
 	{
 		//playMenuClickedSound ();
+		SetPauseButton(true);
 		NoAdsContinueDie ();
 	}
 
