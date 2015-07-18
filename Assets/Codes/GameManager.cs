@@ -103,6 +103,10 @@ public class GameManager : MonoBehaviour {
 	int freeSkinTrialDeathCount = -1;//for count how many deaths you can play with free skin
 	int alreadyAskedTrialQuestionOnDeathCount = -1;
 	public int freeSkinTrialEveryFewDeathNum;
+
+	public int tutorialFinishBarCount;
+	public GameObject TutorialFinishPickupTemplate;
+
 	public void login()
 	{
 
@@ -189,6 +193,8 @@ public class GameManager : MonoBehaviour {
 
 			if(currentSkinTemplateIdx > 0)//not random
 				currentSelectedSkinTemplate = SkinTemplates[currentSkinTemplateIdx];
+
+
 		}
 
 		#if UNITY_IOS && !UNITY_EDITOR
@@ -204,6 +210,7 @@ public class GameManager : MonoBehaviour {
 
 
 		eventHandler = GameObject.Find ("eventHandler").GetComponent<GameSceneEvents>();
+
 
 		if(!SoomlaStore.Initialized)
 			SoomlaStore.Initialize(new ColorJumpStoreAssets());
@@ -244,6 +251,11 @@ public class GameManager : MonoBehaviour {
 #endif
 
 		SetScreenNeverSleepIfHasAds ();
+
+		if(mysave.firstRun)
+			eventHandler.changePlayButtonText ("TUTORIAL");
+		else
+			eventHandler.changePlayButtonText ("PLAY");
 
 	}
 
@@ -417,10 +429,14 @@ public class GameManager : MonoBehaviour {
 			return hardCoreLife;
 		case 2:
 			return 30;//???
+		case 999:
+			return 1;
 		}
 
 		return 3;
 	}
+
+
 
 	public void StartGame(int mode)
 	{
@@ -917,6 +933,14 @@ public class GameManager : MonoBehaviour {
 		hardCoreUnlocked = wantToUnlock;
 		mysave.unlockedHardCore = hardCoreUnlocked;
 		GameFile.Save ("save.data",mysave);
+	}
+
+	public void finishTutorial()
+	{
+		mysave.firstRun = false;
+		GameFile.Save ("save.data",mysave);
+
+		eventHandler.finishTutorialPopup();
 	}
 
 	public void ratedGame()

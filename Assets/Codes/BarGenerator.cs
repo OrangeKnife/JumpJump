@@ -27,6 +27,8 @@ public class BarGenerator : MonoBehaviour {
 	List<GameObject> FloatingObjectList;
 	
 	float difficultyMultiplier;
+
+	private bool spawnOnlyOnce,spawnedOnce;
 	void Start () 
 	{
 		if (gameMgr == null)
@@ -42,12 +44,14 @@ public class BarGenerator : MonoBehaviour {
 		if (FloatingObjectList == null)
 			FloatingObjectList = new List<GameObject> ();
 
-
 	}
 
 	public void resetDifficulty(int gameMode)
 	{
-		difficultyMultiplier = (float)(3 - gameMode)/3f;
+		if (gameMode < 999)
+			difficultyMultiplier = (float)(3 - gameMode) / 3f;
+		else
+			difficultyMultiplier = 1;
 
 		Utils.addLog ("difficultyMultiplier=" + difficultyMultiplier.ToString ());
 	}
@@ -85,6 +89,10 @@ public class BarGenerator : MonoBehaviour {
 		pickupCount = 1;
 
 		resetDifficulty (gameMgr.gameMode);
+
+		spawnOnlyOnce = gameMgr.gameMode >= 999;
+
+		spawnedOnce = false;
 	}
 	
 	public void ActiveAllSpawnedBars()
@@ -120,6 +128,9 @@ public class BarGenerator : MonoBehaviour {
 
 	void SpawnBar(GameObject template)
 	{
+		if (spawnOnlyOnce && spawnedOnce)
+			return;
+
 		EObjectColor lastBarColor = EObjectColor.MAXCOLORNUM;
 		BarController lastBarController = null;
 
@@ -171,7 +182,13 @@ public class BarGenerator : MonoBehaviour {
 				SpawnFloatingObject(gameMgr.ForegroundFloatingObjectList[Random.Range(0,gameMgr.ForegroundFloatingObjectList.Count)],lastBarLocation);
 
 
+			if(barCount == gameMgr.tutorialFinishBarCount && gameMgr.mysave.firstRun)
+			{
+				SpawnPickup( gameMgr.TutorialFinishPickupTemplate , lastBarLocation);
+			}
 		}
+
+		spawnedOnce = true;
 	}
 
 	void SpawnFloatingObject(GameObject floatingObjTemp,Vector3 barloc)

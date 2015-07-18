@@ -17,6 +17,7 @@ public class Pickup : MonoBehaviour
 	public float lifespanAfterPickup;
 
 	public bool UnlockHardMode;
+	public bool TutorialFinish;
 
 	public bool GiveToken;
 	public int GiveTokenNum;

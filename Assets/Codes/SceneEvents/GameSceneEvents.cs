@@ -117,6 +117,12 @@ public class GameSceneEvents : MonoBehaviour {
 	GameObject tutorialLeft = null; 
 	[SerializeField]
 	GameObject tutorialRight = null; 
+	[SerializeField]
+	GameObject tutorialJump = null;
+	[SerializeField]
+	GameObject tutorialColor = null;
+	[SerializeField]
+	GameObject tutorialCombo = null;
 
 	[SerializeField]
 	UnityEngine.UI.Image color1 = null; 
@@ -160,6 +166,9 @@ public class GameSceneEvents : MonoBehaviour {
 
 	[SerializeField]
 	GameObject RecordButton = null;
+
+	[SerializeField]
+	UnityEngine.UI.Text PlayButtonText = null;
 
 	int UnityAdsYesNum;
 
@@ -250,6 +259,13 @@ public class GameSceneEvents : MonoBehaviour {
 			Everyplay.ReadyForRecording += OnReadyForRecording;
 
 		UI_StartPanel.GetComponent<Animator>().Play("TitleSlideAnimation");
+
+
+	}
+
+	public void changePlayButtonText(string _text)
+	{
+		PlayButtonText.text = _text;
 	}
 
 	void Update(){
@@ -516,9 +532,11 @@ public class GameSceneEvents : MonoBehaviour {
 		SetScorePanel (true);
 		UpdateUISocre (gameMgr.currentScore);
 
-		bool isTokenReadynow = gameMgr.IsFreeTokenReady ();
-		if (gameMgr.getOwnedSkins ().Count > 1 || gameMgr.GetTokenNum () > 0 || isTokenReadynow) {
-			UI_ScorePanel.GetComponent<Animator> ().Play ("ScorePanelShopAndGiftSlideIn");
+		if (gameMgr.gameMode < 999) {
+			bool isTokenReadynow = gameMgr.IsFreeTokenReady ();
+			if (gameMgr.getOwnedSkins ().Count > 1 || gameMgr.GetTokenNum () > 0 || isTokenReadynow) {
+				UI_ScorePanel.GetComponent<Animator> ().Play ("ScorePanelShopAndGiftSlideIn");
+			}
 		}
 	}
 
@@ -538,6 +556,12 @@ public class GameSceneEvents : MonoBehaviour {
 
 		tutorialLeft.SetActive(wantToShow);
 		tutorialRight.SetActive(wantToShow);
+
+		if (gameMgr.gameMode >= 999) {
+			tutorialJump.SetActive(wantToShow);
+			tutorialColor.SetActive(wantToShow);
+			tutorialCombo.SetActive(wantToShow);
+		}
 	}
 
 	public void onPlayerColorChanged(EObjectColor currentColor)
@@ -745,7 +769,8 @@ public class GameSceneEvents : MonoBehaviour {
 
 
 		UI_StartPanel.SetActive (false);
-		
+
+
 		gameMgr.StartGame (1);
 
 
@@ -759,8 +784,11 @@ public class GameSceneEvents : MonoBehaviour {
 
 
 		UI_StartPanel.SetActive (false);
-		
-		gameMgr.StartGame (0);
+
+		if (gameMgr.mysave.firstRun)
+			gameMgr.StartGame (999);
+		else
+			gameMgr.StartGame (0);
 
 
 		
@@ -1807,5 +1835,18 @@ public class GameSceneEvents : MonoBehaviour {
 		else
 			animator.Play ("ScaleDown");
 	}
-	
+
+
+	public void finishTutorialPopup()
+	{
+		gameMgr.PauseGame ();
+		changePlayButtonText ("PLAY");
+		ShowAutoMessage ("WOW! YOU FINISHED THE TOTORIAL!", finishTutorialAndBackToMainMenu);
+	}
+
+	public void finishTutorialAndBackToMainMenu()
+	{
+		gameMgr.UnPauseGame ();
+		gameMgr.BackToMainMenu ();
+	}
 }

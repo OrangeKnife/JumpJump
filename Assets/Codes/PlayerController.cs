@@ -205,7 +205,7 @@ public class PlayerController : MonoBehaviour {
 			eventHandler.SetPauseButton(false);
 			Invoke("AskUnityAdsQuestion",1f);
 
-		} else if (gameMgr.AddLife (-1) >= 1) {
+		} else if (gameMgr.gameMode >= 999 || gameMgr.AddLife (-1) >= 1) {
 			allowInput = true;
 			allowInput_jump = false;
 			playSound(audioClips[5]);
@@ -519,7 +519,7 @@ public class PlayerController : MonoBehaviour {
 
 			}
 
-			if(bc.barNum > 1)
+			if(bc.barNum > 1 && gameMgr.gameMode < 999)
 			{
 				AddPopup("LIFE - 1", gameMgr.MainCam.WorldToScreenPoint(gameObject.transform.position + new Vector3(popUpLifeTextOffset.x , popUpLifeTextOffset.y * popUpScreenPos.Count,0)), Time.time, popUpLifeGUIStyle);
 				gameMgr.AddLife(-1);
@@ -927,6 +927,12 @@ public class PlayerController : MonoBehaviour {
 
 	public bool Pickup(Pickup something)
 	{
+		if (something.TutorialFinish) {
+			CleanUpAllPopup ();
+			gameMgr.finishTutorial ();
+			return true;
+		}
+
 		if(something.UnlockHardMode)
 			gameMgr.unlockHardcoreMode(true);
 
