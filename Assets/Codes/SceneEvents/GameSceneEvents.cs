@@ -1231,7 +1231,7 @@ public class GameSceneEvents : MonoBehaviour {
 		} );
 #endif
 #if UNITY_ANDROID
-		ShowAutoMessage("ANDROID  USES  DONT  HAVE  TO  RESTORE!");
+		ShowAutoMessage("ANDROID  USERS  DONT  HAVE  TO  RESTORE!");
 #endif
 	}
 
