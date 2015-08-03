@@ -216,10 +216,8 @@ public class GameManager : MonoBehaviour {
 			SoomlaStore.Initialize(new ColorJumpStoreAssets());
 
 		NoAds = StoreInventory.GetItemBalance (ColorJumpStoreAssets.NO_ADS_LTVG.ItemId) > 0;
+		NoAds = true;//force no ads
 
-#if UNITY_EDITOR
-		NoAds = true;
-#endif
 
 		Utils.addLog ("balance = " + StoreInventory.GetItemBalance (ColorJumpStoreAssets.NO_ADS_LTVG.ItemId));
 
@@ -241,10 +239,11 @@ public class GameManager : MonoBehaviour {
 		savedMinutes = StoreInventory.GetItemBalance (ColorJumpStoreAssets.ACCUMULATED_ACTIVETIME.ItemId);
 		freeGiftCounterBalance = StoreInventory.GetItemBalance (ColorJumpStoreAssets.FREEGIFT_COUNTER.ItemId);
 
-
+		//remove time sync
+		/*
 		syncTimeThread = new Thread(syncTime) {Name = "TcpClient Thread"};
 		syncTimeThread.IsBackground = true;
-		syncTimeThread.Start ();
+		syncTimeThread.Start ();*/
 
 #if UNITY_IOS && !UNITY_EDITOR
 		MyiOSSharing.iOSRegisterWechat("wxf6b5d497940a676e");
@@ -597,7 +596,8 @@ public class GameManager : MonoBehaviour {
 	}
 	
 	void Update () {
-
+		//remove time sync
+		/*
 		if (syncTimeSuccess && !syncFlag) {
 			syncFlag = true;
 			realtimeSinceStartupSec_syncTimeSuccess = Time.realtimeSinceStartup;
@@ -610,7 +610,7 @@ public class GameManager : MonoBehaviour {
 			}
 
 
-		}
+		}*/
 
 		if (Input.GetKeyDown(KeyCode.Escape)) 
 		{

@@ -73,7 +73,9 @@ public class PlayerController : MonoBehaviour {
 	public int minimumBarCountForHidingColorIndicatoin;
 
 	public int maximumUnityAdsCanWatch = 1;
+	public int maximumLifeCanPurchase = 1;
 	int currentUnityAdsWatched = 0;
+	int currentLifePurchased = 0;
 	bool deathSoundPlayed = false;
 
 	float playerStartPlayTime;//track how long player survive
@@ -136,7 +138,11 @@ public class PlayerController : MonoBehaviour {
 			currentUnityAdsWatched++;
 
 			eventHandler.onAdsQuestionPopup ();
-		} else {
+		} 
+		else if(currentLifePurchased < maximumLifeCanPurchase
+		        && (Time.time - playerStartPlayTime > 20f && gameMgr.currentScore > 5 || gameMgr.currentScore > 25) )
+		{}
+		else {
 			DoDeath();
 
 		}

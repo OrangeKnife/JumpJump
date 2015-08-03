@@ -24,7 +24,8 @@ public class FreeTokenController : MonoBehaviour
 
 	public void ForceDisplayNonSynchronizedInfo()
 	{
-		InfoText.text = "CONNECT  TO  INTERNET  AND  GET  FREE  TOKENS !";
+		//InfoText.text = "CONNECT  TO  INTERNET  AND  GET  FREE  TOKENS !";
+		InfoText.text = "WATCH  A  VIDEO  AND  GET  FREE  TOKENS !";
 	}
 
 

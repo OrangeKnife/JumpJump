@@ -5,7 +5,9 @@ using System;
 using UnityEngine.Advertisements;
 using System.IO;
 using UnityEngine.Cloud.Analytics;
+#if ADMOB
 using GoogleMobileAds.Api;
+#endif
 using Soomla.Store;
 
 #if UNITY_ANDROID
@@ -178,10 +180,10 @@ public class GameSceneEvents : MonoBehaviour {
 
 	GameManager gameMgr;
 
-
+#if ADMOB
 	BannerView bannerView,bannerViewBottom;
 	AdRequest request;
-
+#endif
 	[SerializeField]
 	GameObject transitionImg = null; 
 
@@ -211,6 +213,7 @@ public class GameSceneEvents : MonoBehaviour {
 	float lastTimePlayTitleJumpAnim;
 	public void DestoryAllAds()
 	{
+#if ADMOB
 		if (bannerView != null)
 			bannerView.Destroy ();
 
@@ -218,10 +221,12 @@ public class GameSceneEvents : MonoBehaviour {
 			bannerViewBottom.Destroy ();
 
 		RemoveAdsButton.SetActive (false);
+#endif
 	}
 
 	public void InitAds()
 	{
+#if ADMOB
 		RemoveAdsButton.SetActive (true);
 		//init ads
 		string bannerAdsId = "";
@@ -242,7 +247,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 		ShowOneOfTheBannerViews (true);
 			
-
+#endif
 	}
 
 	void Start () {
@@ -348,15 +353,18 @@ public class GameSceneEvents : MonoBehaviour {
 			StartCoroutine (initUnityAds());
 	}
 
+#if ADMOB
 	void requestNewBannerAds(BannerView aBannerView)
 	{
 		request = new AdRequest.Builder ().Build ();
 		// Load the banner with the request.
 		aBannerView.LoadAd (request);
 	}
+#endif
 
 	public void ShowOneOfTheBannerViews(bool forceTop = false)
 	{
+#if ADMOB
 		HideAllBannerViews();
 
 		if (UnityEngine.Random.Range (0, 2) == 0 || forceTop) {
@@ -372,14 +380,17 @@ public class GameSceneEvents : MonoBehaviour {
 				bannerViewBottom.Show ();
 			}
 		}
+#endif
 	}
 
 	void HideAllBannerViews()
 	{
+#if ADMOB
 		if(bannerView != null)
 			bannerView.Hide ();
 		if(bannerViewBottom != null)
 			bannerViewBottom.Hide ();
+#endif
 	}
 		
 	void Awake() {
@@ -727,6 +738,27 @@ public class GameSceneEvents : MonoBehaviour {
 		} );
 		
 	}
+
+	public void onFreeTokensButtonClicked()
+	{
+		SetPauseButton(true);
+		#if UNITY_EDITOR
+		return;
+		#elif UNITY_ANDROID || UNITY_IOS
+
+		if(Everyplay.IsRecording())
+			Everyplay.PauseRecording();
+
+		//UnityADS
+		if(Advertisement.isReady())
+		{ 
+			ShowOptions options = new ShowOptions();
+			options.pause = true;                        // Pauses game while ads are shown
+			options.resultCallback = HandleShowResult_FreeTokens;   // Triggered when the ad is closed
+			Advertisement.Show(null,options);
+		}
+		#endif
+	}
 	
 	public void onRateButtonClicked()
 	{
@@ -943,6 +975,47 @@ public class GameSceneEvents : MonoBehaviour {
 		if(Everyplay.IsPaused())
 			Everyplay.ResumeRecording();
 	}
+
+	public void HandleShowResult_FreeTokens (ShowResult result)
+	{
+		switch (result)
+		{
+		case ShowResult.Finished:
+			if (true) {
+				playGiveFreeTokenSound();
+				int howManyToken = 0;
+				if(UnityEngine.Random.Range(0,10)<=1)// 20% get 10 tokens
+				{
+					howManyToken = gameMgr.AddFreeGiftToken (10);
+				}
+				else
+				{
+					howManyToken = gameMgr.AddFreeGiftToken (UnityEngine.Random.Range(2,6));
+					
+				}
+				
+				ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,giftTokenImg,false,true,true);
+				
+				UnityAnalytics.CustomEvent("GetFreeTokens",new Dictionary<string, object>{
+					{ "GetFreeTokens", howManyToken }
+				} );
+			}
+
+
+			Utils.addLog("The ad was successfully shown.");
+			break;
+		case ShowResult.Skipped:
+			Utils.addLog("The ad was skipped before reaching the end.");
+			break;
+		case ShowResult.Failed:
+			Utils.addLog("The ad failed to be shown.");
+			break;
+		}
+
+		if(Everyplay.IsPaused())
+			Everyplay.ResumeRecording();
+	}
+
 	
 	public void UnityAdsNoButtonClicked()
 	{
@@ -1231,7 +1304,7 @@ public class GameSceneEvents : MonoBehaviour {
 		} );
 #endif
 #if UNITY_ANDROID
-		ShowAutoMessage("ANDROID  USES  DONT  HAVE  TO  RESTORE!");
+		ShowAutoMessage("ANDROID  USERS  DONT  HAVE  TO  RESTORE!");
 #endif
 	}
 
