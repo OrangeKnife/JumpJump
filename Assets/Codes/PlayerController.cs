@@ -323,21 +323,21 @@ public class PlayerController : MonoBehaviour {
 
 
 		// jump check
-		if(allowInput_jump)
-		{
-			if ( Input.GetButtonDown ("Jump") )
-			{
+        if(allowInput_jump)
+        {
+            if ( Input.GetButtonDown ("Jump") )
+            {
                 GenerateJumpCommand();
             }
-		}
+        }
 
-		if(allowInput_color)
-		{
-			if(Input.GetButtonDown("Fire1"))
-			{
+        if(allowInput_color)
+        {
+            if(Input.GetButtonDown("Fire1"))
+            {
                 GenerateChangeColorCommand();
             }
-		}
+        }
 
 
 #elif UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
