@@ -3,10 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SocialPlatforms;
 using UnityEngine.SocialPlatforms.GameCenter;
-using UnityEngine.Cloud.Analytics;
 using Soomla.Store;
 using System.Net.Sockets;
 using System.Threading;
+using UnityEngine.Analytics;
 #if UNITY_ANDROID && !UNITY_EDITOR
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
@@ -644,7 +644,7 @@ public class GameManager : MonoBehaviour {
 				mysave = new SaveObject(true);
 				GameFile.Save("save.data",mysave);
 
-				UnityAnalytics.CustomEvent("GameSaveDataCreated",new Dictionary<string, object>{
+				Analytics.CustomEvent("GameSaveDataCreated",new Dictionary<string, object>{
 					{ "GameSaveData", 1 }
 				} );
 			}
@@ -1006,7 +1006,7 @@ public class GameManager : MonoBehaviour {
 		 
  		if (ownedSkins.IndexOf (rtObj) == -1) {
 
-			UnityAnalytics.CustomEvent("GetSkinFromGiftBox",new Dictionary<string, object>{
+            Analytics.CustomEvent("GetSkinFromGiftBox",new Dictionary<string, object>{
 				{ "GetSkinFromGiftBox", 1 }
 			} );
 
