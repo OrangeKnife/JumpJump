@@ -203,6 +203,7 @@ public class BarGenerator : MonoBehaviour {
 		GameObject go = GameObject.Instantiate (pickupTemplate);
 		PickupList.Add (go);
 		go.transform.position = barloc + new Vector3(barloc.x, Random.Range(barHeight.y*0.3f,barHeight.y * 0.6f),barloc.z);
+        go.GetComponent<Pickup>().addOnPickedUpEventHandler(player.GetComponent<PlayerController>().Pickup);
 	}
 
 }

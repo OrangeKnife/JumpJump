@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -117,7 +118,7 @@ public class PlayerController : MonoBehaviour {
 
 		jumped = false;
 
-		currentColor = (EObjectColor)Random.Range (0,(int)EObjectColor.MAXCOLORNUM);
+		currentColor = (EObjectColor)UnityEngine.Random.Range (0,(int)EObjectColor.MAXCOLORNUM);
 		ChangeColor ();
 
 		playerStartPlayTime = Time.time;
@@ -849,12 +850,13 @@ public class PlayerController : MonoBehaviour {
 		playSound (slowTimeLoopSound, slowtimeAudioSourceIdx, true,1f);
 	}
 
-	public bool Pickup(Pickup something)
-	{
+    public void Pickup(object sender, EventArgs args)
+    {
+        Pickup something = (Pickup)sender;
 		if (something.TutorialFinish) {
 			CleanUpAllPopup ();
 			gameMgr.finishTutorial ();
-			return true;
+			return;
 		}
 
 		if(something.UnlockHardMode)
@@ -875,8 +877,8 @@ public class PlayerController : MonoBehaviour {
 		}
 
 		AddPopup(something.popupMessage,  gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + something.popUpTextOffset), Time.time, something.popupStyle);
+        
 
-
-		return true;
+        return;
 	}
 }
