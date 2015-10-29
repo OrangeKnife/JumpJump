@@ -61,11 +61,11 @@ public class Pickup : MonoBehaviour
 
 	void OnTriggerEnter2D(Collider2D  other) 
 	{
-        if (onPickedUp != null)
+        if (!picked)
         {
             onPickedUp(this, EventArgs.Empty);
+            PostPickedUp();
         }
-        PostPickedUp();
     }
 
 	void PostPickedUp()

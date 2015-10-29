@@ -10,7 +10,7 @@ public class CameraController : MonoBehaviour {
 
 	private GameObject player;
 	private Transform playerTransform;
-	private PlayerController playerCon;
+	//private PlayerController playerCon;
 
 
 	void Start () 
