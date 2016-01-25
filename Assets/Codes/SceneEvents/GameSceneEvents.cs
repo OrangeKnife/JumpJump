@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine.Advertisements;
 using System.IO;
-using UnityEngine.Cloud.Analytics;
+using UnityEngine.Analytics;
 using GoogleMobileAds.Api;
 using Soomla.Store;
 
@@ -324,7 +324,7 @@ public class GameSceneEvents : MonoBehaviour {
 	{
 		if (Advertisement.isSupported && Application.internetReachability != NetworkReachability.NotReachable )
 		{
-			Advertisement.allowPrecache = true;
+			//Advertisement.allowPrecache = true;
 			string UnityAdsId="";
 			#if UNITY_IOS && !UNITY_EDITOR
 			UnityAdsId = "37628";
@@ -422,7 +422,7 @@ public class GameSceneEvents : MonoBehaviour {
 			pc.gameObject.transform.position = new Vector3(0,gameMgr.MainCam.transform.position.y -1.5f,-1);
 
 
-			UnityAnalytics.CustomEvent("GameEnded",new Dictionary<string, object>{
+			Analytics.CustomEvent("GameEnded",new Dictionary<string, object>{
 				{ "FLOOR", maxBarNum },
 				{ "SCORE", gameMgr.currentScore },
 				{ "TIME", (int)gameMgr.getPlayTime () }
@@ -722,7 +722,7 @@ public class GameSceneEvents : MonoBehaviour {
 		//playMenuClickedSound ();
 		gameMgr.RemoveAds ();
 
-		UnityAnalytics.CustomEvent("NoAdsButtonClicked",new Dictionary<string, object>{
+		Analytics.CustomEvent("NoAdsButtonClicked",new Dictionary<string, object>{
 			{ "NoAdsButtonClicked", 1 }
 		} );
 		
@@ -734,7 +734,7 @@ public class GameSceneEvents : MonoBehaviour {
 		gameMgr.ratedGame ();
 		Utils.rateGame ();
 
-		UnityAnalytics.CustomEvent("RateButtonClicked",new Dictionary<string, object>{
+		Analytics.CustomEvent("RateButtonClicked",new Dictionary<string, object>{
 			{ "RateButtonClicked", 1 }
 		} );
 	}
@@ -859,7 +859,7 @@ public class GameSceneEvents : MonoBehaviour {
 	
 	public bool IsUnityAdsReady()
 	{
-		return Advertisement.isReady ();
+        return Advertisement.IsReady();
 	}
 
 	public void SetUnityAdsQuestion(bool bActive)
@@ -870,7 +870,7 @@ public class GameSceneEvents : MonoBehaviour {
 
 	public void onAdsQuestionPopup()
 	{
-		if (Advertisement.isReady ()) {
+		if (Advertisement.IsReady()) {
 
 			SetUnityAdsQuestion (true);
 			SetDimImage (true);
@@ -880,7 +880,7 @@ public class GameSceneEvents : MonoBehaviour {
 			UnityAdsYesNumText.GetComponent<Animator> ().Play ("FlashingTextOneSecondAnimation");
 			TickingUnityAdsYesButton ();
 
-			UnityAnalytics.CustomEvent("UnityAdsPopup",new Dictionary<string, object>{
+			Analytics.CustomEvent("UnityAdsPopup",new Dictionary<string, object>{
 				{ "UnityAdsNum", 1 }
 			} );
 			
@@ -1694,7 +1694,7 @@ public class GameSceneEvents : MonoBehaviour {
 			FreeTokenButton.SetActive( gameMgr.IsFreeTokenReady() );
 
 			
-			UnityAnalytics.CustomEvent("GetFreeTokens",new Dictionary<string, object>{
+			Analytics.CustomEvent("GetFreeTokens",new Dictionary<string, object>{
 				{ "GetFreeTokens", howManyToken }
 			} );
 		}
@@ -1780,7 +1780,7 @@ public class GameSceneEvents : MonoBehaviour {
 					playGiveFreeTokenSound();
 					ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,giftTokenImg,false,true,true);
 
-					UnityAnalytics.CustomEvent("RandomTokensFromGiftBox",new Dictionary<string, object>{
+					Analytics.CustomEvent("RandomTokensFromGiftBox",new Dictionary<string, object>{
 						{ "RandomTokensFromGiftBox", howManyToken }
 					} );
 				}
@@ -1806,7 +1806,7 @@ public class GameSceneEvents : MonoBehaviour {
 				ShowAutoMessage("YOU  GOT  "+howManyToken.ToString() + "  TOKENS!",updateMyTokenBalance,true,giftTokenImg,false,true,true);
 
 				
-				UnityAnalytics.CustomEvent("RandomTokensFromGiftBox",new Dictionary<string, object>{
+				Analytics.CustomEvent("RandomTokensFromGiftBox",new Dictionary<string, object>{
 					{ "RandomTokensFromGiftBox", howManyToken }
 				} );
 			}

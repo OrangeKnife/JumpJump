@@ -4,7 +4,6 @@ using System.Collections;
 public class MaterialScrollingController : MonoBehaviour {
 
 	private SpriteRenderer barSpriteRenderer;
-	private Transform playerTransform;
 
 	private float scrollSpeed = 0.05f;
 

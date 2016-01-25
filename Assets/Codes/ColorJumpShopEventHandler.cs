@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Soomla.Store;
-using UnityEngine.Cloud.Analytics;
+using UnityEngine.Analytics;
 /// <summary>
 /// This class contains functions that receive events that they are subscribed to.
 ///
@@ -99,7 +99,7 @@ public class ColorJumpShopEventHandler {
 		if((PurchaseWithMarket)pvi.PurchaseType != null)
 		{
 			MarketItem mi = ((PurchaseWithMarket)pvi.PurchaseType).MarketItem;
-			UnityAnalytics.Transaction(mi.ProductId, (decimal)mi.Price, mi.MarketCurrencyCode,null , null);
+			Analytics.Transaction(mi.ProductId, (decimal)mi.Price, mi.MarketCurrencyCode,null , null);
 		}
 	}
 	

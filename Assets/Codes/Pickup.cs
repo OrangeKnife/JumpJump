@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 public class Pickup : MonoBehaviour
 {
@@ -33,6 +34,8 @@ public class Pickup : MonoBehaviour
 
 	public float sfxVolume = 0.2f;
 
+    private event EventHandler onPickedUp = delegate { };
+
 	void Start ()
 	{
 		audioSource = GetComponent<AudioSource> ();
@@ -46,23 +49,32 @@ public class Pickup : MonoBehaviour
 
 	}
 
+    public void addOnPickedUpEventHandler(EventHandler eh)
+    {
+        onPickedUp += eh;
+    }
+
+    public void removeOnPickedUpEventHandler(EventHandler eh)
+    {
+        onPickedUp -= eh;
+    }
+
 	void OnTriggerEnter2D(Collider2D  other) 
 	{
-		if (!picked && other.gameObject.tag == "Player") {
-			if(other.gameObject.GetComponent<PlayerController> ().Pickup (this))
-			{
-				OnPickedUp();
-			}
-		}
-	}
+        if (!picked)
+        {
+            onPickedUp(this, EventArgs.Empty);
+            PostPickedUp();
+        }
+    }
 
-	void OnPickedUp()
+	void PostPickedUp()
 	{
 		picked = true;
 		audioSource.clip = audioClips [0];
 		audioSource.Play ();
 		GetComponent<SpriteRenderer>().enabled = false;
-		Invoke("DestoryDelay",lifespanAfterPickup);
+        Invoke("DestoryDelay",lifespanAfterPickup);
 
 	}
 

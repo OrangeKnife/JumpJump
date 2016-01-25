@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -85,7 +86,11 @@ public class PlayerController : MonoBehaviour {
 	//PlayerSkin currentSkin = null;
 
 	bool standOnCheck;//if it's true, check the stand on , will off after one check , will on when you jump
-	void Awake()
+
+    private Queue<Command> CommandQueue = new Queue<Command>();
+    private Command MyJumpCommand = new PlayerJumpCommand(), MyChangeColorCommand = new PlayerChangeColorCommand();//TODO, make an array and enum to access them
+
+    void Awake()
 	{
 		
 		audioSourceList = new List<AudioSource>();
@@ -113,7 +118,7 @@ public class PlayerController : MonoBehaviour {
 
 		jumped = false;
 
-		currentColor = (EObjectColor)Random.Range (0,(int)EObjectColor.MAXCOLORNUM);
+		currentColor = (EObjectColor)UnityEngine.Random.Range (0,(int)EObjectColor.MAXCOLORNUM);
 		ChangeColor ();
 
 		playerStartPlayTime = Time.time;
@@ -154,8 +159,37 @@ public class PlayerController : MonoBehaviour {
 		gameMgr.AddDeathCount (1);
 	}
 
-	
-	public void AfterWatchAds()
+    public bool DoJump()
+    {
+        if (maxBarNum == 0)
+            eventHandler.hideScorePanelShopAndGiftButton(); //only show you are at 0 floor
+
+        if (mySkinAnimator != null)
+            mySkinAnimator.Play("PlayerSkinJump");
+
+        totalJumpCount += 1;
+        jumped = true;
+        currentJumpCount += 1;
+        eventHandler.SetJumpCountText("JUMP " + getJumpXstring());
+        MyRigidBody.velocity = Vector2.Min(Vector2.zero, Vector2.Max(new Vector2(0, -2f), MyRigidBody.velocity)) + new Vector2(0, 0.01f);//avoid crazy current vel !!!
+        MyRigidBody.AddForce(new Vector3(0, jumpPower * 100f, 0));
+        playSound(audioClips[0], 0, false, 0.1f); //jjump
+        if (lastBarStandOn != null)
+        {
+            CancelInvoke("checkStandTime");
+            lastBarStandOn.onPlayerJumped();
+            if (wantJumpCombo)
+            {
+                checkJumpCombo(lastBarStandOn);
+            }
+
+        }
+
+        standOnCheck = true;
+        return true;
+    }
+
+    public void AfterWatchAds()
 	{
 		gameMgr.AddLife (gameMgr.getPlayerLifeByMode(gameMgr.gameMode));
 		allowInput = true;
@@ -263,22 +297,11 @@ public class PlayerController : MonoBehaviour {
 
 	}
 
-	void performJump()
+
+    void Update () 
 	{
-
-	}
-
-	void Update () 
-	{
-		bool ButtonJumpDown, ButtonJumpHold, ButtonJumpUp;
-		bool ButtonChangeColorDown = false;
-
-		//Utils.addLog ("velocity y=" + MyRigidBody.velocity.y);
-
-
 		if (gameMgr.bGamePaused)
 			return;
-		//gameMgr.changeCameraBGColor(gameObject.transform.position.y);
 
 		if (bTimeSlowed) {
 			if (Time.timeScale < 1f)
@@ -296,59 +319,29 @@ public class PlayerController : MonoBehaviour {
 		{
 			return;
 		}
-
-
-
-
-		ButtonJumpDown = false;
-		ButtonJumpHold = false;
-		ButtonJumpUp = false;
-
-
+        
 		#if UNITY_STANDALONE || UNITY_WEBPLAYER
 
 
 		// jump check
-		if(allowInput_jump)
-		{
-			if ( Input.GetButton ("Jump") )
-			{
-				ButtonJumpHold = true;
-			}
-			else
-			{
-				ButtonJumpHold = false;
-			}
+        if(allowInput_jump)
+        {
+            if ( Input.GetButtonDown ("Jump") )
+            {
+                GenerateJumpCommand();
+            }
+        }
 
-			if ( Input.GetButtonDown ("Jump") )
-			{
-				ButtonJumpDown = true;
-			}
-			else
-			{
-				ButtonJumpDown = false;
-			}
+        if(allowInput_color)
+        {
+            if(Input.GetButtonDown("Fire1"))
+            {
+                GenerateChangeColorCommand();
+            }
+        }
 
-			if ( Input.GetButtonUp ("Jump") )
-			{
-				ButtonJumpUp = true;
-			}
-			else
-			{
-				ButtonJumpUp = false;
-			}
-		}
 
-		if(allowInput_color)
-		{
-			if(Input.GetButtonDown("Fire1"))
-			{
-				ButtonChangeColorDown = true;
-			}
-		}
-	
-
-		#elif UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
+#elif UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
 
 		if (Input.touchCount > 0 ) 
 		{
@@ -367,37 +360,15 @@ public class PlayerController : MonoBehaviour {
 							{
 								if (touch.phase == TouchPhase.Began)
 								{
-									ButtonJumpDown = true;
+									GenerateJumpCommand();
 								}
-								else
-								{
-									ButtonJumpDown = false;
-								}
-								
-								if (touch.phase == TouchPhase.Ended)
-								{
-									ButtonJumpUp = true;
-								}
-								else
-								{
-									ButtonJumpUp = false;
-								}
-								
-								if (touch.phase == TouchPhase.Moved)
-								{
-									ButtonJumpHold = true;
-								}
-								else
-								{
-									ButtonJumpHold = false;
-								}
-							}
+                            }
 						}
 						else
 						{
 							if (allowInput_color && touch.phase == TouchPhase.Began)
 							{
-								ButtonChangeColorDown = true;
+								GenerateChangeColorCommand();
 							}
 						}
 					}
@@ -408,7 +379,7 @@ public class PlayerController : MonoBehaviour {
 						{	
 							if (allowInput_color && touch.phase == TouchPhase.Began)
 							{
-								ButtonChangeColorDown = true;
+								GenerateChangeColorCommand();
 							}
 						}
 						else
@@ -417,29 +388,7 @@ public class PlayerController : MonoBehaviour {
 							{
 								if (touch.phase == TouchPhase.Began)
 								{
-									ButtonJumpDown = true;
-								}
-								else
-								{
-									ButtonJumpDown = false;
-								}
-								
-								if (touch.phase == TouchPhase.Ended)
-								{
-									ButtonJumpUp = true;
-								}
-								else
-								{
-									ButtonJumpUp = false;
-								}
-								
-								if (touch.phase == TouchPhase.Moved)
-								{
-									ButtonJumpHold = true;
-								}
-								else
-								{
-									ButtonJumpHold = false;
+									GenerateJumpCommand();
 								}
 							}
 						}
@@ -449,18 +398,15 @@ public class PlayerController : MonoBehaviour {
 				 
 			}
 		}
+
+#endif
+
 		
-		#endif
 
-		 
-			if (ButtonChangeColorDown) {
-				playSound (audioClips [2], 1);
-				ChangeColor (-1, true);
-			}
+        while (CommandQueue.Count > 0)
+            CommandQueue.Dequeue().execute(gameObject);
 
-			HandleInput (ButtonJumpDown, ButtonJumpHold, ButtonJumpUp);
-	 
-		if (MyRigidBody.velocity.y < 0) { //fall
+        if (MyRigidBody.velocity.y < 0) { //fall
 			GameObject obj_foot = FootTouched ();
 			if (obj_foot != null) {
 				BarController bc = obj_foot.GetComponent<BarController> ();
@@ -560,7 +506,14 @@ public class PlayerController : MonoBehaviour {
 		popUpGUIStyle.Add(popupStyle);
 	}
 
-	void ChangeColor(int newColor = -1, bool playerChangeColor = false)
+    public bool DoChangeColor()
+    {
+        playSound(audioClips[2], 1);
+        ChangeColor(-1, true);
+        return true;
+    }
+
+    void ChangeColor(int newColor = -1, bool playerChangeColor = false)
 	{
 		//Color lastColor  = getColorBuyColorEnum (currentColor);
 		if (newColor < 0) {
@@ -670,50 +623,22 @@ public class PlayerController : MonoBehaviour {
 
 		return Xstring;
 	}
-	void HandleInput(bool bButtonJumpDown, bool bButtonJumpHold, bool bButtonJumpUp)
+	void GenerateJumpCommand()
 	{
-		if (bButtonJumpDown && maxJumpCount > currentJumpCount) {
-
-			if(maxBarNum == 0)
-				eventHandler.hideScorePanelShopAndGiftButton(); //only show you are at 0 floor
-			
-			if(mySkinAnimator != null)
-				mySkinAnimator.Play ("PlayerSkinJump");
-
-			totalJumpCount += 1;
-			jumped = true;
-			currentJumpCount += 1;
-			eventHandler.SetJumpCountText("JUMP "+getJumpXstring() );
-			MyRigidBody.velocity = Vector2.Min(Vector2.zero, Vector2.Max(new Vector2(0,-2f),MyRigidBody.velocity)) + new Vector2(0,0.01f);//avoid crazy current vel !!!
-			MyRigidBody.AddForce(new Vector3(0,jumpPower * 100f,0));
-			playSound(audioClips[0],0,false,0.1f); //jjump
-			if(lastBarStandOn != null)
-			{
-				CancelInvoke("checkStandTime");
-				lastBarStandOn.onPlayerJumped();
-				if(wantJumpCombo)
-				{
-					checkJumpCombo(lastBarStandOn);
-				}
-
-			}
-
-			standOnCheck = true;
-
+		if (maxJumpCount > currentJumpCount) {
+            CommandQueue.Enqueue(MyJumpCommand);
 		}
-		/*
-		if (bButtonJumpHold) {
+    }
 
-		}
+    void GenerateChangeColorCommand()
+    {
+        CommandQueue.Enqueue(MyChangeColorCommand);
+    }
 
-		if (bButtonJumpUp && maxJumpCount > currentJumpCount) {
-
-		}
-*/
-
-
-	}
-
+    public void ReceivedCommand(Command _c)
+    {
+        CommandQueue.Enqueue(_c);
+    }
 
 	bool isAlive()
 	{
@@ -925,12 +850,13 @@ public class PlayerController : MonoBehaviour {
 		playSound (slowTimeLoopSound, slowtimeAudioSourceIdx, true,1f);
 	}
 
-	public bool Pickup(Pickup something)
-	{
+    public void Pickup(object sender, EventArgs args)
+    {
+        Pickup something = (Pickup)sender;
 		if (something.TutorialFinish) {
 			CleanUpAllPopup ();
 			gameMgr.finishTutorial ();
-			return true;
+			return;
 		}
 
 		if(something.UnlockHardMode)
@@ -951,8 +877,8 @@ public class PlayerController : MonoBehaviour {
 		}
 
 		AddPopup(something.popupMessage,  gameMgr.MainCam.WorldToScreenPoint (gameObject.transform.position + something.popUpTextOffset), Time.time, something.popupStyle);
+        
 
-
-		return true;
+        return;
 	}
 }
