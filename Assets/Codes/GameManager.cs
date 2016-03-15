@@ -48,8 +48,11 @@ public class GameManager : MonoBehaviour {
 
 	public static string leaderboardId = "";
 	public static string leaderboardId_hardcore = "";
+
+#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
 	ILeaderboard leaderboard;
 	ILeaderboard leaderboard_hardcore;
+#endif
 	public int playerLife,hardCoreLife;
 
 	bool bColorIndication = true;
@@ -157,7 +160,7 @@ public class GameManager : MonoBehaviour {
 	void Start () {
 		//inti google play
 
-		#if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
 		PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder().Build();
 		/*	
 		// enables saving game progress.
@@ -174,7 +177,7 @@ public class GameManager : MonoBehaviour {
 		PlayGamesPlatform.DebugLogEnabled = true;
 		// Activate the Google Play Games platform
 		PlayGamesPlatform.Activate();
-		#endif
+#endif
 
 
 		SetCurrentPlayerTemplateByIdx (0);
@@ -197,13 +200,13 @@ public class GameManager : MonoBehaviour {
 
 		}
 
-		#if UNITY_IOS && !UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
 		leaderboardId = "ColorJumpScore";
 		leaderboardId_hardcore = "ColorJumpScore_HardCore";
-		#elif UNITY_ANDROID && !UNITY_EDITOR
+#elif UNITY_ANDROID && !UNITY_EDITOR
 		leaderboardId = "CgkI_ab0x7wJEAIQCg";
 		leaderboardId_hardcore = "CgkI_ab0x7wJEAIQDA";
-		#endif
+#endif
 
 
 		login ();
@@ -443,7 +446,7 @@ public class GameManager : MonoBehaviour {
 		if(mode >= 0)
 			gameMode = mode;
 		/*
-#if(UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
+#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
 		if (gameMode == 0) {
 			leaderboard = Social.CreateLeaderboard ();
 			leaderboard.id = leaderboardId;

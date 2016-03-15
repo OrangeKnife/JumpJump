@@ -7,8 +7,9 @@ public class Utils {
 	static int logLineCount = 0;
 	static List<string> stringLog = new List<string>();
 	static int LogMaxLine = 20;
-
+#if UNITY_ANDROID || UNITY_IOS
 	static string appId;
+#endif
 
 	public static bool bDebug;
 	public static void addLog(string logstring)
@@ -49,13 +50,13 @@ public class Utils {
 
 	public static void rateGame()
 	{
-		#if UNITY_ANDROID
+#if UNITY_ANDROID
 		appId = "com.JunshengYao.ColorJump";
 		Application.OpenURL("market://details?id="+appId);
-		#elif UNITY_IPHONE
+#elif UNITY_IPHONE
 		appId = "id992004670";
 		Application.OpenURL("itms-apps://itunes.apple.com/app/"+appId);
-		#endif
+#endif
 	}
 
 	public static Texture2D LoadPNG(int w, int h,string filePath) {

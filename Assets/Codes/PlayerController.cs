@@ -90,11 +90,11 @@ public class PlayerController : MonoBehaviour {
     private Queue<Command> CommandQueue = new Queue<Command>();
     private Command MyJumpCommand = new PlayerJumpCommand(), MyChangeColorCommand = new PlayerChangeColorCommand();//TODO, make an array and enum to access them
 
+
     void Awake()
 	{
 		
 		audioSourceList = new List<AudioSource>();
-
 		audioSourceList.Add( gameObject.AddComponent<AudioSource>() );
 		audioSourceList.Add( gameObject.AddComponent<AudioSource>() );
 

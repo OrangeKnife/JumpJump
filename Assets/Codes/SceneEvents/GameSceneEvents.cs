@@ -172,10 +172,6 @@ public class GameSceneEvents : MonoBehaviour {
 
 	int UnityAdsYesNum;
 
-
-	GameObject Player;
-
-
 	GameManager gameMgr;
 
 
